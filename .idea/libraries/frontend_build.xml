@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="frontend_build">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/frontend/build/frontend_build.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

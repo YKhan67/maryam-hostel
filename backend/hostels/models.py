@@ -82,11 +82,11 @@ class StudentProfile(models.Model):
     Separate profile linked to User with role=STUDENT.
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="student_profile")
-    hostel = models.ForeignKey(Hostel, on_delete=models.PROTECT, related_name="students")
+    hostel = models.ForeignKey(Hostel, on_delete=models.PROTECT, related_name="students", null=True, blank=True)
     bed = models.OneToOneField(Bed, on_delete=models.PROTECT, related_name="student", null=True, blank=True)
 
     # Personal
-    mobile = models.CharField(max_length=20)
+    mobile = models.CharField(max_length=20, blank=True)
     whatsapp = models.CharField(max_length=20, blank=True)
     guardian_name = models.CharField(max_length=100, blank=True)
     guardian_phone = models.CharField(max_length=20, blank=True)

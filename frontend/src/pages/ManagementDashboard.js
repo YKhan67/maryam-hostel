@@ -1,10 +1,10 @@
 // src/pages/ManagementDashboard.js
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import AppShell from "../components/AppShell";
 import api from "../api";
-import "../styles/admin-menu.css";
+import { AuthContext } from "../AuthContext";
 
 function formatCurrency(v) {
   if (v === null || v === undefined || isNaN(v)) return "Rs 0";
@@ -14,17 +14,18 @@ function formatCurrency(v) {
   })}`;
 }
 
-// Helper: get Date for first day N months ago (0 = current month)
-function getMonthStartOffset(monthOffset = 0) {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth(); // 0–11
-  const target = new Date(year, month + monthOffset, 1);
-  target.setHours(0, 0, 0, 0);
-  return target;
-}
+const WelcomeGraphic = () => (
+  <div style={{ position: 'absolute', right: '32px', bottom: '0', opacity: 0.1, pointerEvents: 'none' }}>
+    <svg width="180" height="120" viewBox="0 0 180 120" fill="none">
+       <path d="M10 110C30 90 60 90 80 110" stroke="var(--primary)" strokeWidth="8" strokeLinecap="round"/>
+       <circle cx="140" cy="40" r="25" fill="var(--primary)" fillOpacity="0.2"/>
+       <rect x="110" y="70" width="60" height="40" rx="10" fill="var(--secondary)" fillOpacity="0.05"/>
+    </svg>
+  </div>
+);
 
 export default function ManagementDashboard() {
+  const { user } = useContext(AuthContext);
   const [rows, setRows] = useState([]);
   const [hostels, setHostels] = useState([]);
   const [incomeByHostel, setIncomeByHostel] = useState([]);
@@ -35,396 +36,201 @@ export default function ManagementDashboard() {
 
   useEffect(() => {
     let isMounted = true;
-
     async function loadData() {
       setLoading(true);
-      setError(null);
-
       try {
-        // 1) Inventory / expenses
-        const invResp = await api.get("/inventory/list/", {
-          params: { ordering: "-date" },
-        });
-        let invData = invResp.data;
-        if (!Array.isArray(invData) && invData && Array.isArray(invData.results)) {
-          invData = invData.results;
-        }
-        if (!Array.isArray(invData)) {
-          throw new Error("Unexpected response format from /inventory/list/");
-        }
-        if (isMounted) setRows(invData);
+        const [invResp, hostelsResp, incomeResp] = await Promise.all([
+          api.get("/inventory/list/").catch(() => ({ data: [] })),
+          api.get("/hostels/").catch(() => ({ data: [] })),
+          api.get("/fees/dashboard/hostel-income/").catch(() => ({ data: [] }))
+        ]);
 
-        // 2) Hostels master list
-        try {
-          const hostelsResp = await api.get("/hostels/");
-          const hostelsData = Array.isArray(hostelsResp.data)
-            ? hostelsResp.data
-            : hostelsResp.data?.results || [];
-          if (isMounted) setHostels(hostelsData);
-        } catch (err) {
-          console.warn("Failed to load hostels list", err);
-        }
-
-        // 3) Income per hostel (fees)
-        try {
-          const incomeResp = await api.get("/fees/dashboard/hostel-income/");
-          if (isMounted) {
-            setIncomeByHostel(
-              Array.isArray(incomeResp.data) ? incomeResp.data : []
-            );
-          }
-        } catch (err) {
-          console.warn("Failed to load hostel income summary", err);
+        if (isMounted) {
+          setRows(Array.isArray(invResp.data) ? invResp.data : invResp.data?.results || []);
+          setHostels(Array.isArray(hostelsResp.data) ? hostelsResp.data : hostelsResp.data?.results || []);
+          setIncomeByHostel(Array.isArray(incomeResp.data) ? incomeResp.data : []);
         }
       } catch (err) {
-        console.error("Failed to load dashboard data", err);
-        if (isMounted) {
-          setError(
-            err.response?.data?.detail ||
-              err.message ||
-              "Failed to load management dashboard."
-          );
-        }
+        if (isMounted) setError("Connection lost. Please refresh.");
       } finally {
         if (isMounted) setLoading(false);
       }
     }
-
     loadData();
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, []);
 
-  // ─────────────────────────────────
-  // Derived metrics
-  // ─────────────────────────────────
-
-  const {
-    totalSpendCurrentMonth,
-    lineCountCurrentMonth,
-    spendPerHostel,
-    last3MonthsSpendPerHostel,
-    topVendors,
-  } = useMemo(() => {
-    let totalSpendCurrentMonth = 0;
-    let lineCountCurrentMonth = 0;
-
-    const spendPerHostel = new Map(); // hostel -> total spend (all-time)
-    const last3MonthsSpendPerHostel = new Map(); // hostel -> spend in last 3 months
-    const vendorSpend = new Map(); // vendor -> spend (last 3 months)
-
-    const last3Start = getMonthStartOffset(-2); // 1st day of month 2 months ago
+  const metrics = useMemo(() => {
     const today = new Date();
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth(); // 0–11
+    let currentMonthSpend = 0;
+    const spendPerHostel = new Map();
+    const vendorSpend = new Map();
 
-    for (const r of rows) {
-      const spend = Number(r.total_cost || 0) || 0;
-      const hostelName = r.hostel || "Unassigned";
-      const vendorName = r.vendor || "Unknown";
-
-      // Total spend per hostel (all-time)
-      const currentHostelSpend = spendPerHostel.get(hostelName) || 0;
-      spendPerHostel.set(hostelName, currentHostelSpend + spend);
+    rows.forEach(r => {
+      const spend = Number(r.total_cost || 0);
+      const hostel = r.hostel || "Unassigned";
+      spendPerHostel.set(hostel, (spendPerHostel.get(hostel) || 0) + spend);
 
       if (r.date) {
         const d = new Date(r.date);
-        if (!Number.isNaN(d.getTime())) {
-          // Current month metrics
-          if (
-            d.getFullYear() === currentYear &&
-            d.getMonth() === currentMonth
-          ) {
-            totalSpendCurrentMonth += spend;
-            lineCountCurrentMonth += 1;
-          }
-
-          // Last 3 months metrics
-          if (d >= last3Start) {
-            // Expenses per hostel in last 3 months
-            const last3HostelSpend =
-              last3MonthsSpendPerHostel.get(hostelName) || 0;
-            last3MonthsSpendPerHostel.set(hostelName, last3HostelSpend + spend);
-
-            // Vendor spend in last 3 months
-            const vendSpend = vendorSpend.get(vendorName) || 0;
-            vendorSpend.set(vendorName, vendSpend + spend);
-          }
+        if (d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth()) {
+          currentMonthSpend += spend;
         }
+        vendorSpend.set(r.vendor || "Unknown", (vendorSpend.get(r.vendor || "Unknown") || 0) + spend);
       }
-    }
+    });
 
-    // Sort vendors
     const topVendors = Array.from(vendorSpend.entries())
       .map(([vendor, amount]) => ({ vendor, amount }))
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 5);
+      .sort((a, b) => b.amount - a.amount).slice(0, 5);
 
-    return {
-      totalSpendCurrentMonth,
-      lineCountCurrentMonth,
-      spendPerHostel,
-      last3MonthsSpendPerHostel,
-      topVendors,
-    };
-  }, [rows]);
+    let totalIncomeCurrentMonth = 0;
+    incomeByHostel.forEach(item => {
+      totalIncomeCurrentMonth += Number(item.current_month_income || 0);
+    });
 
-  // Income map for easier lookup
-  const incomeMap = useMemo(() => {
-    const map = new Map();
-    for (const item of incomeByHostel) {
-      map.set(item.hostel, item);
-    }
-    return map;
-  }, [incomeByHostel]);
+    return { currentMonthSpend, totalIncomeCurrentMonth, spendPerHostel, topVendors };
+  }, [rows, incomeByHostel]);
 
-  // Active & inactive hostels
-  const { activeHostelsCount, inactiveHostels, totalIncomeCurrentMonth } =
-    useMemo(() => {
-      const activeNames = new Set();
-
-      // Active if they have any expense
-      for (const hostelName of spendPerHostel.keys()) {
-        activeNames.add(hostelName);
-      }
-
-      // Also active if they have any income (fee)
-      for (const item of incomeByHostel) {
-        if (item.hostel) activeNames.add(item.hostel);
-      }
-
-      let totalIncomeCurrentMonth = 0;
-      for (const item of incomeByHostel) {
-        totalIncomeCurrentMonth += Number(item.current_month_income || 0);
-      }
-
-      const allHostelNames = (hostels || []).map((h) => h.name);
-      const inactiveHostels = allHostelNames.filter(
-        (name) => !activeNames.has(name)
-      );
-
-      return {
-        activeHostelsCount: activeNames.size,
-        inactiveHostels,
-        totalIncomeCurrentMonth,
-      };
-    }, [spendPerHostel, incomeByHostel, hostels]);
-
-  const handleHostelClick = (hostelName) => {
-    navigate("/inventory", { state: { hostel: hostelName } });
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    return "Good Evening";
   };
 
-  // Build combined last 3-month stats per hostel (expenses + income)
-  const last3MonthsCombined = useMemo(() => {
-    const combinedMap = new Map();
-
-    // Expenses side
-    for (const [hostel, spend] of last3MonthsSpendPerHostel.entries()) {
-      combinedMap.set(hostel, {
-        hostel,
-        expenses: spend,
-        income: 0,
-      });
-    }
-
-    // Income side (last three months)
-    for (const item of incomeByHostel) {
-      const hostel = item.hostel || "Unassigned";
-      const existing = combinedMap.get(hostel) || {
-        hostel,
-        expenses: 0,
-        income: 0,
-      };
-      existing.income += Number(item.last_three_month_income || 0);
-      combinedMap.set(hostel, existing);
-    }
-
-    return Array.from(combinedMap.values()).sort(
-      (a, b) => b.expenses - a.expenses
-    );
-  }, [last3MonthsSpendPerHostel, incomeByHostel]);
+  if (loading) return <AppShell subtitle="Loading System..."><div className="card">Refreshing metrics...</div></AppShell>;
 
   return (
-    <AppShell subtitle="Management Dashboard">
-      <div className="page management-page">
-        {loading && (
-          <div className="card">
-            <p>Loading management dashboard…</p>
+    <AppShell subtitle="Executive Dashboard">
+      {/* Friendly Welcome Header */}
+      <div className="card" style={{ position: 'relative', overflow: 'hidden', padding: '32px', marginBottom: '32px', border: 'none', background: 'linear-gradient(135deg, #fff 0%, #fdf7ec 100%)', boxShadow: 'var(--shadow-lg)' }}>
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <h1 style={{ margin: '0 0 8px 0', fontSize: '1.75rem', fontWeight: 800, color: 'var(--secondary)' }}>
+            {getGreeting()}, {user?.first_name || user?.username}! 👋
+          </h1>
+          <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: 500, maxWidth: '500px' }}>
+            Everything looks good today. You have {hostels.length} active hostels under your management.
+            Here's the financial snapshot for {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}.
+          </p>
+          <div style={{ marginTop: '24px', display: 'flex', gap: '12px' }}>
+             <button onClick={() => navigate('/fees-management')} className="btn btn-primary" style={{ padding: '8px 20px' }}>Review Student Dues</button>
+             <button onClick={() => navigate('/inventory')} className="btn" style={{ padding: '8px 20px', background: '#fff', border: '1px solid var(--border)' }}>Check Stock</button>
           </div>
-        )}
+        </div>
+        <WelcomeGraphic />
+      </div>
 
-        {!loading && error && (
-          <div className="card">
-            <p style={{ color: "#b91c1c" }}>{String(error)}</p>
+      <div className="kpi-grid">
+        <div className="card kpi-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <span className="kpi-label">TOTAL DISBURSEMENTS</span>
+            <div style={{ padding: '4px', background: '#fee2e2', borderRadius: '8px', color: '#ef4444' }}>
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+            </div>
           </div>
-        )}
+          <div className="kpi-value" style={{ color: "var(--danger)", margin: '12px 0' }}>
+            {formatCurrency(metrics.currentMonthSpend)}
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+             Expenses this month
+          </div>
+        </div>
 
-        {!loading && !error && (
-          <>
-            {/* Top KPI cards – expenses + hostels + income */}
-            <div className="cards-row">
-              <div className="card kpi-card">
-                <div className="card-title">
-                  Total Spend (All Hostels – Current Month)
-                </div>
-                <div className="card-value">
-                  {formatCurrency(totalSpendCurrentMonth)}
-                </div>
-                <div className="card-subtext">
-                  Across {lineCountCurrentMonth} purchase line
-                  {lineCountCurrentMonth === 1 ? "" : "s"} in current month
-                </div>
-              </div>
-
-              <div className="card kpi-card">
-                <div className="card-title">Active Hostels</div>
-                <div className="card-value">{activeHostelsCount}</div>
-                <div className="card-subtext">
-                  Hostels with at least one purchase or fee
-                </div>
-              </div>
-
-              <div className="card kpi-card">
-                <div className="card-title">Inactive Hostels</div>
-                <div className="card-value">
-                  {inactiveHostels.length || 0}
-                </div>
-                <div className="card-subtext">
-                  No activity (no purchases and no fee income)
-                </div>
-              </div>
-
-              <div className="card kpi-card">
-                <div className="card-title">Total Fee Income (Current Month)</div>
-                <div className="card-value">
-                  {formatCurrency(totalIncomeCurrentMonth)}
-                </div>
-                <div className="card-subtext">
-                  Fees collected across all hostels (this month)
-                </div>
-              </div>
+        <div className="card kpi-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <span className="kpi-label">TOTAL COLLECTION</span>
+            <div style={{ padding: '4px', background: '#dcfce7', borderRadius: '8px', color: '#10b981' }}>
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M7 7l9.2 9.2M7 17h10V7"/></svg>
             </div>
+          </div>
+          <div className="kpi-value" style={{ color: "var(--success)", margin: '12px 0' }}>
+            {formatCurrency(metrics.totalIncomeCurrentMonth)}
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+            Revenue this month
+          </div>
+        </div>
 
-            {/* Spend & income per hostel – high level */}
-            <div className="card table-card">
-              <div className="card-title">Spend vs Income by Hostel</div>
-              <div className="card-subtext">
-                Click a hostel row to open detailed inventory view (all-time).
-              </div>
-              <div className="table-wrapper">
-                <table className="inventory-table">
-                  <thead>
-                    <tr>
-                      <th>Hostel</th>
-                      <th>Total Spend (All Time)</th>
-                      <th>Fee Income (Current Month)</th>
+        <div className="card kpi-card">
+          <span className="kpi-label">NET PERFORMANCE</span>
+          <div className="kpi-value" style={{ margin: '12px 0' }}>
+            {formatCurrency(metrics.totalIncomeCurrentMonth - metrics.currentMonthSpend)}
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+            Profitability across branches
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '32px' }}>
+        <div className="card">
+          <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ margin: 0, fontWeight: 700 }}>Branch Performance</h3>
+            <div style={{ fontSize: '0.75rem', padding: '4px 12px', background: 'var(--background)', borderRadius: '999px', fontWeight: 600 }}>REAL-TIME</div>
+          </div>
+          <div className="table-container">
+            <table className="modern-table">
+              <thead>
+                <tr>
+                  <th>Hostel Name</th>
+                  <th>Revenue</th>
+                  <th>Expenses</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {hostels.map(h => {
+                  const income = incomeByHostel.find(i => i.hostel === h.name)?.current_month_income || 0;
+                  const expense = metrics.spendPerHostel.get(h.name) || 0;
+                  const net = income - expense;
+                  return (
+                    <tr key={h.id}>
+                      <td style={{ fontWeight: 600 }}>{h.name}</td>
+                      <td style={{ color: 'var(--success)', fontWeight: 600 }}>{formatCurrency(income)}</td>
+                      <td style={{ color: 'var(--danger)' }}>{formatCurrency(expense)}</td>
+                      <td>
+                        <span style={{
+                          padding: '4px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 700,
+                          background: net >= 0 ? '#dcfce7' : '#fee2e2',
+                          color: net >= 0 ? '#166534' : '#991b1b'
+                        }}>
+                          {net >= 0 ? 'PROFIT' : 'LOSS'}
+                        </span>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {Array.from(spendPerHostel.entries()).map(
-                      ([hostelName, spend]) => {
-                        const incomeItem = incomeMap.get(hostelName);
-                        const incomeCurrentMonth = incomeItem
-                          ? incomeItem.current_month_income
-                          : 0;
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-                        return (
-                          <tr
-                            key={hostelName}
-                            className="clickable-row"
-                            onClick={() => handleHostelClick(hostelName)}
-                          >
-                            <td>{hostelName}</td>
-                            <td>{formatCurrency(spend)}</td>
-                            <td>{formatCurrency(incomeCurrentMonth)}</td>
-                          </tr>
-                        );
-                      }
-                    )}
-                    {spendPerHostel.size === 0 && (
-                      <tr>
-                        <td colSpan={3}>No purchase data yet.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Last 3 months – expenses & income per hostel */}
-            <div className="card table-card">
-              <div className="card-title">
-                Last 3 Months – Expenses & Income by Hostel
-              </div>
-              <div className="table-wrapper">
-                <table className="inventory-table">
-                  <thead>
-                    <tr>
-                      <th>Hostel</th>
-                      <th>Expenses (3 months)</th>
-                      <th>Fee Income (3 months)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {last3MonthsCombined.map((row) => (
-                      <tr key={row.hostel}>
-                        <td>{row.hostel}</td>
-                        <td>{formatCurrency(row.expenses)}</td>
-                        <td>{formatCurrency(row.income)}</td>
-                      </tr>
-                    ))}
-                    {last3MonthsCombined.length === 0 && (
-                      <tr>
-                        <td colSpan={3}>No data for last 3 months.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Top vendors – last 3 months */}
-            <div className="card table-card">
-              <div className="card-title">
-                Top Purchases by Vendor – Last 3 Months
-              </div>
-              <div className="table-wrapper">
-                <table className="inventory-table">
-                  <thead>
-                    <tr>
-                      <th>Vendor</th>
-                      <th>Total Spend (3 months)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {topVendors.map((v) => (
-                      <tr key={v.vendor}>
-                        <td>{v.vendor}</td>
-                        <td>{formatCurrency(v.amount)}</td>
-                      </tr>
-                    ))}
-                    {topVendors.length === 0 && (
-                      <tr>
-                        <td colSpan={2}>No vendor data in last 3 months.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Optional: list inactive hostel names (small text) */}
-            {inactiveHostels.length > 0 && (
-              <div className="card">
-                <div className="card-title">Inactive Hostels</div>
-                <div className="card-subtext">
-                  {inactiveHostels.join(", ")}
+        <div className="card">
+          <h3 style={{ margin: '0 0 24px 0', fontWeight: 700 }}>Supply Chain Insight</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {metrics.topVendors.map((v, i) => (
+              <div key={v.vendor} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '40px', height: '40px', background: 'var(--primary-light)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-dark)', fontWeight: 700 }}>
+                    {v.vendor.charAt(0)}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>{v.vendor}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Supply Tier {i+1}</div>
+                  </div>
                 </div>
+                <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{formatCurrency(v.amount)}</div>
               </div>
-            )}
-          </>
-        )}
+            ))}
+          </div>
+          <div style={{ marginTop: '32px', padding: '16px', background: 'var(--background)', borderRadius: '16px' }}>
+             <div style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px' }}>Pro Tip 💡</div>
+             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                You can save up to 12% by centralizing purchases from your top 3 vendors across all hostels.
+             </div>
+          </div>
+        </div>
       </div>
     </AppShell>
   );

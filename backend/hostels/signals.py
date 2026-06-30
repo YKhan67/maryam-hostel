@@ -11,22 +11,18 @@ User = settings.AUTH_USER_MODEL
 @receiver(post_save, sender=User)
 def create_student_profile_on_user_save(sender, instance, created, **kwargs):
     """
-    Whenever a User with role 'STUDENT' is created via admin or code,
+    Whenever a User with role 'STUDENT' is created or updated,
     ensure a StudentProfile exists so fees/hostel modules can see them.
     """
-    # only for newly created users
-    if not created:
-        return
-
     role = getattr(instance, "role", None)
     if role != "STUDENT":
         return
 
-    # Try to pick a default hostel (if any). You can remove this if you
-    # prefer to set hostel manually later.
-    default_hostel = Hostel.objects.first()
-
+    # Use get_or_create to ensure it exists regardless of whether user was just created
+    # or updated to become a student.
+    
     defaults = {}
+    default_hostel = Hostel.objects.first()
     if default_hostel is not None:
         defaults["hostel"] = default_hostel
 

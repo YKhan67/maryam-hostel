@@ -11,7 +11,10 @@ class IsSuperAdmin(permissions.BasePermission):
         return bool(
             request.user
             and request.user.is_authenticated
-            and getattr(request.user, "role", None) == "SUPER_ADMIN"
+            and (
+                getattr(request.user, "role", None) == "SUPER_ADMIN"
+                or request.user.is_superuser
+            )
         )
 
 

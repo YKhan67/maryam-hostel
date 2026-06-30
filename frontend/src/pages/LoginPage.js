@@ -14,9 +14,7 @@ export default function LoginPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitting(true);
-
     const loggedInUser = await login(username, password);
-
     setSubmitting(false);
 
     if (loggedInUser && loggedInUser.role) {
@@ -26,60 +24,76 @@ export default function LoginPage() {
         navigate("/management", { replace: true });
       }
     }
-    // If null / error, stay on the page and show error from context
   }
 
   return (
     <div className="login-wrapper">
       <div className="login-card">
-        <div className="login-logo">
-          <div className="login-logo-circle">
-            <img src={logoImg} alt="Maryam Hostel Logo" />
-          </div>
-          <div className="login-title">Maryam Hostel</div>
-          <div className="login-subtitle">
-            Secure portal for students and management
-          </div>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <img src={logoImg} alt="Logo" style={{ height: '64px', marginBottom: '16px' }} />
+          <h1 style={{ margin: '0 0 8px 0', fontSize: '1.5rem', fontWeight: 800, color: 'var(--secondary)' }}>
+            Maryam Hostel
+          </h1>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+            Management & Student Portal
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Username</label>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div>
+            <label className="form-label" style={{ fontWeight: 700, color: 'var(--secondary)', marginBottom: '8px' }}>
+              Username
+            </label>
             <input
               type="text"
               className="form-input"
+              placeholder="e.g. admin_01"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              autoComplete="username"
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Password</label>
-            <input
-              type="password"
-              className="form-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
             />
           </div>
 
-          {error && <div className="form-error">{error}</div>}
+          <div>
+            <label className="form-label" style={{ fontWeight: 700, color: 'var(--secondary)', marginBottom: '8px' }}>
+              Password
+            </label>
+            <input
+              type="password"
+              className="form-input"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          {error && (
+            <div style={{
+              padding: '12px',
+              background: '#fee2e2',
+              color: '#dc2626',
+              borderRadius: '8px',
+              fontSize: '0.8125rem',
+              fontWeight: 600,
+              textAlign: 'center'
+            }}>
+              {error}
+            </div>
+          )}
 
           <button
             type="submit"
             className="btn btn-primary"
-            style={{ width: "100%", marginTop: 8 }}
+            style={{ width: "100%", padding: '14px', fontSize: '1rem' }}
             disabled={submitting}
           >
-            {submitting ? "Logging in..." : "Login"}
+            {submitting ? "Authenticating..." : "Sign In"}
           </button>
 
-          <div className="helper-text" style={{ marginTop: 8 }}>
-            Use your hostel credentials provided by Maryam Hostel management.
-          </div>
+          <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px' }}>
+            © {new Date().getFullYear()} Maryam Hostel Management. <br/> All rights reserved.
+          </p>
         </form>
       </div>
     </div>

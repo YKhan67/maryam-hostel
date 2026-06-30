@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="maryam-hostel">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/maryam_hms.zip!/" />
+      <root url="jar://$PROJECT_DIR$/maryam_hostel.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

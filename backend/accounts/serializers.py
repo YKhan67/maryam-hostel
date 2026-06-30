@@ -17,11 +17,12 @@ class UserCreateUpdateSerializer(serializers.ModelSerializer):
     """
     Serializer used when creating/updating users via API.
 
-    - Always uses set_password(), so login works.
+    - Uses set_password(), so login works.
     - is_active is always True by default.
-    - StudentProfile auto-creation is handled by the hostels signals you already added.
+    - password is required for creation, optional for update.
+    - StudentProfile auto-creation is handled by the hostels signals.
     """
-    password = serializers.CharField(write_only=True, required=True)
+    password = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = User
@@ -32,14 +33,21 @@ class UserCreateUpdateSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "role",
+            "hostel",
             "password",
         ]
         read_only_fields = ["id"]
 
+    def validate_password(self, value):
+        if self.instance is None and not value:
+            raise serializers.ValidationError("Password is required for new users.")
+        return value
+
     def create(self, validated_data):
-        raw_password = validated_data.pop("password")
+        raw_password = validated_data.pop("password", None)
         user = User(**validated_data)
-        user.set_password(raw_password)   # ✅ hashed
+        if raw_password:
+            user.set_password(raw_password)
         user.is_active = True
         user.save()
         return user

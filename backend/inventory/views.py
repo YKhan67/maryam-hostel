@@ -1,15 +1,13 @@
 from django.shortcuts import render
-from datetime import date
+from datetime import date, timedelta
 from django.db.models import Sum, Avg, F, DecimalField, Q
 from django.http import HttpResponse
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from rest_framework import viewsets, permissions
-
-from .models import Category, Unit, Item, Vendor, Purchase
+from .models import Category, Unit, Item, Vendor, Purchase, Consumption
 from hostels.models import Hostel
 
 from .serializers import (
@@ -18,8 +16,8 @@ from .serializers import (
     ItemSerializer,
     VendorSerializer,
     PurchaseSerializer,
+    ConsumptionSerializer,
 )
-
 
 class IsHostelManagerOrAbove(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -32,458 +30,205 @@ class IsHostelManagerOrAbove(permissions.BasePermission):
             "STAFF",
         ]
 
-
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all().order_by("name")
     serializer_class = CategorySerializer
     permission_classes = [IsHostelManagerOrAbove]
-
 
 class UnitViewSet(viewsets.ModelViewSet):
     queryset = Unit.objects.all().order_by("name")
     serializer_class = UnitSerializer
     permission_classes = [IsHostelManagerOrAbove]
 
-
 class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.filter(is_active=True).order_by("name")
     serializer_class = ItemSerializer
     permission_classes = [IsHostelManagerOrAbove]
-
 
 class VendorViewSet(viewsets.ModelViewSet):
     queryset = Vendor.objects.all().order_by("name")
     serializer_class = VendorSerializer
     permission_classes = [IsHostelManagerOrAbove]
 
-
 class PurchaseViewSet(viewsets.ModelViewSet):
-    queryset = (
-        Purchase.objects.select_related("hostel", "vendor", "item")
-        .all()
-        .order_by("-date")
-    )
+    queryset = Purchase.objects.select_related("hostel", "vendor", "item").all().order_by("-date")
     serializer_class = PurchaseSerializer
     permission_classes = [IsHostelManagerOrAbove]
 
-    def perform_create(self, serializer):
-        # later we can auto-limit hostel by user.hostel
-        serializer.save()
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+        if user.role == "HOSTEL_MANAGER" and user.hostel:
+            return qs.filter(hostel=user.hostel)
+        return qs
 
+class ConsumptionViewSet(viewsets.ModelViewSet):
+    queryset = Consumption.objects.select_related("hostel", "item").all().order_by("-date")
+    serializer_class = ConsumptionSerializer
+    permission_classes = [IsHostelManagerOrAbove]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+        if user.role == "HOSTEL_MANAGER" and user.hostel:
+            return qs.filter(hostel=user.hostel)
+        return qs
 
 class InventorySummaryView(APIView):
-    """
-    Groceries / inventory spend and price comparison
-    for the management dashboard.
-
-    - Total spend for current month
-    - Top vendors by spend + avg unit price
-    - Top items by spend + avg unit price
-    """
-
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         today = date.today()
         month_start = date(today.year, today.month, 1)
+        user = request.user
 
-        # Filter purchases for the current month (inclusive)
-        purchases = Purchase.objects.filter(
-            date__gte=month_start,
-            date__lte=today,
-        )
-
-        # Total spent = sum(quantity * price_per_unit)
-        total_spent = (
-            purchases.aggregate(
-                total=Sum(
-                    F("quantity") * F("price_per_unit"),
-                    output_field=DecimalField(max_digits=20, decimal_places=2),
-                )
-            )["total"]
-            or 0
-        )
-
-        # Top vendors by spend
-        by_vendor_qs = (
-            purchases.values("vendor__name")
-            .annotate(
-                total_spent=Sum(
-                    F("quantity") * F("price_per_unit"),
-                    output_field=DecimalField(max_digits=20, decimal_places=2),
-                ),
-                avg_unit_price=Avg("price_per_unit"),
+        purchases = Purchase.objects.filter(date__gte=month_start)
+        items_qs = Item.objects.all()
+        
+        if user.role == "HOSTEL_MANAGER" and user.hostel:
+            purchases = purchases.filter(hostel=user.hostel)
+            # For stock levels, we also filter by hostel in the annotation
+            items_qs = items_qs.annotate(
+                total_purchased=Sum('purchases__quantity', filter=Q(purchases__hostel=user.hostel)),
+                total_consumed=Sum('consumptions__quantity', filter=Q(consumptions__hostel=user.hostel)),
             )
-            .order_by("-total_spent")[:5]
-        )
-
-        # Top items by spend
-        by_item_qs = (
-            purchases.values("item__name")
-            .annotate(
-                total_spent=Sum(
-                    F("quantity") * F("price_per_unit"),
-                    output_field=DecimalField(max_digits=20, decimal_places=2),
-                ),
-                avg_unit_price=Avg("price_per_unit"),
+        else:
+            items_qs = items_qs.annotate(
+                total_purchased=Sum('purchases__quantity'),
+                total_consumed=Sum('consumptions__quantity'),
             )
-            .order_by("-total_spent")[:5]
-        )
+
+        total_spent = purchases.aggregate(
+            total=Sum(F("quantity") * F("price_per_unit"), output_field=DecimalField(max_digits=20, decimal_places=2))
+        )["total"] or 0
+
+        stock_levels = [
+            {
+                "item": item.name,
+                "unit": item.unit.name,
+                "purchased": float(item.total_purchased or 0),
+                "consumed": float(item.total_consumed or 0),
+                "balance": float((item.total_purchased or 0) - (item.total_consumed or 0))
+            }
+            for item in items_qs.filter(Q(total_purchased__gt=0) | Q(total_consumed__gt=0))
+        ]
 
         data = {
-            "month_start": month_start,
-            "total_spent": float(total_spent),
-            "by_vendor": [
-                {
-                    "vendor": row["vendor__name"],
-                    "total_spent": float(row["total_spent"] or 0),
-                    "avg_unit_price": float(row["avg_unit_price"] or 0),
-                }
-                for row in by_vendor_qs
-            ],
-            "by_item": [
-                {
-                    "item": row["item__name"],
-                    "total_spent": float(row["total_spent"] or 0),
-                    "avg_unit_price": float(row["avg_unit_price"] or 0),
-                }
-                for row in by_item_qs
-            ],
+            "total_spent_this_month": float(total_spent),
+            "stock_levels": stock_levels,
+            "top_vendors": purchases.values("vendor__name").annotate(
+                total=Sum(F("quantity") * F("price_per_unit"), output_field=DecimalField())
+            ).order_by("-total")[:5]
         }
         return Response(data)
 
-
 class InventoryListView(APIView):
-    """
-    Detailed list of purchases, with filters:
-    - ?city_id=
-    - ?hostel_id=
-    - ?from_date=YYYY-MM-DD
-    - ?to_date=YYYY-MM-DD
-    - ?search=rice
-    - ?ordering=date or -date or total_cost or -total_cost or price_per_unit/-price_per_unit
-    """
-
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        user = request.user
         city_id = request.query_params.get("city_id")
         hostel_id = request.query_params.get("hostel_id")
         from_date = request.query_params.get("from_date")
         to_date = request.query_params.get("to_date")
         search = request.query_params.get("search")
-        ordering = request.query_params.get("ordering")  # e.g. "-date", "total_cost"
+        ordering = request.query_params.get("ordering")
 
-        # Base queryset with all joins we need
-        purchases = Purchase.objects.all().select_related(
-            "hostel", "vendor", "item", "item__category", "item__unit"
-        )
+        purchases = Purchase.objects.select_related("hostel", "vendor", "item", "item__unit")
 
-        # Filter by city / hostel using the hostel FK
-        hostels_qs = Hostel.objects.all()
-        if city_id:
-            hostels_qs = hostels_qs.filter(city_id=city_id)
-        if hostel_id:
-            hostels_qs = hostels_qs.filter(id=hostel_id)
-        if city_id or hostel_id:
-            purchases = purchases.filter(hostel__in=hostels_qs)
-
-        # Date range filters (if provided)
-        if from_date:
-            purchases = purchases.filter(date__gte=from_date)
-        if to_date:
-            purchases = purchases.filter(date__lte=to_date)
-
-        # Search on vendor name and item name
-        if search:
-            purchases = purchases.filter(
-                Q(vendor__name__icontains=search)
-                | Q(item__name__icontains=search)
-            )
-
-        # Annotate total_cost_annot = quantity * price_per_unit
-        # (we can't call it "total_cost" because the model has a @property with that name)
-        purchases = purchases.annotate(
-            total_cost_annot=F("quantity") * F("price_per_unit")
-        )
-
-        # Sorting: allow date, total_cost, price_per_unit (asc/desc)
-        allowed_frontend_order = {
-            "date",
-            "-date",
-            "total_cost",
-            "-total_cost",
-            "price_per_unit",
-            "-price_per_unit",
-        }
-
-        if ordering in allowed_frontend_order:
-            backend_order = ordering
-            # map total_cost → total_cost_annot to avoid property conflict
-            if "total_cost" in ordering:
-                backend_order = ordering.replace("total_cost", "total_cost_annot")
-            purchases = purchases.order_by(backend_order, "-id")
+        # Security: Hostel Managers can ONLY see their hostel
+        if user.role == "HOSTEL_MANAGER" and user.hostel:
+            purchases = purchases.filter(hostel=user.hostel)
         else:
-            purchases = purchases.order_by("-date", "-id")
+            if city_id: purchases = purchases.filter(hostel__city_id=city_id)
+            if hostel_id: purchases = purchases.filter(hostel_id=hostel_id)
 
-        # Serialize rows
-        data = []
-        for p in purchases:
-            # read from the annotation if present, else fallback to model property
-            total_cost_val = getattr(p, "total_cost_annot", None)
-            if total_cost_val is None:
-                total_cost_val = p.total_cost  # model @property
+        if from_date: purchases = purchases.filter(date__gte=from_date)
+        if to_date: purchases = purchases.filter(date__lte=to_date)
+        if search:
+            purchases = purchases.filter(Q(vendor__name__icontains=search) | Q(item__name__icontains=search))
 
-            data.append(
-                {
-                    "id": p.id,
-                    "date": p.date,
-                    "hostel": p.hostel.name if getattr(p, "hostel", None) else None,
-                    "vendor": p.vendor.name if getattr(p, "vendor", None) else None,
-                    "item": p.item.name if getattr(p, "item", None) else None,
-                    "category": getattr(getattr(p.item, "category", None), "name", None)
-                    if getattr(p, "item", None)
-                    else None,
-                    "unit": getattr(getattr(p.item, "unit", None), "name", None)
-                    if getattr(p, "item", None)
-                    else None,
-                    "quantity": float(p.quantity),
-                    "price_per_unit": float(p.price_per_unit),
-                    "total_cost": float(total_cost_val),
-                }
-            )
+        purchases = purchases.annotate(total_cost_annot=F("quantity") * F("price_per_unit"))
 
-        return Response(data)
+        if ordering:
+            purchases = purchases.order_by(ordering.replace("total_cost", "total_cost_annot"))
+        else:
+            purchases = purchases.order_by("-date")
 
-
-import csv
-
+        return Response([
+            {
+                "id": p.id,
+                "date": p.date,
+                "hostel": p.hostel.name,
+                "vendor": p.vendor.name,
+                "item": p.item.name,
+                "quantity": float(p.quantity),
+                "unit": p.item.unit.name,
+                "price_per_unit": float(p.price_per_unit),
+                "total_cost": float(p.total_cost_annot),
+            } for p in purchases
+        ])
 
 class InventoryExportCSVView(APIView):
-    """
-    CSV export of inventory with same filters as InventoryListView.
-    Excel can open this directly.
-    """
-
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        import csv
+        user = request.user
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = 'attachment filename="inventory_export.csv"'
-
+        response["Content-Disposition"] = 'attachment; filename="inventory_export.csv"'
         writer = csv.writer(response)
-        writer.writerow(
-            [
-                "ID",
-                "Date",
-                "Hostel",
-                "Vendor",
-                "Item",
-                "Category",
-                "Unit",
-                "Quantity",
-                "Price per Unit",
-                "Total Cost",
-            ]
-        )
+        writer.writerow(["Date", "Hostel", "Vendor", "Item", "Qty", "Unit", "Price", "Total"])
+        
+        qs = Purchase.objects.all().select_related("hostel", "vendor", "item", "item__unit")
+        if user.role == "HOSTEL_MANAGER" and user.hostel:
+            qs = qs.filter(hostel=user.hostel)
 
-        city_id = request.query_params.get("city_id")
-        hostel_id = request.query_params.get("hostel_id")
-        from_date = request.query_params.get("from_date")
-        to_date = request.query_params.get("to_date")
-
-        purchases = Purchase.objects.all().select_related(
-            "hostel", "vendor", "item", "item__category", "item__unit"
-        )
-
-        hostels_qs = Hostel.objects.all()
-        if city_id:
-            hostels_qs = hostels_qs.filter(city_id=city_id)
-        if hostel_id:
-            hostels_qs = hostels_qs.filter(id=hostel_id)
-        if city_id or hostel_id:
-            purchases = purchases.filter(hostel__in=hostels_qs)
-
-        if from_date:
-            purchases = purchases.filter(date__gte=from_date)
-        if to_date:
-            purchases = purchases.filter(date__lte=to_date)
-
-        # annotate with a safe name
-        purchases = purchases.annotate(
-            total_cost_annot=F("quantity") * F("price_per_unit")
-        ).order_by("-date", "-id")
-
-        for p in purchases:
-            total_cost_val = getattr(p, "total_cost_annot", None)
-            if total_cost_val is None:
-                total_cost_val = p.total_cost
-
-            writer.writerow(
-                [
-                    p.id,
-                    p.date,
-                    p.hostel.name if p.hostel_id else "",
-                    p.vendor.name if p.vendor_id else "",
-                    p.item.name if p.item_id else "",
-                    (
-                        getattr(getattr(p.item, "category", None), "name", "")
-                        if p.item_id
-                        else ""
-                    ),
-                    (
-                        getattr(getattr(p.item, "unit", None), "name", "")
-                        if p.item_id
-                        else ""
-                    ),
-                    float(p.quantity),
-                    float(p.price_per_unit),
-                    float(total_cost_val),
-                ]
-            )
-
+        for p in qs:
+            writer.writerow([p.date, p.hostel.name, p.vendor.name, p.item.name, p.quantity, p.item.unit.name, p.price_per_unit, p.total_cost])
+        
         return response
 
-
 class VendorPriceTrendView(APIView):
-    """
-    Average price per vendor over time for a given item.
-    - ?item_id=1
-    Optional:
-    - ?hostel_id=
-    - ?city_id=
-    """
-
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         item_id = request.query_params.get("item_id")
-        if not item_id:
-            return Response({"detail": "item_id is required"}, status=400)
-
-        city_id = request.query_params.get("city_id")
-        hostel_id = request.query_params.get("hostel_id")
-
+        if not item_id: return Response({"detail": "item_id required"}, status=400)
+        
+        user = request.user
         purchases = Purchase.objects.filter(item_id=item_id)
+        if user.role == "HOSTEL_MANAGER" and user.hostel:
+            purchases = purchases.filter(hostel=user.hostel)
 
-        hostels_qs = Hostel.objects.all()
-        if city_id:
-            hostels_qs = hostels_qs.filter(city_id=city_id)
-        if hostel_id:
-            hostels_qs = hostels_qs.filter(id=hostel_id)
-        if city_id or hostel_id:
-            purchases = purchases.filter(hostel__in=hostels_qs)
-
-        # group by year-month & vendor
-        trend_qs = (
-            purchases.annotate(
-                ym_year=F("date__year"),
-                ym_month=F("date__month"),
-            )
-            .values("ym_year", "ym_month", "vendor__name")
-            .annotate(
-                avg_price=Avg("price_per_unit"),
-                total_qty=Sum("quantity"),
-            )
-            .order_by("ym_year", "ym_month", "vendor__name")
-        )
-
-        result = []
-        for row in trend_qs:
-            ym_str = f"{row['ym_year']}-{row['ym_month']:02d}"
-            result.append(
-                {
-                    "year_month": ym_str,
-                    "vendor": row["vendor__name"],
-                    "avg_unit_price": float(row["avg_price"] or 0),
-                    "total_quantity": float(row["total_qty"] or 0),
-                }
-            )
-
-        return Response(result)
-
+        trend = purchases.values(
+            "vendor__name", "date__year", "date__month"
+        ).annotate(
+            avg_price=Avg("price_per_unit")
+        ).order_by("date__year", "date__month")
+        
+        return Response(trend)
 
 class SavingsSuggestionsView(APIView):
-    """
-    Simple savings hints per item based on average vendor prices.
-    Optional filters: ?city_id= & ?hostel_id=
-    """
-
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        city_id = request.query_params.get("city_id")
-        hostel_id = request.query_params.get("hostel_id")
-
-        purchases = Purchase.objects.all()
-
-        hostels_qs = Hostel.objects.all()
-        if city_id:
-            hostels_qs = hostels_qs.filter(city_id=city_id)
-        if hostel_id:
-            hostels_qs = hostels_qs.filter(id=hostel_id)
-        if city_id or hostel_id:
-            purchases = purchases.filter(hostel__in=hostels_qs)
-
-        # avg price per item & vendor
-        item_vendor_qs = purchases.values(
-            "item_id", "item__name", "vendor_id", "vendor__name"
-        ).annotate(
-            avg_price=Avg("price_per_unit"),
-            total_qty=Sum("quantity"),
-        )
-
-        # group by item in Python
-        by_item = {}
-        for row in item_vendor_qs:
-            item_id = row["item_id"]
-            if item_id not in by_item:
-                by_item[item_id] = {
-                    "item": row["item__name"],
-                    "vendors": [],
-                }
-            by_item[item_id]["vendors"].append(
-                {
-                    "vendor_id": row["vendor_id"],
-                    "vendor": row["vendor__name"],
-                    "avg_price": float(row["avg_price"] or 0),
-                    "total_qty": float(row["total_qty"] or 0),
-                }
-            )
-
+        user = request.user
+        items = Item.objects.all()
         suggestions = []
-        for item_id, info in by_item.items():
-            vendors = info["vendors"]
-            if len(vendors) < 2:
-                continue  # no comparison possible
+        for item in items:
+            qs = Purchase.objects.filter(item=item)
+            if user.role == "HOSTEL_MANAGER" and user.hostel:
+                qs = qs.filter(hostel=user.hostel)
 
-            # find cheapest vendor
-            cheapest = min(vendors, key=lambda v: v["avg_price"])
-            # approximate potential saving: compare others to cheapest
-            potential_saving = 0.0
-            for v in vendors:
-                if v["vendor_id"] == cheapest["vendor_id"]:
-                    continue
-                price_diff = v["avg_price"] - cheapest["avg_price"]
-                if price_diff > 0:
-                    potential_saving += price_diff * v["total_qty"]
-
-            if potential_saving <= 0:
-                continue
-
-            suggestions.append(
-                {
-                    "item": info["item"],
-                    "cheapest_vendor": cheapest["vendor"],
-                    "cheapest_avg_price": cheapest["avg_price"],
-                    "estimated_saving_if_buy_from_cheapest": potential_saving,
-                }
-            )
-
-        # sort by highest potential saving
-        suggestions.sort(
-            key=lambda s: s["estimated_saving_if_buy_from_cheapest"],
-            reverse=True,
-        )
-
+            best_price = qs.values("vendor__name").annotate(
+                min_p=Avg("price_per_unit")
+            ).order_by("min_p").first()
+            
+            if best_price:
+                suggestions.append({
+                    "item": item.name,
+                    "best_vendor": best_price["vendor__name"],
+                    "best_avg_price": float(best_price["min_p"])
+                })
         return Response(suggestions)

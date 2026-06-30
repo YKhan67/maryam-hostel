@@ -1,29 +1,21 @@
 from django.db import models
-
-# Create your models here.
-
-# backend/inventory/models.py
-from django.db import models
 from hostels.models import Hostel
 
 class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True)  # e.g. Grains, Oil, Dairy
+    name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return self.name
 
 class Unit(models.Model):
-    name = models.CharField(max_length=50, unique=True)   # e.g. kg, litre, packet
+    name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
 
 class Item(models.Model):
-    """
-    Standardised grocery item master (dropdown only).
-    """
-    code = models.CharField(max_length=50, unique=True)   # e.g. RICE-BASM-1121
-    name = models.CharField(max_length=150)               # e.g. Rice – Basmati 1121
+    code = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=150)
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="items")
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name="items")
     is_active = models.BooleanField(default=True)
@@ -45,10 +37,6 @@ class Vendor(models.Model):
         return self.name
 
 class Purchase(models.Model):
-    """
-    Each row = one item line in a purchase (for simplicity).
-    You can group by invoice_no & date in reports.
-    """
     hostel = models.ForeignKey(Hostel, on_delete=models.PROTECT, related_name="purchases")
     date = models.DateField()
     vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, related_name="purchases")
@@ -66,3 +54,17 @@ class Purchase(models.Model):
 
     def __str__(self):
         return f"{self.date} {self.hostel.code} {self.item.name} x {self.quantity}"
+
+class Consumption(models.Model):
+    """
+    Tracks daily usage of items from the inventory.
+    """
+    hostel = models.ForeignKey(Hostel, on_delete=models.PROTECT, related_name="consumptions")
+    date = models.DateField()
+    item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name="consumptions")
+    quantity = models.DecimalField(max_digits=12, decimal_places=3)
+    remarks = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.date} {self.hostel.code} consumed {self.quantity} {self.item.unit.name} of {self.item.name}"

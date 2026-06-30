@@ -1,8 +1,13 @@
 // src/api.js
 import axios from "axios";
 
-// Use your Django server IP here:
-const API_BASE_URL = "https://maryamhostel.com/api";
+// Use a dynamic base URL that works for both local development and production
+const API_BASE_URL =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1" ||
+  window.location.hostname.startsWith("192.168.")
+    ? `http://${window.location.hostname}:8000/api/v1`
+    : "/api/v1";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -22,12 +27,12 @@ export default api;
 // Separate auth API for JWT token calls
 export const authApi = {
   login: (username, password) =>
-    axios.post("https://maryamhostel.com/api/auth/token/", {
+    axios.post(`${API_BASE_URL}/auth/token/`, {
       username,
       password,
     }),
   refresh: (refreshToken) =>
-    axios.post("https://maryamhostel.com/api/auth/token/refresh/", {
+    axios.post(`${API_BASE_URL}/auth/token/refresh/`, {
       refresh: refreshToken,
     }),
 };
