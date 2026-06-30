@@ -1,0 +1,292 @@
+ Volume in drive C has no label.
+ Volume Serial Number is 02E5-215B
+
+ Directory of c:\girls_hostel_mgm\backend
+
+29-Nov-25  10:25 PM    <DIR>          .
+29-Nov-25  10:25 PM    <DIR>          ..
+20-Nov-25  08:38 AM    <DIR>          accounts
+18-Nov-25  10:47 PM    <DIR>          backend
+29-Nov-25  10:25 PM                 0 backend.txt
+24-Nov-25  08:02 PM           219,756 backend.zip
+22-Nov-25  01:03 PM           368,640 db.sqlite3
+21-Nov-25  11:26 PM    <DIR>          fees
+21-Nov-25  09:08 AM    <DIR>          hostels
+21-Nov-25  09:08 AM    <DIR>          inventory
+18-Nov-25  10:47 PM               685 manage.py
+21-Nov-25  10:02 PM    <DIR>          payment_proofs
+24-Nov-25  06:53 PM               278 requirements.txt
+24-Nov-25  06:56 PM    <DIR>          venv
+               5 File(s)        589,359 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\accounts
+
+20-Nov-25  08:38 AM    <DIR>          .
+20-Nov-25  08:38 AM    <DIR>          ..
+19-Nov-25  12:02 AM                89 admin.py
+18-Nov-25  10:47 PM               154 apps.py
+18-Nov-25  11:18 PM    <DIR>          migrations
+20-Nov-25  08:16 AM             1,565 models.py
+20-Nov-25  01:27 AM             3,141 serializers - Copy.py
+20-Nov-25  08:49 AM             1,688 serializers.py
+18-Nov-25  10:47 PM                63 tests.py
+20-Nov-25  08:51 AM             1,287 views.py
+18-Nov-25  10:47 PM                 0 __init__.py
+20-Nov-25  08:51 AM    <DIR>          __pycache__
+               8 File(s)          7,987 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\accounts\migrations
+
+18-Nov-25  11:18 PM    <DIR>          .
+18-Nov-25  11:18 PM    <DIR>          ..
+18-Nov-25  11:18 PM             3,154 0001_initial.py
+18-Nov-25  10:47 PM                 0 __init__.py
+18-Nov-25  11:18 PM    <DIR>          __pycache__
+               2 File(s)          3,154 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\accounts\migrations\__pycache__
+
+18-Nov-25  11:18 PM    <DIR>          .
+18-Nov-25  11:18 PM    <DIR>          ..
+18-Nov-25  11:18 PM             3,784 0001_initial.cpython-313.pyc
+18-Nov-25  11:18 PM               156 __init__.cpython-313.pyc
+               2 File(s)          3,940 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\accounts\__pycache__
+
+20-Nov-25  08:51 AM    <DIR>          .
+20-Nov-25  08:51 AM    <DIR>          ..
+19-Nov-25  12:02 AM               318 admin.cpython-313.pyc
+18-Nov-25  11:18 PM               513 apps.cpython-313.pyc
+20-Nov-25  08:18 AM             2,021 models.cpython-313.pyc
+20-Nov-25  08:49 AM             2,657 serializers.cpython-313.pyc
+20-Nov-25  08:51 AM             2,572 views.cpython-313.pyc
+18-Nov-25  11:18 PM               145 __init__.cpython-313.pyc
+               6 File(s)          8,226 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\backend
+
+18-Nov-25  10:47 PM    <DIR>          .
+18-Nov-25  10:47 PM    <DIR>          ..
+18-Nov-25  10:47 PM               407 asgi.py
+20-Nov-25  01:41 AM             4,144 settings.py
+21-Nov-25  08:09 PM             3,052 urls.py
+18-Nov-25  10:47 PM               407 wsgi.py
+18-Nov-25  10:47 PM                 0 __init__.py
+24-Nov-25  06:56 PM    <DIR>          __pycache__
+               5 File(s)          8,010 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\backend\__pycache__
+
+24-Nov-25  06:56 PM    <DIR>          .
+24-Nov-25  06:56 PM    <DIR>          ..
+               0 File(s)              0 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\fees
+
+21-Nov-25  11:26 PM    <DIR>          .
+21-Nov-25  11:26 PM    <DIR>          ..
+19-Nov-25  12:02 AM               258 admin.py
+22-Nov-25  01:57 AM            19,751 api_views.py
+18-Nov-25  11:43 PM               146 apps.py
+21-Nov-25  07:58 PM    <DIR>          commands
+19-Nov-25  12:54 AM    <DIR>          management
+19-Nov-25  12:45 AM    <DIR>          migrations
+21-Nov-25  07:29 PM            11,076 models.py
+19-Nov-25  04:22 PM               854 serializers.py
+19-Nov-25  01:04 AM             3,224 services.py
+18-Nov-25  11:43 PM                63 tests.py
+22-Nov-25  02:02 AM             1,257 urls.py
+21-Nov-25  08:04 PM             1,378 utils.py
+19-Nov-25  01:46 AM             1,822 views.py
+21-Nov-25  11:26 PM             1,460 whatsapp.py
+18-Nov-25  11:43 PM                 0 __init__.py
+22-Nov-25  02:04 AM    <DIR>          __pycache__
+              12 File(s)         41,289 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\fees\commands
+
+21-Nov-25  07:58 PM    <DIR>          .
+21-Nov-25  07:58 PM    <DIR>          ..
+               0 File(s)              0 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\fees\management
+
+19-Nov-25  12:54 AM    <DIR>          .
+19-Nov-25  12:54 AM    <DIR>          ..
+19-Nov-25  12:59 AM    <DIR>          commands
+21-Nov-25  07:59 PM                 0 __init__.py
+19-Nov-25  12:54 AM    <DIR>          __pycache__
+               1 File(s)              0 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\fees\management\commands
+
+19-Nov-25  12:59 AM    <DIR>          .
+19-Nov-25  12:59 AM    <DIR>          ..
+19-Nov-25  01:00 AM             1,142 apply_late_fees.py
+21-Nov-25  08:01 PM             3,152 generate_monthly_fees.py
+18-Nov-25  11:43 PM                 0 __init__.py
+19-Nov-25  01:00 AM    <DIR>          __pycache__
+               3 File(s)          4,294 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\fees\management\commands\__pycache__
+
+19-Nov-25  01:00 AM    <DIR>          .
+19-Nov-25  01:00 AM    <DIR>          ..
+19-Nov-25  01:00 AM             1,970 apply_late_fees.cpython-313.pyc
+19-Nov-25  12:54 AM             2,053 generate_monthly_fees.cpython-313.pyc
+19-Nov-25  12:54 AM               161 __init__.cpython-313.pyc
+               3 File(s)          4,184 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\fees\management\__pycache__
+
+19-Nov-25  12:54 AM    <DIR>          .
+19-Nov-25  12:54 AM    <DIR>          ..
+19-Nov-25  12:54 AM               152 __init__.cpython-313.pyc
+               1 File(s)            152 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\fees\migrations
+
+19-Nov-25  12:45 AM    <DIR>          .
+19-Nov-25  12:45 AM    <DIR>          ..
+18-Nov-25  11:49 PM             3,555 0001_initial.py
+19-Nov-25  12:45 AM               429 0002_feehead_default_amount.py
+18-Nov-25  11:43 PM                 0 __init__.py
+19-Nov-25  12:46 AM    <DIR>          __pycache__
+               3 File(s)          3,984 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\fees\migrations\__pycache__
+
+19-Nov-25  12:46 AM    <DIR>          .
+19-Nov-25  12:46 AM    <DIR>          ..
+18-Nov-25  11:49 PM             4,226 0001_initial.cpython-313.pyc
+19-Nov-25  12:46 AM               819 0002_feehead_default_amount.cpython-313.pyc
+18-Nov-25  11:49 PM               152 __init__.cpython-313.pyc
+               3 File(s)          5,197 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\fees\__pycache__
+
+22-Nov-25  02:04 AM    <DIR>          .
+22-Nov-25  02:04 AM    <DIR>          ..
+19-Nov-25  12:02 AM               600 admin.cpython-313.pyc
+22-Nov-25  02:04 AM            20,296 api_views.cpython-313.pyc
+18-Nov-25  11:49 PM               501 apps.cpython-313.pyc
+21-Nov-25  07:29 PM            12,484 models.cpython-313.pyc
+19-Nov-25  04:22 PM             2,349 serializers.cpython-313.pyc
+19-Nov-25  01:04 AM             4,068 services.cpython-313.pyc
+22-Nov-25  02:04 AM             1,342 urls.cpython-313.pyc
+21-Nov-25  08:09 PM             1,925 utils.cpython-313.pyc
+19-Nov-25  01:47 AM             3,235 views.cpython-313.pyc
+21-Nov-25  11:32 PM             2,035 whatsapp.cpython-313.pyc
+18-Nov-25  11:49 PM               141 __init__.cpython-313.pyc
+              11 File(s)         48,976 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\hostels
+
+21-Nov-25  09:08 AM    <DIR>          .
+21-Nov-25  09:08 AM    <DIR>          ..
+19-Nov-25  12:00 AM               349 admin.py
+20-Nov-25  01:30 AM               241 apps.py
+18-Nov-25  11:18 PM    <DIR>          migrations
+18-Nov-25  11:10 PM             3,864 models.py
+18-Nov-25  11:11 PM             1,786 serializers.py
+20-Nov-25  01:29 AM             1,017 signals.py
+18-Nov-25  10:47 PM                63 tests.py
+19-Nov-25  11:21 PM             6,736 views.py
+18-Nov-25  10:47 PM                 0 __init__.py
+20-Nov-25  01:30 AM    <DIR>          __pycache__
+               8 File(s)         14,056 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\hostels\migrations
+
+18-Nov-25  11:18 PM    <DIR>          .
+18-Nov-25  11:18 PM    <DIR>          ..
+18-Nov-25  11:18 PM             5,577 0001_initial.py
+18-Nov-25  10:47 PM                 0 __init__.py
+18-Nov-25  11:18 PM    <DIR>          __pycache__
+               2 File(s)          5,577 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\hostels\migrations\__pycache__
+
+18-Nov-25  11:18 PM    <DIR>          .
+18-Nov-25  11:18 PM    <DIR>          ..
+18-Nov-25  11:18 PM             5,916 0001_initial.cpython-313.pyc
+18-Nov-25  11:18 PM               155 __init__.cpython-313.pyc
+               2 File(s)          6,071 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\hostels\__pycache__
+
+20-Nov-25  01:30 AM    <DIR>          .
+20-Nov-25  01:30 AM    <DIR>          ..
+19-Nov-25  12:00 AM               863 admin.cpython-313.pyc
+20-Nov-25  01:30 AM               663 apps.cpython-313.pyc
+18-Nov-25  11:18 PM             7,694 models.cpython-313.pyc
+18-Nov-25  11:18 PM             4,255 serializers.cpython-313.pyc
+20-Nov-25  01:30 AM             1,179 signals.cpython-313.pyc
+19-Nov-25  11:21 PM             9,270 views.cpython-313.pyc
+18-Nov-25  11:18 PM               144 __init__.cpython-313.pyc
+               7 File(s)         24,068 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\inventory
+
+21-Nov-25  09:08 AM    <DIR>          .
+21-Nov-25  09:08 AM    <DIR>          ..
+19-Nov-25  12:01 AM               271 admin.py
+18-Nov-25  10:47 PM               156 apps.py
+18-Nov-25  11:18 PM    <DIR>          migrations
+18-Nov-25  11:12 PM             2,442 models.py
+18-Nov-25  11:13 PM             1,061 serializers.py
+18-Nov-25  10:47 PM                63 tests.py
+20-Nov-25  12:37 PM            16,551 views.py
+18-Nov-25  10:47 PM                 0 __init__.py
+20-Nov-25  12:37 PM    <DIR>          __pycache__
+               7 File(s)         20,544 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\inventory\migrations
+
+18-Nov-25  11:18 PM    <DIR>          .
+18-Nov-25  11:18 PM    <DIR>          ..
+18-Nov-25  11:18 PM             3,321 0001_initial.py
+18-Nov-25  10:47 PM                 0 __init__.py
+18-Nov-25  11:18 PM    <DIR>          __pycache__
+               2 File(s)          3,321 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\inventory\migrations\__pycache__
+
+18-Nov-25  11:18 PM    <DIR>          .
+18-Nov-25  11:18 PM    <DIR>          ..
+18-Nov-25  11:18 PM             3,735 0001_initial.cpython-313.pyc
+18-Nov-25  11:18 PM               157 __init__.cpython-313.pyc
+               2 File(s)          3,892 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\inventory\__pycache__
+
+20-Nov-25  12:37 PM    <DIR>          .
+20-Nov-25  12:37 PM    <DIR>          ..
+19-Nov-25  12:01 AM               682 admin.cpython-313.pyc
+18-Nov-25  11:18 PM               516 apps.cpython-313.pyc
+18-Nov-25  11:18 PM             4,653 models.cpython-313.pyc
+18-Nov-25  11:18 PM             2,761 serializers.cpython-313.pyc
+20-Nov-25  12:37 PM            18,367 views.cpython-313.pyc
+18-Nov-25  11:18 PM               146 __init__.cpython-313.pyc
+               6 File(s)         27,125 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\payment_proofs
+
+21-Nov-25  10:02 PM    <DIR>          .
+21-Nov-25  10:02 PM    <DIR>          ..
+21-Nov-25  10:02 PM            49,130 Cutie_patootie.png
+19-Nov-25  12:35 AM             8,045 teststudent1.jpg
+21-Nov-25  01:58 PM             8,045 teststudent1_SJlX3qx.jpg
+19-Nov-25  04:36 PM             8,045 teststudent1_T2u5bhw.jpg
+               4 File(s)         73,265 bytes
+
+ Directory of c:\girls_hostel_mgm\backend\venv
+
+24-Nov-25  06:56 PM    <DIR>          .
+24-Nov-25  06:56 PM    <DIR>          ..
+               0 File(s)              0 bytes
+
+     Total Files Listed:
+             105 File(s)        906,671 bytes
+              77 Dir(s)  520,241,811,456 bytes free

@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "/static/css/main.5e523927.css",
+    "main.js": "/static/js/main.5ab606ff.js",
+    "static/js/239.ad40150f.chunk.js": "/static/js/239.ad40150f.chunk.js",
+    "static/js/977.7a7b0c82.chunk.js": "/static/js/977.7a7b0c82.chunk.js",
+    "static/js/455.d84a77af.chunk.js": "/static/js/455.d84a77af.chunk.js",
+    "static/media/dinner_menu.jpg": "/static/media/dinner_menu.9746d27fc73fa2d0cc6a.jpg",
+    "static/media/lunch_menu.jpg": "/static/media/lunch_menu.47968e4b18899228093c.jpg",
+    "static/media/maryam_logo.png": "/static/media/maryam_logo.6d8349790d5ba8e341ce.png",
+    "static/media/breakfast_menu.jpg": "/static/media/breakfast_menu.6efb86cc71bbe33ee636.jpg",
+    "static/media/hostel_room.jpg": "/static/media/hostel_room.38601b461f750323938d.jpg",
+    "static/media/hostel_hero.jpg": "/static/media/hostel_hero.39bba80449066e858d3b.jpg",
+    "static/media/hostel_life.jpg": "/static/media/hostel_life.cb17576665fb87e8fec5.jpg",
+    "index.html": "/index.html",
+    "main.5e523927.css.map": "/static/css/main.5e523927.css.map",
+    "main.5ab606ff.js.map": "/static/js/main.5ab606ff.js.map",
+    "239.ad40150f.chunk.js.map": "/static/js/239.ad40150f.chunk.js.map",
+    "977.7a7b0c82.chunk.js.map": "/static/js/977.7a7b0c82.chunk.js.map",
+    "455.d84a77af.chunk.js.map": "/static/js/455.d84a77af.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.5e523927.css",
+    "static/js/main.5ab606ff.js"
+  ]
+}
