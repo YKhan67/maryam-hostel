@@ -2,12 +2,13 @@
 import axios from "axios";
 
 // Use a dynamic base URL that works for both local development and production
+// On production, it will be just "/api" (relative to the domain)
 const API_BASE_URL =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1" ||
   window.location.hostname.startsWith("192.168.")
-    ? `http://${window.location.hostname}:8000/api/v1`
-    : "/api/v1";
+    ? `http://${window.location.hostname}:8000/api`
+    : "/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,

@@ -31,7 +31,7 @@ export function AuthProvider({ children }) {
     }
 
     try {
-      const res = await api.get("/me/"); // expects user { username, role, ... }
+      const res = await api.get("me/"); // expects user { username, role, ... }
       setUser(res.data);
     } catch (err) {
       console.error("Failed to load current user", err);
@@ -68,7 +68,7 @@ export function AuthProvider({ children }) {
       }
 
       // 3) Fetch current user from /api/me/
-      const meRes = await api.get("/me/");
+      const meRes = await api.get("me/");
       setUser(meRes.data);
 
       // IMPORTANT: return the user object
