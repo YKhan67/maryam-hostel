@@ -18,7 +18,7 @@ class ItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Item
-        fields = ["id", "code", "name", "category", "category_name", "unit", "unit_name", "is_active"]
+        fields = ["id", "code", "name", "category", "category_name", "unit", "unit_name", "reorder_level", "is_active"]
 
 class VendorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -35,10 +35,11 @@ class PurchaseSerializer(serializers.ModelSerializer):
         model = Purchase
         fields = [
             "id", "hostel", "hostel_name", "date", "vendor", "vendor_name", 
-            "invoice_no", "item", "item_name", "quantity", "price_per_unit", 
-            "total_cost", "created_at",
+            "invoice_no", "invoice_photo", "items_photo", "item", "item_name", 
+            "quantity", "price_per_unit", "total_cost", "status", 
+            "approved_by", "rejection_remarks", "created_at",
         ]
-        read_only_fields = ["id", "total_cost", "created_at"]
+        read_only_fields = ["id", "total_cost", "status", "approved_by", "created_at"]
 
 class ConsumptionSerializer(serializers.ModelSerializer):
     item_name = serializers.CharField(source="item.name", read_only=True)
@@ -46,5 +47,5 @@ class ConsumptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Consumption
-        fields = ["id", "hostel", "hostel_name", "date", "item", "item_name", "quantity", "remarks", "created_at"]
+        fields = ["id", "hostel", "hostel_name", "date", "item", "item_name", "quantity", "photo", "remarks", "created_at"]
         read_only_fields = ["id", "created_at"]

@@ -114,12 +114,21 @@ class MonthlyFee(models.Model):
     month = models.DateField()
 
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     is_paid = models.BooleanField(default=False)
+    is_partially_paid = models.BooleanField(default=False)
 
     # Snapshot of current late fee (we can recompute + update over time)
     late_fee_applied = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def balance_due(self):
+        """
+        Total (Amount + Late Fee) - Amount Paid
+        """
+        return (self.amount + self.late_fee_applied) - self.amount_paid
 
     class Meta:
         unique_together = ("student", "fee_head", "month")
@@ -299,6 +308,51 @@ class PaymentProof(models.Model):
         # if status changed to APPROVED → mark related fee as paid
         if self.status == "APPROVED" and (old_status != "APPROVED"):
             fee = self.fee
+            # Handle as full payment if not specified otherwise
+            fee.amount_paid = fee.amount + fee.late_fee_applied
             fee.is_paid = True
+            fee.is_partially_paid = False
             # When approved, we can also lock in the final late fee snapshot
             fee.refresh_late_fee(on_date=date.today(), save=True)
+
+
+class Receipt(models.Model):
+    """
+    Official digital receipt issued upon payment verification.
+    """
+    receipt_no = models.CharField(max_length=50, unique=True)
+    fee = models.ForeignKey(MonthlyFee, on_delete=models.CASCADE, related_name="receipts")
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    date_issued = models.DateTimeField(auto_now_add=True)
+    payment_method = models.CharField(max_length=50, default="Bank Transfer")
+
+    def save(self, *args, **kwargs):
+        if not self.receipt_no:
+            # Generate professional receipt number MH-2026-0001
+            import random
+            year = date.today().year
+            self.receipt_no = f"MH-{year}-{random.randint(10000, 99999)}"
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.receipt_no
+
+
+class SecurityDeposit(models.Model):
+    """
+    Tracks refundable security deposits paid at admission.
+    """
+    STATUS_CHOICES = [
+        ("HELD", "Held by Hostel"),
+        ("REFUNDED", "Refunded to Student"),
+        ("FORFEITED", "Forfeited (Damages/Dues)"),
+    ]
+    student = models.OneToOneField(StudentProfile, on_delete=models.CASCADE, related_name="security_deposit")
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    date_paid = models.DateField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="HELD")
+    refund_date = models.DateField(null=True, blank=True)
+    remarks = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"Security: {self.student.user.username} - {self.amount}"

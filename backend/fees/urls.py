@@ -9,9 +9,39 @@ from .api_views import (
     MarkFeesPaidView,
     SendWhatsappPendingFeesView,
     WaiveFineView,
+    StudentLedgerView,
+    UnitEconomicsView,
+    SecurityDepositView,
+    GenerateReceiptPDFView,
+    ParentSecureLedgerView,
 )
 
 urlpatterns = [
+    path(
+        "parent-ledger/<str:token>/",
+        ParentSecureLedgerView.as_view(),
+        name="fees-parent-ledger",
+    ),
+    path(
+        "student-ledger/",
+        StudentLedgerView.as_view(),
+        name="fees-student-ledger",
+    ),
+    path(
+        "unit-economics/",
+        UnitEconomicsView.as_view(),
+        name="fees-unit-economics",
+    ),
+    path(
+        "security-deposits/",
+        SecurityDepositView.as_view(),
+        name="fees-security-deposits",
+    ),
+    path(
+        "receipt/<int:receipt_id>/",
+        GenerateReceiptPDFView.as_view(),
+        name="fees-generate-receipt",
+    ),
     path(
         "dashboard/current-month/",
         CurrentMonthFeeDashboard.as_view(),

@@ -57,6 +57,15 @@ class StudentProfileViewSet(viewsets.ModelViewSet):
     serializer_class = StudentProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+        if user.role == "STUDENT":
+            return qs.filter(user=user)
+        if user.role in ["HOSTEL_MANAGER", "PARTNER", "STAFF"] and user.hostel:
+            return qs.filter(hostel=user.hostel)
+        return qs
+
 from .models import Bed, StudentProfile, Hostel, City
 from fees.models import MonthlyFee
 

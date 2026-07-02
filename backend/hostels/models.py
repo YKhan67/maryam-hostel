@@ -90,6 +90,11 @@ class StudentProfile(models.Model):
     whatsapp = models.CharField(max_length=20, blank=True)
     guardian_name = models.CharField(max_length=100, blank=True)
     guardian_phone = models.CharField(max_length=20, blank=True)
+    
+    # Parent/Guardian for Notifications
+    parent_phone = models.CharField(max_length=20, blank=True, help_text="For automated fee alerts")
+    parent_whatsapp = models.CharField(max_length=20, blank=True, help_text="For automated receipts")
+
     college_name = models.CharField(max_length=150, blank=True)
     course = models.CharField(max_length=150, blank=True)
     year = models.CharField(max_length=20, blank=True)
@@ -98,6 +103,15 @@ class StudentProfile(models.Model):
     joined_on = models.DateField(null=True, blank=True)
     left_on = models.DateField(null=True, blank=True)
 
+    # Secure Parent Access
+    parent_link_token = models.CharField(max_length=100, unique=True, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.parent_link_token:
+            import uuid
+            self.parent_link_token = uuid.uuid4().hex
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.user.get_full_name() or self.user.username} - {self.hostel.code}"
+        return f"{self.user.get_full_name() or self.user.username} - {self.hostel.code if self.hostel else 'No Hostel'}"
 

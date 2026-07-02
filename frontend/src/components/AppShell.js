@@ -50,6 +50,9 @@ export default function AppShell({ children, subtitle }) {
                 <NavLink to="/student" className={navClass}>
                   🏠 My Dashboard
                 </NavLink>
+                <NavLink to="/change-password" className={navClass}>
+                  🔒 Change Password
+                </NavLink>
               </>
             )}
 
@@ -62,13 +65,45 @@ export default function AppShell({ children, subtitle }) {
                   📊 Management Dashboard
                 </NavLink>
 
+                <NavLink to="/change-password" className={navClass}>
+                  🔒 Change Password
+                </NavLink>
+
+                <NavLink to="/staff-tasks" className={navClass}>
+                  🛠️ Staff Tasks
+                </NavLink>
+
                 <NavLink to="/inventory" className={navClass}>
-                  📦 Inventory
+                  📦 Inventory Logs
+                </NavLink>
+
+                <NavLink to="/inventory-items" className={navClass}>
+                  🏷️ Item Labels
                 </NavLink>
 
                 <NavLink to="/inventory-kpis" className={navClass}>
                   📈 Inventory KPIs
                 </NavLink>
+
+                <NavLink to="/procurement" className={navClass}>
+                  🛒 Smart Re-order
+                </NavLink>
+
+                {(user.role === "SUPER_ADMIN" || user.role === "CITY_MANAGER") && (
+                  <NavLink to="/purchase-approvals" className={navClass}>
+                    ⚖️ Purchase Approvals
+                  </NavLink>
+                )}
+
+                <NavLink to="/visual-audit" className={navClass}>
+                  📷 Visual Audit
+                </NavLink>
+
+                {(user.role === "SUPER_ADMIN" || user.role === "PARTNER") && (
+                  <NavLink to="/investor-portal" className={navClass}>
+                    📈 Investor Portal
+                  </NavLink>
+                )}
 
                 {/* Fees section */}
                 <div className="sidebar-section-title" style={{ marginTop: 12 }}>
@@ -77,6 +112,14 @@ export default function AppShell({ children, subtitle }) {
 
                 <NavLink to="/fees-management" className={navClass}>
                   🧾 Fee Management
+                </NavLink>
+
+                <NavLink to="/payment-verification" className={navClass}>
+                  ✅ Verify Payments
+                </NavLink>
+
+                <NavLink to="/security-deposits" className={navClass}>
+                  🛡️ Security Deposits
                 </NavLink>
 
                 <NavLink to="/fees-dashboard" className={navClass}>

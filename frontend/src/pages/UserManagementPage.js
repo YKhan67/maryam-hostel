@@ -36,7 +36,7 @@ export default function UserManagementPage() {
     setLoadingUsers(true);
     setError(null);
     try {
-      const res = await api.get("/users/");
+      const res = await api.get("users/");
       setUsers(res.data);
     } catch (err) {
       console.error("Error loading users:", err);
@@ -57,7 +57,7 @@ export default function UserManagementPage() {
     setCreateMessage("");
     try {
       const payload = { ...form };
-      await api.post("/users/", payload);
+      await api.post("users/", payload);
       setCreateMessage("✅ User created successfully.");
       // clear form
       setForm({
@@ -225,6 +225,7 @@ export default function UserManagementPage() {
                   <th>Role</th>
                   <th>Name</th>
                   <th>Email</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -236,6 +237,21 @@ export default function UserManagementPage() {
                       {(u.first_name || "") + " " + (u.last_name || "")}
                     </td>
                     <td>{u.email}</td>
+                    <td>
+                      {u.role === "STUDENT" && u.parent_link_token && (
+                        <button
+                          onClick={() => {
+                            const link = `${window.location.origin}/parent-portal/${u.parent_link_token}`;
+                            navigator.clipboard.writeText(link);
+                            alert("Parent Link copied to clipboard!");
+                          }}
+                          className="btn btn-soft"
+                          style={{ padding: '4px 8px', fontSize: '0.7rem' }}
+                        >
+                          🔗 Copy Parent Link
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

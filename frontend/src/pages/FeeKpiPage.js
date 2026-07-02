@@ -34,7 +34,7 @@ export default function FeeKpiPage() {
       setMonthlyLoading(true);
       setMonthlyError(null);
       try {
-        const resp = await api.get("/fees/dashboard/last-three-months/");
+        const resp = await api.get("fees/dashboard/last-three-months/");
         let data = resp.data;
         if (!Array.isArray(data)) {
           throw new Error("Unexpected response format from /fees/dashboard/last-three-months/");

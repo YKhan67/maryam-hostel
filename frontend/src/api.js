@@ -1,14 +1,13 @@
 // src/api.js
 import axios from "axios";
 
-// Use a dynamic base URL that works for both local development and production
-// On production, it will be just "/api" (relative to the domain)
+// Use a robust base URL that always ends with a slash to ensure correct path joining
 const API_BASE_URL =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1" ||
   window.location.hostname.startsWith("192.168.")
-    ? `http://${window.location.hostname}:8000/api`
-    : "/api";
+    ? `http://${window.location.hostname}:8000/api/`
+    : "/api/";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -28,12 +27,12 @@ export default api;
 // Separate auth API for JWT token calls
 export const authApi = {
   login: (username, password) =>
-    axios.post(`${API_BASE_URL}/auth/token/`, {
+    axios.post(`${API_BASE_URL}auth/token/`, {
       username,
       password,
     }),
   refresh: (refreshToken) =>
-    axios.post(`${API_BASE_URL}/auth/token/refresh/`, {
+    axios.post(`${API_BASE_URL}auth/token/refresh/`, {
       refresh: refreshToken,
     }),
 };

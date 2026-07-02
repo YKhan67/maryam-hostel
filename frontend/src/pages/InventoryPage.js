@@ -24,286 +24,297 @@ function formatDate(value) {
   return d.toLocaleDateString("en-GB");
 }
 
+/* --- SUB-COMPONENT: PURCHASE FORM --- */
+const PurchaseEntryForm = ({ hostels, items, vendors, onCancel, onRefresh }) => {
+  const [formData, setFormData] = useState({
+    hostel: "", item: "", vendor: "", date: new Date().toISOString().split('T')[0],
+    quantity: "", price_per_unit: "", invoice_no: ""
+  });
+  const [invoicePhoto, setInvoicePhoto] = useState(null);
+  const [itemsPhoto, setItemsPhoto] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    const data = new FormData();
+    Object.keys(formData).forEach(key => data.append(key, formData[key]));
+    if (invoicePhoto) data.append("invoice_photo", invoicePhoto);
+    if (itemsPhoto) data.append("items_photo", itemsPhoto);
+
+    try {
+      await api.post("purchases/", data, { headers: { "Content-Type": "multipart/form-data" } });
+      alert("Purchase submitted for approval!");
+      onRefresh();
+      onCancel();
+    } catch (err) {
+      alert("Failed to submit purchase.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+      <select className="form-input" required onChange={e => setFormData({...formData, hostel: e.target.value})}>
+        <option value="">Select Hostel</option>
+        {hostels.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
+      </select>
+      <select className="form-input" required onChange={e => setFormData({...formData, item: e.target.value})}>
+        <option value="">Select Item</option>
+        {items.map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
+      </select>
+      <select className="form-input" required onChange={e => setFormData({...formData, vendor: e.target.value})}>
+        <option value="">Select Vendor</option>
+        {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+      </select>
+      <input type="date" className="form-input" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} required />
+      <input type="number" placeholder="Quantity" className="form-input" required onChange={e => setFormData({...formData, quantity: e.target.value})} />
+      <input type="number" placeholder="Price Per Unit" className="form-input" required onChange={e => setFormData({...formData, price_per_unit: e.target.value})} />
+      <div className="filter-group">
+        <label className="filter-label">Invoice Photo</label>
+        <input type="file" accept="image/*" onChange={e => setInvoicePhoto(e.target.files[0])} />
+      </div>
+      <div className="filter-group">
+        <label className="filter-label">Items Photo</label>
+        <input type="file" accept="image/*" onChange={e => setItemsPhoto(e.target.files[0])} />
+      </div>
+      <div style={{ gridColumn: 'span 2', display: 'flex', gap: '10px' }}>
+        <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? "Submitting..." : "Save Purchase"}</button>
+        <button type="button" className="btn btn-soft" onClick={onCancel}>Cancel</button>
+      </div>
+    </form>
+  );
+};
+
+/* --- SUB-COMPONENT: CONSUMPTION FORM --- */
+const ConsumptionEntryForm = ({ hostels, items, onCancel, onRefresh }) => {
+  const [formData, setFormData] = useState({
+    hostel: "", item: "", date: new Date().toISOString().split('T')[0],
+    quantity: "", remarks: ""
+  });
+  const [photo, setPhoto] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    const data = new FormData();
+    Object.keys(formData).forEach(key => data.append(key, formData[key]));
+    if (photo) data.append("photo", photo);
+
+    try {
+      await api.post("consumptions/", data, { headers: { "Content-Type": "multipart/form-data" } });
+      alert("Usage logged successfully!");
+      onRefresh();
+      onCancel();
+    } catch (err) {
+      alert("Failed to log usage.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <select className="form-input" required onChange={e => setFormData({...formData, hostel: e.target.value})}>
+          <option value="">Select Hostel</option>
+          {hostels.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
+        </select>
+        <select className="form-input" required onChange={e => setFormData({...formData, item: e.target.value})}>
+          <option value="">Select Item</option>
+          {items.map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
+        </select>
+        <input type="date" className="form-input" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} required />
+        <input type="number" placeholder="Quantity Removed" className="form-input" required onChange={e => setFormData({...formData, quantity: e.target.value})} />
+      </div>
+      <div className="filter-group">
+        <label className="filter-label">Proof Photo (Optional)</label>
+        <input type="file" accept="image/*" capture="environment" onChange={e => setPhoto(e.target.files[0])} />
+      </div>
+      <textarea className="form-input" placeholder="Remarks" onChange={e => setFormData({...formData, remarks: e.target.value})} />
+      <div style={{ display: 'flex', gap: '10px' }}>
+        <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? "Logging..." : "Confirm Removal"}</button>
+        <button type="button" className="btn btn-soft" onClick={onCancel}>Cancel</button>
+      </div>
+    </form>
+  );
+};
+
 export default function InventoryPage() {
   const [rows, setRows] = useState([]);
   const [hostels, setHostels] = useState([]);
+  const [items, setItems] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const [search, setSearch] = useState("");
   const [hostelFilter, setHostelFilter] = useState("ALL");
+  const [showPurchaseForm, setShowPurchaseForm] = useState(false);
+  const [showConsumptionForm, setShowConsumptionForm] = useState(false);
 
   const location = useLocation();
 
-  // ─────────────────────────────
-  // Load purchases + hostels
-  // ─────────────────────────────
-  useEffect(() => {
-    let isMounted = true;
+  const loadData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [invResp, hostelsResp, itemsResp, vendorsResp] = await Promise.all([
+        api.get("inventory/list/").catch(() => ({ data: [] })),
+        api.get("hostels/").catch(() => ({ data: [] })),
+        api.get("items/").catch(() => ({ data: [] })),
+        api.get("vendors/").catch(() => ({ data: [] }))
+      ]);
 
-    async function loadData() {
-      setLoading(true);
-      setError(null);
-
-      try {
-        // 1) Purchases
-        const resp = await api.get("/inventory/list/", {
-          params: { ordering: "-date" },
-        });
-
-        let data = resp.data;
-        if (!Array.isArray(data) && data && Array.isArray(data.results)) {
-          data = data.results;
-        }
-        if (!Array.isArray(data)) {
-          throw new Error("Unexpected response format from /inventory/list/");
-        }
-        if (isMounted) setRows(data);
-
-        // 2) Hostels for dropdown (optional)
-        try {
-          const hostelsResp = await api.get("/hostels/");
-          const hostelsData = Array.isArray(hostelsResp.data)
-            ? hostelsResp.data
-            : hostelsResp.data?.results || [];
-          if (isMounted) setHostels(hostelsData);
-        } catch (err) {
-          console.warn("Failed to load hostels list", err);
-        }
-      } catch (err) {
-        console.error("Failed to load inventory", err);
-        if (isMounted) {
-          setError(
-            err.response?.data?.detail ||
-              err.message ||
-              "Failed to load inventory data."
-          );
-        }
-      } finally {
-        if (isMounted) setLoading(false);
-      }
+      setRows(Array.isArray(invResp.data) ? invResp.data : invResp.data.results || []);
+      setHostels(Array.isArray(hostelsResp.data) ? hostelsResp.data : hostelsResp.data.results || []);
+      setItems(Array.isArray(itemsResp.data) ? itemsResp.data : itemsResp.data.results || []);
+      setVendors(Array.isArray(vendorsResp.data) ? vendorsResp.data : vendorsResp.data.results || []);
+    } catch (err) {
+      console.error("Failed to load inventory", err);
+      setError("Failed to sync records.");
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     loadData();
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
-  // Apply drill-down filter if navigated from Management Dashboard
   useEffect(() => {
-    const hostelFromState = location.state?.hostel;
-    if (hostelFromState) {
-      setHostelFilter(hostelFromState);
-    }
+    if (location.state?.hostel) setHostelFilter(location.state.hostel);
   }, [location.state]);
 
-  // ─────────────────────────────
-  // Filters applied on the client
-  // ─────────────────────────────
   const filteredRows = useMemo(() => {
     let data = rows;
-
-    if (hostelFilter !== "ALL") {
-      data = data.filter((r) => String(r.hostel) === String(hostelFilter));
-    }
-
+    if (hostelFilter !== "ALL") data = data.filter((r) => String(r.hostel) === String(hostelFilter));
     if (search.trim()) {
       const q = search.trim().toLowerCase();
-      data = data.filter((r) => {
-        const fields = [
-          r.item,
-          r.vendor,
-          r.invoice_no,
-          r.hostel,
-          r.category,
-          r.unit,
-        ];
-        return fields
-          .filter(Boolean)
-          .some((v) => String(v).toLowerCase().includes(q));
-      });
+      data = data.filter((r) => [r.item, r.vendor, r.invoice_no].some(v => String(v).toLowerCase().includes(q)));
     }
-
     return data;
   }, [rows, hostelFilter, search]);
 
-  // ─────────────────────────────
-  // KPI summaries
-  // ─────────────────────────────
   const { totalSpend, lineCount } = useMemo(() => {
-    let spend = 0;
-    let lines = 0;
-
-    for (const r of filteredRows) {
-      const val = Number(r.total_cost || 0);
-      if (!Number.isNaN(val)) spend += val;
-      lines += 1;
-    }
-
-    return { totalSpend: spend, lineCount: lines };
+    const spend = filteredRows.reduce((sum, r) => sum + Number(r.total_cost || 0), 0);
+    return { totalSpend: spend, lineCount: filteredRows.length };
   }, [filteredRows]);
 
-  // ─────────────────────────────
-  // Export handlers
-  // ─────────────────────────────
-  const handleExportExcel = () => {
-    const filterDesc = [
-      hostelFilter !== "ALL" ? `Hostel: ${hostelFilter}` : null,
-      search ? `Search: ${search}` : null,
-    ]
-      .filter(Boolean)
-      .join(" | ");
-
-    exportInventoryToExcel(filteredRows, {
-      fileName: "maryam_inventory.xlsx",
-      filters: filterDesc,
-    });
-  };
-
-  const handleExportPdf = () => {
-    const filterDesc = [
-      hostelFilter !== "ALL" ? `Hostel: ${hostelFilter}` : null,
-      search ? `Search: ${search}` : null,
-    ]
-      .filter(Boolean)
-      .join(" | ");
-
-    exportInventoryToPdf(filteredRows, {
-      title: "Maryam Hostel – Inventory Report",
-      fileName: "maryam_inventory.pdf",
-      filters: filterDesc,
-    });
+  const handleOCRScan = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("image", file);
+    try {
+      setLoading(true);
+      const res = await api.post("inventory/ocr/", formData, { headers: { "Content-Type": "multipart/form-data" } });
+      alert(`AI Detected Total: Rs ${res.data.detected_total}`);
+    } catch (err) {
+      alert("AI Scan failed.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <AppShell subtitle="Groceries & Inventory">
+    <AppShell subtitle="Inventory Logs & Operations">
       <div className="page management-page">
-        {/* Top KPIs */}
+
+        {/* ACTION HUB */}
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+           <button onClick={() => setShowPurchaseForm(true)} className="btn btn-primary" style={{ background: '#10b981' }}>➕ Log Purchase</button>
+           <button onClick={() => setShowConsumptionForm(true)} className="btn btn-primary" style={{ background: '#c3922b' }}>📤 Log Usage</button>
+        </div>
+
+        {showPurchaseForm && (
+          <div className="card" style={{ border: '2px solid #10b981', marginBottom: '24px' }}>
+            <PurchaseEntryForm hostels={hostels} items={items} vendors={vendors} onCancel={() => setShowPurchaseForm(false)} onRefresh={loadData} />
+          </div>
+        )}
+
+        {showConsumptionForm && (
+          <div className="card" style={{ border: '2px solid #c3922b', marginBottom: '24px' }}>
+            <ConsumptionEntryForm hostels={hostels} items={items} onCancel={() => setShowConsumptionForm(false)} onRefresh={loadData} />
+          </div>
+        )}
+
+        {/* TOP METRICS */}
         <div className="cards-row">
           <div className="card kpi-card">
             <div className="card-title">Total Spend (PKR)</div>
             <div className="card-value">{formatCurrency(totalSpend)}</div>
-            <div className="card-subtext">
-              Across {lineCount} purchase line{lineCount === 1 ? "" : "s"}
-            </div>
+            <div className="card-subtext">Across {lineCount} records</div>
           </div>
-
           <div className="card kpi-card">
-            <div className="card-title">Purchase Lines</div>
-            <div className="card-value">{lineCount}</div>
-            <div className="card-subtext">
-              Filtered result of all grocery purchases
-            </div>
+            <div className="card-title">Active Items</div>
+            <div className="card-value">{items.length}</div>
+            <div className="card-subtext">Monitored in inventory</div>
           </div>
         </div>
 
-        {/* Filters + Export actions */}
+        {/* FILTERS */}
         <div className="card filters-card">
           <div className="filters-row">
             <div className="filter-group">
-              <label className="filter-label">Search</label>
-              <input
-                type="text"
-                placeholder="Search item, vendor, invoice"
-                className="filter-input"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+              <label className="filter-label">Search History</label>
+              <input type="text" placeholder="Item, Vendor..." className="filter-input" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
-
             <div className="filter-group">
-              <label className="filter-label">Hostel</label>
-              <select
-                className="filter-select"
-                value={hostelFilter}
-                onChange={(e) => setHostelFilter(e.target.value)}
-              >
-                <option value="ALL">All hostels</option>
-                {hostels.map((h) => (
-                  <option key={h.id ?? h.name} value={h.name}>
-                    {h.name}
-                  </option>
-                ))}
+              <label className="filter-label">Filter Branch</label>
+              <select className="filter-select" value={hostelFilter} onChange={(e) => setHostelFilter(e.target.value)}>
+                <option value="ALL">All Branchs</option>
+                {hostels.map(h => <option key={h.id} value={h.name}>{h.name}</option>)}
               </select>
             </div>
-
             <div className="filters-actions">
-              <button
-                type="button"
-                className="btn btn-soft"
-                onClick={handleExportExcel}
-              >
-                ⬇ Export Excel
-              </button>
-              <button
-                type="button"
-                className="btn btn-soft"
-                onClick={handleExportPdf}
-              >
-                ⬇ Export PDF
-              </button>
+              <label className="btn btn-soft" style={{ cursor: 'pointer' }}>📷 AI Scan Receipt<input type="file" hidden accept="image/*" onChange={handleOCRScan} /></label>
+              <button className="btn btn-soft" onClick={() => exportInventoryToPdf(filteredRows)}>PDF Report</button>
             </div>
           </div>
         </div>
 
-        {/* Status panels */}
-        {loading && (
-          <div className="card">
-            <p>Loading inventory data…</p>
-          </div>
-        )}
-
-        {!loading && error && (
-          <div className="card">
-            <p style={{ color: "#b91c1c" }}>
-              Failed to load inventory data. {String(error)}
-            </p>
-          </div>
-        )}
-
-        {!loading && !error && filteredRows.length === 0 && (
-          <div className="card">
-            <p>No purchases found for the selected filters.</p>
-          </div>
-        )}
-
-        {/* Table */}
-        {!loading && !error && filteredRows.length > 0 && (
-          <div className="card table-card">
-            <div className="card-title">Purchase lines</div>
-            <div className="table-wrapper">
-              <table className="inventory-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Hostel</th>
-                    <th>Vendor</th>
-                    <th>Invoice</th>
-                    <th>Item</th>
-                    <th>Qty</th>
-                    <th>Unit price</th>
-                    <th>Total cost</th>
+        {/* DATA TABLE */}
+        <div className="card table-card">
+          <div className="card-title">Approved Purchase History</div>
+          <div className="table-wrapper">
+            <table className="inventory-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Branch</th>
+                  <th>Vendor</th>
+                  <th>Item</th>
+                  <th>Qty</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>PO</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRows.map(row => (
+                  <tr key={row.id}>
+                    <td>{formatDate(row.date)}</td>
+                    <td>{row.hostel}</td>
+                    <td>{row.vendor}</td>
+                    <td>{row.item}</td>
+                    <td>{row.quantity} {row.unit}</td>
+                    <td style={{ fontWeight: 700 }}>{formatCurrency(row.total_cost)}</td>
+                    <td>
+                      <span className={`badge ${row.status === 'APPROVED' ? 'badge-success' : row.status === 'REJECTED' ? 'badge-danger' : 'badge-warning'}`}>
+                        {row.status || 'PENDING'}
+                      </span>
+                    </td>
+                    <td><button onClick={() => window.open(`${api.defaults.baseURL}inventory/purchases/${row.id}/po/`, "_blank")} className="btn btn-soft" style={{ padding: '4px 8px', fontSize: '0.7rem' }}>📄 PO</button></td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredRows.map((row) => (
-                    <tr key={row.id}>
-                      <td>{formatDate(row.date)}</td>
-                      <td>{row.hostel || "-"}</td>
-                      <td>{row.vendor || "-"}</td>
-                      <td>{row.invoice_no || "-"}</td>
-                      <td>{row.item || "-"}</td>
-                      <td>{row.quantity}</td>
-                      <td>{formatCurrency(row.price_per_unit)}</td>
-                      <td>{formatCurrency(row.total_cost)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
+        </div>
+
       </div>
     </AppShell>
   );

@@ -57,6 +57,7 @@ export default function FeeManagementPage() {
   const [markYear, setMarkYear] = useState(currentYear);
   const [markMonth, setMarkMonth] = useState(currentMonth);
   const [markAllMonths, setMarkAllMonths] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState("");
   const [markLoading, setMarkLoading] = useState(false);
   const [markMessage, setMarkMessage] = useState("");
 
@@ -88,7 +89,7 @@ export default function FeeManagementPage() {
       setLoadingStudents(true);
       setStudentsError(null);
       try {
-        const resp = await api.get("/students/");
+        const resp = await api.get("students/");
         let data = resp.data;
         if (!Array.isArray(data) && data && Array.isArray(data.results)) {
           data = data.results;
@@ -155,7 +156,7 @@ export default function FeeManagementPage() {
         payload.student_id = Number(genStudentId);
       }
 
-      const resp = await api.post("/fees/actions/generate-fees/", payload);
+      const resp = await api.post("fees/actions/generate-fees/", payload);
       setGenMessage(
         `Done. Created: ${resp.data.created ?? 0}, existing skipped: ${
           resp.data.skipped_existing ?? 0
@@ -183,22 +184,18 @@ export default function FeeManagementPage() {
       const payload = {
         scope: markScope,
         all_months: markAllMonths,
+        amount: paymentAmount || 0,
       };
 
-      if (!markAllMonths) {
-        payload.year = Number(markYear);
-        payload.month = Number(markMonth);
-      }
       if (markScope === "STUDENT" && markStudentId) {
         payload.student_id = Number(markStudentId);
+        // If single student, we need to know WHICH fee record if not bulk
+        // For simplicity, we can add a 'fee_id' selector or assume latest
       }
 
-      const resp = await api.post("/fees/actions/mark-paid/", payload);
-      setMarkMessage(
-        `Done. Marked ${resp.data.updated ?? 0} record(s) as paid (out of ${
-          resp.data.total ?? resp.data.selected ?? "?"
-        }).`
-      );
+      const resp = await api.post("fees/actions/mark-paid/", payload);
+      setMarkMessage(`Done. Records updated.`);
+      setPaymentAmount("");
     } catch (err) {
       console.error("Failed to mark fees as paid", err);
       setMarkMessage(
@@ -233,7 +230,7 @@ export default function FeeManagementPage() {
       }
 
       const resp = await api.post(
-        "/fees/actions/send-whatsapp-pending/",
+        "fees/actions/send-whatsapp-pending/",
         payload
       );
       setWaMessage(
@@ -279,7 +276,7 @@ export default function FeeManagementPage() {
         payload.partial_amount = Number(wvAmount || 0);
       }
 
-      const resp = await api.post("/fees/actions/waive-fine/", payload);
+      const resp = await api.post("fees/actions/waive-fine/", payload);
       setWvMessage(
         `Done. Updated fines on ${resp.data.updated ?? 0} record(s) (total matched: ${
           resp.data.total ?? "?"
@@ -461,6 +458,17 @@ export default function FeeManagementPage() {
                   </div>
                 </>
               )}
+
+              <div className="filter-group">
+                <label className="filter-label">Payment Amount (Optional)</label>
+                <input
+                  type="number"
+                  placeholder="Leave blank for full"
+                  className="filter-input"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                />
+              </div>
             </div>
 
             <div style={{ marginTop: 8 }}>

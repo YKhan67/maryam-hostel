@@ -9,6 +9,7 @@ class User(AbstractUser):
         SUPER_ADMIN = "SUPER_ADMIN", "Super Admin"
         CITY_MANAGER = "CITY_MANAGER", "City Manager"
         HOSTEL_MANAGER = "HOSTEL_MANAGER", "Hostel Manager"
+        PARTNER = "PARTNER", "Partner"
         STAFF = "STAFF", "Staff"
         STUDENT = "STUDENT", "Student"
 

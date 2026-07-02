@@ -45,6 +45,9 @@ INSTALLED_APPS = [
     "hostels.apps.HostelsConfig",
     "inventory",
     "fees",
+    "communication",
+    "django_celery_results",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -150,4 +153,26 @@ JAZZMIN_SETTINGS = {
     "usermenu_links": [
         {"name": "Log out", "url": "admin:logout", "icon": "fas fa-sign-out-alt"},
     ],
+}
+
+# Celery Settings
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+
+# Celery Beat Schedule
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'check-ticket-slas-every-30-min': {
+        'task': 'communication.tasks.check_ticket_slas',
+        'schedule': crontab(minute='*/30'),
+    },
+    'check-low-stock-every-morning': {
+        'task': 'inventory.tasks.check_low_stock_alerts',
+        'schedule': crontab(hour=9, minute=0), # Check every morning at 9 AM
+    },
 }

@@ -36,8 +36,12 @@ class MonthlyFeeViewSet(viewsets.ModelViewSet):
                 return qs.filter(student=student_profile)
             except StudentProfile.DoesNotExist:
                 return qs.none()
+        
+        # Isolation for Managers/Partners
+        if hasattr(user, "role") and user.role in ["HOSTEL_MANAGER", "PARTNER", "STAFF"] and user.hostel:
+            return qs.filter(student__hostel=user.hostel)
 
-        # Management / admin: see all (later we can restrict by hostel)
+        # Management / admin: see all
         return qs
 
 

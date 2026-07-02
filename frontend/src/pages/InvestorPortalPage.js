@@ -1,0 +1,138 @@
+// src/pages/InvestorPortalPage.js
+import React, { useEffect, useState, useContext } from "react";
+import AppShell from "../components/AppShell";
+import api from "../api";
+import { AuthContext } from "../AuthContext";
+
+function formatCurrency(v) {
+  if (v === null || v === undefined || isNaN(v)) return "Rs 0";
+  const num = Number(v);
+  return `Rs ${num.toLocaleString("en-PK", { maximumFractionDigits: 0 })}`;
+}
+
+export default function InvestorPortalPage() {
+  const { user } = useContext(AuthContext);
+  const [pnlData, setPnlData] = useState([]);
+  const [occupancyData, setOccupancyData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadInvestorData();
+  }, []);
+
+  async function loadInvestorData() {
+    setLoading(true);
+    try {
+      const [pnlRes, kpiRes] = await Promise.all([
+        api.get("inventory/branch_pnl/"),
+        api.get("management/kpis/")
+      ]);
+      setPnlData(pnlRes.data);
+      setOccupancyData(kpiRes.data.beds);
+    } catch (err) {
+      console.error("Failed to load investor data", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleExport = (format) => {
+    const url = `${api.defaults.baseURL}inventory/export_pnl/?format=${format}`;
+    window.open(url, "_blank");
+  };
+
+  if (loading) return <AppShell subtitle="Investor Portal">Syncing Financial Records...</AppShell>;
+
+  const totalIncome = pnlData.reduce((acc, curr) => acc + curr.income, 0);
+  const totalExpenses = pnlData.reduce((acc, curr) => acc + curr.expenses, 0);
+  const totalNet = totalIncome - totalExpenses;
+
+  return (
+    <AppShell subtitle="Investor & Partner Portal">
+
+      {/* 1. Global Performance (Super Admin) or Branch Summary (Partner) */}
+      <div className="cards-row" style={{ marginBottom: '32px' }}>
+        <div className="card kpi-card">
+          <div className="card-title">Portfolio Revenue</div>
+          <div className="card-value" style={{ color: 'var(--success)' }}>{formatCurrency(totalIncome)}</div>
+          <div className="card-subtext">Total cash inflow from student fees</div>
+        </div>
+        <div className="card kpi-card">
+          <div className="card-title">Operational Burn</div>
+          <div className="card-value" style={{ color: 'var(--danger)' }}>{formatCurrency(totalExpenses)}</div>
+          <div className="card-subtext">Total procurement and logistics cost</div>
+        </div>
+        <div className="card kpi-card">
+          <div className="card-title">Net Profitability</div>
+          <div className="card-value" style={{ fontWeight: 800 }}>{formatCurrency(totalNet)}</div>
+          <div className="card-subtext">Consolidated financial position</div>
+        </div>
+        {occupancyData && (
+          <div className="card kpi-card">
+            <div className="card-title">Occupancy Efficiency</div>
+            <div className="card-value">{occupancyData.occupancy_rate}%</div>
+            <div className="card-subtext">{occupancyData.occupied_beds} of {occupancyData.total_beds} beds filled</div>
+          </div>
+        )}
+      </div>
+
+      {/* 2. Branch Breakdown Matrix */}
+      <div className="card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <h2 style={{ margin: 0 }}>Branch Performance Matrix</h2>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={() => handleExport('pdf')} className="btn btn-primary" style={{ padding: '6px 16px', fontSize: '0.8rem' }}>
+              📄 Download PDF
+            </button>
+            <button onClick={() => handleExport('csv')} className="btn btn-soft" style={{ padding: '6px 16px', fontSize: '0.8rem' }}>
+              📊 Export CSV
+            </button>
+          </div>
+        </div>
+        <div className="table-wrapper">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Branch Name</th>
+                <th>Revenue</th>
+                <th>Expenses</th>
+                <th>Net Profit</th>
+                <th>Profit Margin</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pnlData.map(branch => (
+                <tr key={branch.hostel_id}>
+                  <td style={{ fontWeight: 700 }}>{branch.hostel_name}</td>
+                  <td style={{ color: 'var(--success)', fontWeight: 600 }}>{formatCurrency(branch.income)}</td>
+                  <td style={{ color: 'var(--danger)', fontWeight: 600 }}>{formatCurrency(branch.expenses)}</td>
+                  <td style={{ fontWeight: 800 }}>{formatCurrency(branch.net_profit)}</td>
+                  <td style={{ fontWeight: 700 }}>{branch.profit_margin}%</td>
+                  <td>
+                    <span className={`badge ${branch.profit_margin > 20 ? 'badge-success' : 'badge-warning'}`}>
+                      {branch.profit_margin > 0 ? 'PROFITABLE' : 'BREAK-EVEN'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 3. Investor Insights */}
+      <div className="card" style={{ marginTop: '32px', background: '#f8fafc' }}>
+        <h3 style={{ margin: '0 0 12px 0' }}>💡 Strategic Growth Insight</h3>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+          {totalNet > 0
+            ? "Your portfolio is maintaining a healthy cash flow. Reinvesting 10% of net profits into facility maintenance is recommended to maintain premium occupancy rates."
+            : "Operational costs are currently equal to or higher than revenue. We recommend a review of procurement prices in the 'Smart Re-order' sheet to optimize margins."
+          }
+        </p>
+      </div>
+
+      <div style={{ height: '60px' }}></div>
+    </AppShell>
+  );
+}

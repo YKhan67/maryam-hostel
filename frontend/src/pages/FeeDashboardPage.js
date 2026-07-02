@@ -123,7 +123,7 @@ export default function FeeDashboardPage() {
           params.months = months;
         }
 
-        const resp = await api.get("/fees/dashboard/current-month/", {
+        const resp = await api.get("fees/dashboard/current-month/", {
           params,
         });
 

@@ -20,13 +20,26 @@ def send_pending_fee_reminders(fee_ids, on_date_str=None):
     sent_count = 0
     
     for fee in qs:
-        phone = fee.student.whatsapp or fee.student.mobile
-        if phone:
-            msg = fee.build_whatsapp_text(on_date=on_date)
-            if send_whatsapp_text(phone, msg):
+        # 1. Send to Student
+        student_phone = fee.student.whatsapp or fee.student.mobile
+        msg = fee.build_whatsapp_text(on_date=on_date)
+        
+        if student_phone:
+            if send_whatsapp_text(student_phone, msg):
                 sent_count += 1
+        
+        # 2. CC Parent (Suggestion #6)
+        parent_phone = fee.student.parent_whatsapp or fee.student.parent_phone
+        if parent_phone:
+            parent_link = f"https://maryamhostel.com/parent-portal/{fee.student.parent_link_token}"
+            parent_msg = (
+                f"💡 *PARENT COPY - Fee Reminder*\n\n"
+                f"{msg}\n\n"
+                f"View daughter's official ledger here:\n{parent_link}"
+            )
+            send_whatsapp_text(parent_phone, parent_msg)
     
-    return f"Sent {sent_count} reminders."
+    return f"Sent {sent_count} student reminders (+ parent CCs)."
 
 @shared_task
 def generate_monthly_fees_task(year, month, student_ids=None):

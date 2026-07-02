@@ -7,10 +7,12 @@ class UserSerializer(serializers.ModelSerializer):
     """
     Read-only user serializer (for listing, MeView, etc.).
     """
+    parent_link_token = serializers.CharField(source="student_profile.parent_link_token", read_only=True)
+
     class Meta:
         model = User
-        fields = ["id", "username", "first_name", "last_name", "email", "role"]
-        read_only_fields = ["id", "role"]
+        fields = ["id", "username", "first_name", "last_name", "email", "role", "parent_link_token"]
+        read_only_fields = ["id", "role", "parent_link_token"]
 
 
 class UserCreateUpdateSerializer(serializers.ModelSerializer):
@@ -63,3 +65,14 @@ class UserCreateUpdateSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Old password is not correct")
+        return value

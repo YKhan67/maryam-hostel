@@ -18,6 +18,7 @@ class Item(models.Model):
     name = models.CharField(max_length=150)
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="items")
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name="items")
+    reorder_level = models.DecimalField(max_digits=12, decimal_places=3, default=0, help_text="Alert when stock falls below this")
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -37,14 +38,35 @@ class Vendor(models.Model):
         return self.name
 
 class Purchase(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending Approval'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    ]
+
     hostel = models.ForeignKey(Hostel, on_delete=models.PROTECT, related_name="purchases")
     date = models.DateField()
     vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, related_name="purchases")
     invoice_no = models.CharField(max_length=100, blank=True)
+    
+    # Visual Proof
+    invoice_photo = models.ImageField(upload_to='inventory/purchases/invoices/', null=True, blank=True)
+    items_photo = models.ImageField(upload_to='inventory/purchases/items/', null=True, blank=True)
 
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name="purchases")
     quantity = models.DecimalField(max_digits=12, decimal_places=3)
     price_per_unit = models.DecimalField(max_digits=12, decimal_places=2)
+
+    # Approval Workflow
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    approved_by = models.ForeignKey(
+        "accounts.User", 
+        null=True, 
+        blank=True, 
+        on_delete=models.SET_NULL, 
+        related_name="approved_purchases"
+    )
+    rejection_remarks = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -63,6 +85,10 @@ class Consumption(models.Model):
     date = models.DateField()
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name="consumptions")
     quantity = models.DecimalField(max_digits=12, decimal_places=3)
+    
+    # Visual Proof
+    photo = models.ImageField(upload_to='inventory/consumptions/', null=True, blank=True)
+
     remarks = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

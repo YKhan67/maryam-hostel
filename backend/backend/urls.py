@@ -7,7 +7,7 @@ from django.contrib.auth import logout
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
-from accounts.views import UserViewSet, MeView
+from accounts.views import UserViewSet, MeView, ChangePasswordView
 from hostels.views import (
     CityViewSet, HostelViewSet, BuildingViewSet, FloorViewSet,
     RoomViewSet, BedViewSet, StudentProfileViewSet,
@@ -24,6 +24,14 @@ from inventory.views import (
     InventoryExportCSVView,
     VendorPriceTrendView,
     SavingsSuggestionsView,
+    SmartReorderSheetView,
+    ConsumptionAnalyticsView,
+    BranchProfitLossView,
+    ExportPnLReportView,
+    ReceiptOCRView,
+    GeneratePurchaseOrderView,
+    SendPOWhatsAppView,
+    GenerateAllItemLabelsPDFView,
 )
 
 from fees.views import (
@@ -80,6 +88,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
     path("api/me/", MeView.as_view(), name="me"),
+    path("api/change-password/", ChangePasswordView.as_view(), name="change-password"),
     path("api/auth/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 
@@ -89,7 +98,16 @@ urlpatterns = [
     path("api/inventory/export/", InventoryExportCSVView.as_view(), name="inventory-export"),
     path("api/inventory/vendor_trend/", VendorPriceTrendView.as_view(), name="vendor-trend"),
     path("api/inventory/savings_suggestions/", SavingsSuggestionsView.as_view(), name="savings-suggestions"),
+    path("api/inventory/reorder_sheet/", SmartReorderSheetView.as_view(), name="reorder-sheet"),
+    path("api/inventory/consumption_analytics/", ConsumptionAnalyticsView.as_view(), name="consumption-analytics"),
+    path("api/inventory/branch_pnl/", BranchProfitLossView.as_view(), name="branch-pnl"),
+    path("api/inventory/export_pnl/", ExportPnLReportView.as_view(), name="export-pnl"),
+    path("api/inventory/ocr/", ReceiptOCRView.as_view(), name="ocr-scan"),
+    path("api/inventory/purchases/<int:pk>/po/", GeneratePurchaseOrderView.as_view(), name="generate-po"),
+    path("api/inventory/purchases/<int:pk>/send_vendor/", SendPOWhatsAppView.as_view(), name="send-vendor-whatsapp"),
+    path("api/inventory/print_all_labels/", GenerateAllItemLabelsPDFView.as_view(), name="print-all-labels"),
     path("api/fees/", include("fees.urls")),
+    path("api/communication/", include("communication.urls")),
 
     # Schema & Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

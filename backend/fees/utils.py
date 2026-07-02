@@ -1,6 +1,6 @@
 # backend/fees/utils.py
 
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
 from fees.models import FeeRule, MonthlyFee
@@ -32,7 +32,6 @@ def compute_late_fee_for_record(fee: MonthlyFee, on_date: date | None = None) ->
       next_month = date(year + 1, 1, 1)
     else:
       next_month = date(year, month + 1, 1)
-    from datetime import timedelta
     due_date = next_month - timedelta(days=1)
 
   if on_date <= due_date:

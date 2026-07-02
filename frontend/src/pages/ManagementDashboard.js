@@ -30,6 +30,7 @@ export default function ManagementDashboard() {
   const [incomeByHostel, setIncomeByHostel] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [unitEconomics, setUnitEconomics] = useState(null);
 
   const navigate = useNavigate();
 
@@ -41,40 +42,18 @@ export default function ManagementDashboard() {
       setError(null);
 
       try {
-        // 1) Inventory / expenses
-        const invResp = await api.get("/inventory/list/", {
-          params: { ordering: "-date" },
-        });
-        let invData = invResp.data;
-        if (!Array.isArray(invData) && invData && Array.isArray(invData.results)) {
-          invData = invData.results;
-        }
-        if (!Array.isArray(invData)) {
-          throw new Error("Unexpected response format from /inventory/list/");
-        }
-        if (isMounted) setRows(invData);
+        const [invResp, hostelsResp, incomeResp, economicsResp] = await Promise.all([
+          api.get("inventory/list/").catch(() => ({ data: [] })),
+          api.get("hostels/").catch(() => ({ data: [] })),
+          api.get("fees/dashboard/hostel-income/").catch(() => ({ data: [] })),
+          api.get("fees/unit-economics/").catch(() => ({ data: null }))
+        ]);
 
-        // 2) Hostels master list
-        try {
-          const hostelsResp = await api.get("/hostels/");
-          const hostelsData = Array.isArray(hostelsResp.data)
-            ? hostelsResp.data
-            : hostelsResp.data?.results || [];
-          if (isMounted) setHostels(hostelsData);
-        } catch (err) {
-          console.warn("Failed to load hostels list", err);
-        }
-
-        // 3) Income per hostel (fees)
-        try {
-          const incomeResp = await api.get("/fees/dashboard/hostel-income/");
-          if (isMounted) {
-            setIncomeByHostel(
-              Array.isArray(incomeResp.data) ? incomeResp.data : []
-            );
-          }
-        } catch (err) {
-          console.warn("Failed to load hostel income summary", err);
+        if (isMounted) {
+          setRows(Array.isArray(invResp.data) ? invResp.data : invResp.data.results || []);
+          setHostels(Array.isArray(hostelsResp.data) ? hostelsResp.data : hostelsResp.data.results || []);
+          setIncomeByHostel(Array.isArray(incomeResp.data) ? incomeResp.data : []);
+          setUnitEconomics(economicsResp.data);
         }
       } catch (err) {
         console.error("Failed to load dashboard data", err);
@@ -264,6 +243,16 @@ export default function ManagementDashboard() {
           <>
             {/* Top KPI cards – expenses + hostels + income */}
             <div className="cards-row">
+              {unitEconomics && (
+                <div className="card kpi-card" style={{ background: '#f0f9ff', border: '1px solid #bae6fd' }}>
+                  <div className="card-title" style={{ color: '#0369a1' }}>Profitability Per Student</div>
+                  <div className="card-value" style={{ color: '#0c4a6e' }}>{formatCurrency(unitEconomics.net_margin)}</div>
+                  <div className="card-subtext">
+                    {unitEconomics.avg_revenue.toFixed(0)} (Rev) - {unitEconomics.avg_cost.toFixed(0)} (Cost)
+                  </div>
+                </div>
+              )}
+
               <div className="card kpi-card">
                 <div className="card-title">
                   Total Spend (All Hostels – Current Month)
