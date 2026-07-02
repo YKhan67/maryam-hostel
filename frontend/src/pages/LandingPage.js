@@ -9,7 +9,7 @@ import roomImg from "../assets/hostel_room.jpg";
 import lifeImg from "../assets/hostel_life.jpg";
 import breakfastImg from "../assets/breakfast_menu.jpg";
 import lunchImg from "../assets/lunch_menu.jpg";
-import dinnerImg from "../assets/dinner_menu.jpg";
+import dinnerImg from "../assets/Dinner_menu.jpg";
 
 /**
  * Vibrant public landing page for Maryam Girls Hostel

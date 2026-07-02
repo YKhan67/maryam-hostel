@@ -111,7 +111,7 @@ LOGOUT_REDIRECT_URL = '/'
 LOGOUT_ON_GET = True
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = '/static/'
+STATIC_URL = '/django_static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'

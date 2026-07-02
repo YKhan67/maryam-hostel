@@ -1,11 +1,11 @@
 {
   "files": {
     "main.css": "/static/css/main.5e523927.css",
-    "main.js": "/static/js/main.860174be.js",
+    "main.js": "/static/js/main.dda4cd54.js",
     "static/js/239.e39fb35b.chunk.js": "/static/js/239.e39fb35b.chunk.js",
     "static/js/977.459ae33c.chunk.js": "/static/js/977.459ae33c.chunk.js",
     "static/js/455.462f7e27.chunk.js": "/static/js/455.462f7e27.chunk.js",
-    "static/media/dinner_menu.jpg": "/static/media/dinner_menu.9746d27fc73fa2d0cc6a.jpg",
+    "static/media/Dinner_menu.jpg": "/static/media/Dinner_menu.9746d27fc73fa2d0cc6a.jpg",
     "static/media/lunch_menu.jpg": "/static/media/lunch_menu.47968e4b18899228093c.jpg",
     "static/media/maryam_logo.png": "/static/media/maryam_logo.6d8349790d5ba8e341ce.png",
     "static/media/breakfast_menu.jpg": "/static/media/breakfast_menu.6efb86cc71bbe33ee636.jpg",
@@ -14,13 +14,13 @@
     "static/media/hostel_life.jpg": "/static/media/hostel_life.cb17576665fb87e8fec5.jpg",
     "index.html": "/index.html",
     "main.5e523927.css.map": "/static/css/main.5e523927.css.map",
-    "main.860174be.js.map": "/static/js/main.860174be.js.map",
+    "main.dda4cd54.js.map": "/static/js/main.dda4cd54.js.map",
     "239.e39fb35b.chunk.js.map": "/static/js/239.e39fb35b.chunk.js.map",
     "977.459ae33c.chunk.js.map": "/static/js/977.459ae33c.chunk.js.map",
     "455.462f7e27.chunk.js.map": "/static/js/455.462f7e27.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.5e523927.css",
-    "static/js/main.860174be.js"
+    "static/js/main.dda4cd54.js"
   ]
 }

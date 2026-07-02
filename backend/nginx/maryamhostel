@@ -1,7 +1,26 @@
 server {
     server_name 72.61.125.165 maryamhostel.com www.maryamhostel.com;
 
-    # Django Admin Panel
+    # 1. React Frontend (Serve from root)
+    root /var/www/maryamhostel/frontend;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 2. Django Static Files (Admin/Jazzmin)
+    # We use /django_static/ to avoid clashing with React's /static/ folder
+    location /django_static/ {
+        alias /var/www/maryamhostel/backend/staticfiles/;
+    }
+
+    # 3. Django Media Files
+    location /media/ {
+        alias /var/www/maryamhostel/backend/media/;
+    }
+
+    # 4. Django Admin Panel
     location /admin/ {
        proxy_pass http://127.0.0.1:8001;
        proxy_set_header Host $host;
@@ -10,33 +29,13 @@ server {
        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # Consolidated Django Static Files (Admin, Jazzmin, DRF)
-    location /static/ {
-        autoindex on;
-        alias /var/www/maryamhostel/backend/staticfiles/;
-        expires 30d;
-        add_header Cache-Control "public, no-transform";
-    }
-
-    # Django Media Files (Payment Proofs, Photos)
-    location /media/ {
-        alias /var/www/maryamhostel/backend/media/;
-    }
-
-    # Django API
+    # 5. Django API
     location /api/ {
         proxy_pass http://127.0.0.1:8001;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    # React Frontend
-    location / {
-        root /var/www/maryamhostel/frontend;
-        index index.html;
-        try_files $uri $uri/ /index.html;
     }
 
     listen 443 ssl; # managed by Certbot
