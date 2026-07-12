@@ -7,10 +7,10 @@ from django.contrib.auth import logout
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
-from accounts.views import UserViewSet, MeView, ChangePasswordView
+from accounts.views import UserViewSet, MeView, ChangePasswordView, ModulePermissionViewSet
 from hostels.views import (
     CityViewSet, HostelViewSet, BuildingViewSet, FloorViewSet,
-    RoomViewSet, BedViewSet, StudentProfileViewSet,
+    RoomViewSet, BedViewSet, StudentProfileViewSet, ManagementKPIView
 )
 from inventory.views import (
     CategoryViewSet,
@@ -43,8 +43,6 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from hostels.views import ManagementKPIView
-from inventory.views import InventorySummaryView
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -57,6 +55,7 @@ router = DefaultRouter()
 
 # Accounts
 router.register(r"users", UserViewSet, basename="user")
+router.register(r"module-permissions", ModulePermissionViewSet, basename="modulepermission")
 
 # Hostels
 router.register(r"cities", CityViewSet, basename="city")
@@ -108,6 +107,8 @@ urlpatterns = [
     path("api/inventory/print_all_labels/", GenerateAllItemLabelsPDFView.as_view(), name="print-all-labels"),
     path("api/fees/", include("fees.urls")),
     path("api/communication/", include("communication.urls")),
+    path("api/payroll/", include("payroll.urls")),
+    path("api/finance/", include("finance.urls")),
 
     # Schema & Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

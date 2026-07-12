@@ -1,7 +1,6 @@
 // src/pages/FeeKpiPage.js
 
 import React, { useEffect, useMemo, useState } from "react";
-import AppShell from "../components/AppShell";
 import api from "../api";
 
 function formatCurrency(v) {
@@ -130,7 +129,7 @@ export default function FeeKpiPage() {
   }, [summaryData]);
 
   return (
-    <AppShell subtitle="Fee KPIs">
+    <>
       <div className="page management-page">
         {/* 1) Last 3 months KPIs */}
         <div className="card">
@@ -278,6 +277,6 @@ export default function FeeKpiPage() {
           )}
         </div>
       </div>
-    </AppShell>
+    </>
   );
 }

@@ -1,9 +1,14 @@
 // src/pages/StaffTasksPage.js
-import React, { useEffect, useState } from "react";
-import AppShell from "../components/AppShell";
+import React, { useEffect, useState, useContext } from "react";
 import api from "../api";
+import { AuthContext } from "../AuthContext";
+import { usePermissions } from "../hooks/usePermissions";
 
 export default function StaffTasksPage() {
+  const { user } = useContext(AuthContext);
+  const { check } = usePermissions();
+  const isReadOnly = !check("TASKS", "edit");
+
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,10 +37,10 @@ export default function StaffTasksPage() {
     }
   }
 
-  if (loading) return <AppShell subtitle="Staff Center">Loading tasks...</AppShell>;
+  if (loading) return <p>Loading tasks...</p>;
 
   return (
-    <AppShell subtitle="Staff Action Center">
+    <>
       <div className="card">
         <h2 style={{ marginBottom: '24px' }}>Active Assignments</h2>
         <div className="table-wrapper">
@@ -48,7 +53,7 @@ export default function StaffTasksPage() {
                 <th>Student</th>
                 <th>Status</th>
                 <th>Created</th>
-                <th>Action</th>
+                {!isReadOnly && <th>Action</th>}
               </tr>
             </thead>
             <tbody>
@@ -68,17 +73,19 @@ export default function StaffTasksPage() {
                     </span>
                   </td>
                   <td>{new Date(t.created_at).toLocaleString()}</td>
-                  <td>
-                    {t.status !== 'RESOLVED' && (
-                      <button
-                        onClick={() => updateStatus(t.id, 'RESOLVED')}
-                        className="btn btn-primary"
-                        style={{ padding: '4px 12px', fontSize: '0.8rem' }}
-                      >
-                        Mark Fixed
-                      </button>
-                    )}
-                  </td>
+                  {!isReadOnly && (
+                    <td>
+                      {t.status !== 'RESOLVED' && (
+                        <button
+                          onClick={() => updateStatus(t.id, 'RESOLVED')}
+                          className="btn btn-primary"
+                          style={{ padding: '4px 12px', fontSize: '0.8rem' }}
+                        >
+                          Mark Fixed
+                        </button>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
               {tickets.length === 0 && (
@@ -88,6 +95,6 @@ export default function StaffTasksPage() {
           </table>
         </div>
       </div>
-    </AppShell>
+    </>
   );
 }

@@ -34,7 +34,15 @@ class TicketViewSet(viewsets.ModelViewSet):
         return Ticket.objects.filter(Q(assigned_to=user) | Q(assigned_to__isnull=True))
 
     def perform_create(self, serializer):
-        serializer.save()
+        user = self.request.user
+        if user.role == 'STUDENT':
+            try:
+                student = user.student_profile
+                serializer.save(student=student, hostel=student.hostel)
+            except StudentProfile.DoesNotExist:
+                serializer.save()
+        else:
+            serializer.save()
 
 class SLASettingViewSet(viewsets.ModelViewSet):
     queryset = SLASetting.objects.all()

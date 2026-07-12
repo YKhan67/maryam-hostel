@@ -46,3 +46,27 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.role})"
+
+class ModulePermission(models.Model):
+    """
+    Dynamic permission matrix. Can be role-based or user-specific.
+    """
+    role = models.CharField(max_length=20, choices=User.Roles.choices, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="custom_permissions")
+    module_name = models.CharField(max_length=50) 
+    
+    can_view = models.BooleanField(default=False)
+    can_add = models.BooleanField(default=False)
+    can_edit = models.BooleanField(default=False)
+    can_delete = models.BooleanField(default=False)
+
+    class Meta:
+        # Allows one record per (Role + Module) OR (User + Module)
+        constraints = [
+            models.UniqueConstraint(fields=['role', 'module_name'], name='unique_role_module', condition=models.Q(user__isnull=True)),
+            models.UniqueConstraint(fields=['user', 'module_name'], name='unique_user_module', condition=models.Q(role__isnull=True)),
+        ]
+
+    def __str__(self):
+        target = self.user.username if self.user else self.role
+        return f"{target} - {self.module_name}"

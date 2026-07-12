@@ -1,6 +1,5 @@
 // src/pages/SecurityDepositPage.js
 import React, { useEffect, useState } from "react";
-import AppShell from "../components/AppShell";
 import api from "../api";
 import { formatPKR } from "../utils/formatPKR";
 
@@ -23,10 +22,10 @@ export default function SecurityDepositPage() {
     }
   }
 
-  if (loading) return <AppShell subtitle="Finance">Loading Deposits...</AppShell>;
+  if (loading) return <p>Loading Deposits...</p>;
 
   return (
-    <AppShell subtitle="Refundable Security Ledger">
+    <>
       <div className="card">
         <h2 style={{ marginBottom: '24px' }}>Security Deposit Status</h2>
         <div className="table-wrapper">
@@ -65,6 +64,6 @@ export default function SecurityDepositPage() {
           💡 <b>Investor Tip:</b> Security deposits are liabilities. Ensure these are not mixed with monthly operational revenue in your PnL.
         </p>
       </div>
-    </AppShell>
+    </>
   );
 }

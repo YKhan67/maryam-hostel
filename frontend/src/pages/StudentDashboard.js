@@ -3,7 +3,6 @@ import { formatPKR } from "../utils/formatPKR";
 import React, { useContext, useEffect, useState } from "react";
 import api from "../api";
 import { AuthContext } from "../AuthContext";
-import AppShell from "../components/AppShell";
 
 export default function StudentDashboard() {
   const { user } = useContext(AuthContext);
@@ -71,8 +70,8 @@ export default function StudentDashboard() {
     try {
       await api.post("communication/tickets/", {
         ...newTicket,
-        student: data.summary.student_id, // We'll need to add this to the API response
-        hostel: data.summary.hostel_id   // We'll need to add this to the API response
+        student: data.summary.student_id,
+        hostel: data.summary.hostel_id
       });
       setMessage("Support ticket raised successfully. Staff will be notified.");
       setShowTicketForm(false);
@@ -109,27 +108,24 @@ export default function StudentDashboard() {
     }
   }
 
-  if (loading) return <AppShell subtitle="My Portal">Loading your records...</AppShell>;
+  if (loading) return <p>Loading your records...</p>;
 
   if (errorInfo) return (
-    <AppShell subtitle="Portal Alert">
-      <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '20px' }}>⚠️</div>
-        <h3>System Notification</h3>
-        <p style={{ color: 'var(--danger)', fontWeight: 600 }}>{errorInfo}</p>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Please contact hostel management to verify your account registration.</p>
-        <button onClick={fetchLedger} className="btn btn-primary" style={{ marginTop: '20px' }}>Try Refreshing</button>
-      </div>
-    </AppShell>
+    <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
+      <div style={{ fontSize: '3rem', marginBottom: '20px' }}>⚠️</div>
+      <h3>System Notification</h3>
+      <p style={{ color: 'var(--danger)', fontWeight: 600 }}>{errorInfo}</p>
+      <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Please contact hostel management to verify your account registration.</p>
+      <button onClick={fetchLedger} className="btn btn-primary" style={{ marginTop: '20px' }}>Try Refreshing</button>
+    </div>
   );
 
-  if (!data) return <AppShell subtitle="My Portal">Initializing data sync...</AppShell>;
+  if (!data) return <p>Initializing data sync...</p>;
 
   const { summary, ledger, tickets } = data;
 
   return (
-    <AppShell subtitle="Student Dashboard">
-
+    <div className="student-dashboard-wrapper">
       {/* 1. FINANCIAL SUMMARY BANNER */}
       <div className="card" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', color: '#fff' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -308,7 +304,6 @@ export default function StudentDashboard() {
                       Ticket #{t.id} • {new Date(t.created_at).toLocaleDateString()}
                     </div>
 
-                    {/* Visual Progress Bar */}
                     <div style={{ marginTop: '12px', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
                       <div style={{ width: progressWidth, height: '100%', background: statusColor, transition: 'width 0.5s ease-in-out' }}></div>
                     </div>
@@ -402,6 +397,6 @@ export default function StudentDashboard() {
       </div>
 
       <div style={{ height: '60px' }}></div>
-    </AppShell>
+    </div>
   );
 }

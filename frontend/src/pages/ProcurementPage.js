@@ -1,6 +1,5 @@
 // src/pages/ProcurementPage.js
 import React, { useEffect, useState } from "react";
-import AppShell from "../components/AppShell";
 import api from "../api";
 
 function formatCurrency(v) {
@@ -36,11 +35,10 @@ export default function ProcurementPage() {
     }
   }
 
-  if (loading) return <AppShell subtitle="Procurement">Loading Intelligence Dashboard...</AppShell>;
+  if (loading) return <p>Loading Intelligence Dashboard...</p>;
 
   return (
-    <AppShell subtitle="Procurement & Stock Intelligence">
-
+    <>
       {/* 1. Smart Re-order Sheet */}
       <div className="card" style={{ marginBottom: '32px' }}>
         <h2 style={{ marginBottom: '20px' }}>Smart Re-order Sheet</h2>
@@ -101,19 +99,19 @@ export default function ProcurementPage() {
               </tr>
             </thead>
             <tbody>
-              {abnormalConsumption.map((item, i) => (
-                <tr key={i}>
-                  <td style={{ fontWeight: 700 }}>{item.item}</td>
-                  <td>{item.avg_monthly.toFixed(2)}</td>
-                  <td>{item.current_month.toFixed(2)}</td>
-                  <td style={{ color: 'var(--danger)', fontWeight: 800 }}>+{item.spike_percentage}%</td>
-                  <td>
-                    <span style={{ fontSize: '0.85rem' }}>
-                      ⚠️ Unusual usage detected. Verify store exit logs or check for wastage.
-                    </span>
-                  </td>
-                </tr>
-              ))}
+                {abnormalConsumption.map((item, i) => (
+                  <tr key={i}>
+                    <td style={{ fontWeight: 700 }}>{item.item}</td>
+                    <td>{item.avg_monthly?.toFixed(2) || "0.00"}</td>
+                    <td>{item.current_month?.toFixed(2) || "0.00"}</td>
+                    <td style={{ color: 'var(--danger)', fontWeight: 800 }}>+{item.spike_percentage || 0}%</td>
+                    <td>
+                      <span style={{ fontSize: '0.85rem' }}>
+                        ⚠️ Unusual usage detected. Verify store exit logs or check for wastage.
+                      </span>
+                    </td>
+                  </tr>
+                ))}
               {abnormalConsumption.length === 0 && (
                 <tr><td colSpan="5" style={{ textAlign: 'center', padding: '40px' }}>No abnormal consumption detected for this period.</td></tr>
               )}
@@ -123,6 +121,6 @@ export default function ProcurementPage() {
       </div>
 
       <div style={{ height: '60px' }}></div>
-    </AppShell>
+    </>
   );
 }

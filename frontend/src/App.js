@@ -1,14 +1,10 @@
 // src/App.js
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 import { AuthProvider } from "./AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import MainLayout from "./components/MainLayout";
 
 import LoginPage from "./pages/LoginPage";
 import LandingPage from "./pages/LandingPage";
@@ -25,7 +21,14 @@ import PurchaseApprovalPage from "./pages/PurchaseApprovalPage";
 import VisualAuditPage from "./pages/VisualAuditPage";
 import InvestorPortalPage from "./pages/InvestorPortalPage";
 import QuickLogPage from "./pages/QuickLogPage";
+import EmployeeProfilePage from "./pages/EmployeeProfilePage";
+import AdvanceLedgerPage from "./pages/AdvanceLedgerPage";
+import PayrollDashboardPage from "./pages/PayrollDashboardPage";
+import PayrollSlipsPage from "./pages/PayrollSlipsPage";
+import AssetInventoryPage from "./pages/AssetInventoryPage";
+import BalanceSheetPage from "./pages/BalanceSheetPage";
 import UserManagementPage from "./pages/UserManagementPage";
+import PermissionsManagementPage from "./pages/PermissionsManagementPage";
 
 import FeeDashboardPage from "./pages/FeeDashboardPage";
 import FeeKpiPage from "./pages/FeeKpiPage";
@@ -35,280 +38,53 @@ import SecurityDepositPage from "./pages/SecurityDepositPage";
 import StaffTasksPage from "./pages/StaffTasksPage";
 
 function AppRoutes() {
+  // Access Tiers
+  const EXEC_LEVEL = ["SUPER_ADMIN", "CITY_MANAGER", "PARTNER"]; // For Financials/HR
+  const BRANCH_MGMT = ["SUPER_ADMIN", "CITY_MANAGER", "HOSTEL_MANAGER", "PARTNER"]; // For Assets/Procurement
+  const STAFF_LEVEL = ["SUPER_ADMIN", "CITY_MANAGER", "HOSTEL_MANAGER", "STAFF", "PARTNER"]; // For Day-to-Day Ops
+
   return (
     <Routes>
-      {/* Public marketing landing page */}
       <Route path="/" element={<LandingPage />} />
-
-      {/* Public login route */}
       <Route path="/login" element={<LoginPage />} />
-
-      {/* Public parent portal route */}
       <Route path="/parent-portal/:token" element={<ParentPortalPage />} />
 
-      {/* Student dashboard */}
-      <Route
-        path="/student"
-        element={
-          <ProtectedRoute allowedRoles={["STUDENT"]}>
-            <StudentDashboard />
-          </ProtectedRoute>
-        }
-      />
+      <Route element={<MainLayout />}>
+        {/* Basic Access */}
+        <Route path="/student" element={<ProtectedRoute allowedRoles={["STUDENT"]}><StudentDashboard /></ProtectedRoute>} />
+        <Route path="/change-password" element={<ProtectedRoute allowedRoles={["STUDENT", "STAFF", "HOSTEL_MANAGER", "CITY_MANAGER", "SUPER_ADMIN", "PARTNER"]}><ChangePasswordPage /></ProtectedRoute>} />
+        <Route path="/management" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><ManagementDashboard /></ProtectedRoute>} />
+        <Route path="/staff-tasks" element={<ProtectedRoute allowedRoles={STAFF_LEVEL}><StaffTasksPage /></ProtectedRoute>} />
 
-      <Route
-        path="/change-password"
-        element={
-          <ProtectedRoute allowedRoles={["STUDENT", "SUPER_ADMIN", "CITY_MANAGER", "HOSTEL_MANAGER", "STAFF"]}>
-            <ChangePasswordPage />
-          </ProtectedRoute>
-        }
-      />
+        {/* Logistics & Assets (Branch Mgmt + Partner View) */}
+        <Route path="/inventory" element={<ProtectedRoute allowedRoles={STAFF_LEVEL}><InventoryPage /></ProtectedRoute>} />
+        <Route path="/inventory-items" element={<ProtectedRoute allowedRoles={STAFF_LEVEL}><InventoryItemsPage /></ProtectedRoute>} />
+        <Route path="/inventory-kpis" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><InventoryKpiPage /></ProtectedRoute>} />
+        <Route path="/procurement" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><ProcurementPage /></ProtectedRoute>} />
+        <Route path="/visual-audit" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><VisualAuditPage /></ProtectedRoute>} />
+        <Route path="/asset-inventory" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><AssetInventoryPage /></ProtectedRoute>} />
+        <Route path="/purchase-approvals" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><PurchaseApprovalPage /></ProtectedRoute>} />
 
-      {/* Management dashboard */}
-      <Route
-        path="/management"
-        element={
-          <ProtectedRoute
-            allowedRoles={[
-              "SUPER_ADMIN",
-              "CITY_MANAGER",
-              "HOSTEL_MANAGER",
-              "STAFF",
-            ]}
-          >
-            <ManagementDashboard />
-          </ProtectedRoute>
-        }
-      />
+        {/* HR & Payroll (Executive Only + Partner View) */}
+        <Route path="/payroll-dashboard" element={<ProtectedRoute allowedRoles={EXEC_LEVEL}><PayrollDashboardPage /></ProtectedRoute>} />
+        <Route path="/payroll-slips/:recordId" element={<ProtectedRoute allowedRoles={EXEC_LEVEL}><PayrollSlipsPage /></ProtectedRoute>} />
+        <Route path="/employee-profiles" element={<ProtectedRoute allowedRoles={EXEC_LEVEL}><EmployeeProfilePage /></ProtectedRoute>} />
+        <Route path="/advance-ledger" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><AdvanceLedgerPage /></ProtectedRoute>} />
 
-      {/* Inventory */}
-      <Route
-        path="/inventory"
-        element={
-          <ProtectedRoute
-            allowedRoles={[
-              "SUPER_ADMIN",
-              "CITY_MANAGER",
-              "HOSTEL_MANAGER",
-              "STAFF",
-            ]}
-          >
-            <InventoryPage />
-          </ProtectedRoute>
-        }
-      />
+        {/* Fees & Strategic Finance (Executive Only + Partner View) */}
+        <Route path="/fees-dashboard" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><FeeDashboardPage /></ProtectedRoute>} />
+        <Route path="/fees-kpis" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><FeeKpiPage /></ProtectedRoute>} />
+        <Route path="/fees-management" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><FeeManagementPage /></ProtectedRoute>} />
+        <Route path="/payment-verification" element={<ProtectedRoute allowedRoles={STAFF_LEVEL}><PaymentVerificationPage /></ProtectedRoute>} />
+        <Route path="/security-deposits" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><SecurityDepositPage /></ProtectedRoute>} />
+        <Route path="/investor-portal" element={<ProtectedRoute allowedRoles={["SUPER_ADMIN", "PARTNER"]}><InvestorPortalPage /></ProtectedRoute>} />
+        <Route path="/balance-sheet" element={<ProtectedRoute allowedRoles={["SUPER_ADMIN", "PARTNER"]}><BalanceSheetPage /></ProtectedRoute>} />
 
-      <Route
-        path="/inventory-items"
-        element={
-          <ProtectedRoute
-            allowedRoles={[
-              "SUPER_ADMIN",
-              "CITY_MANAGER",
-              "HOSTEL_MANAGER",
-              "STAFF",
-            ]}
-          >
-            <InventoryItemsPage />
-          </ProtectedRoute>
-        }
-      />
+        {/* System Administration (Absolute Restricted) */}
+        <Route path="/users" element={<ProtectedRoute allowedRoles={["SUPER_ADMIN", "CITY_MANAGER"]}><UserManagementPage /></ProtectedRoute>} />
+        <Route path="/permissions" element={<ProtectedRoute allowedRoles={["SUPER_ADMIN"]}><PermissionsManagementPage /></ProtectedRoute>} />
+      </Route>
 
-      <Route
-        path="/inventory-kpis"
-        element={
-          <ProtectedRoute
-            allowedRoles={[
-              "SUPER_ADMIN",
-              "CITY_MANAGER",
-              "HOSTEL_MANAGER",
-              "STAFF",
-            ]}
-          >
-            <InventoryKpiPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/procurement"
-        element={
-          <ProtectedRoute
-            allowedRoles={[
-              "SUPER_ADMIN",
-              "CITY_MANAGER",
-              "HOSTEL_MANAGER",
-              "STAFF",
-            ]}
-          >
-            <ProcurementPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/purchase-approvals"
-        element={
-          <ProtectedRoute
-            allowedRoles={["SUPER_ADMIN", "CITY_MANAGER"]}
-          >
-            <PurchaseApprovalPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/visual-audit"
-        element={
-          <ProtectedRoute
-            allowedRoles={[
-              "SUPER_ADMIN",
-              "CITY_MANAGER",
-              "HOSTEL_MANAGER",
-              "STAFF",
-            ]}
-          >
-            <VisualAuditPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/quick-log/:itemId"
-        element={
-          <ProtectedRoute
-            allowedRoles={[
-              "SUPER_ADMIN",
-              "CITY_MANAGER",
-              "HOSTEL_MANAGER",
-              "STAFF",
-            ]}
-          >
-            <QuickLogPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/investor-portal"
-        element={
-          <ProtectedRoute
-            allowedRoles={["SUPER_ADMIN", "PARTNER"]}
-          >
-            <InvestorPortalPage />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Fees */}
-      <Route
-        path="/fees-dashboard"
-        element={
-          <ProtectedRoute
-            allowedRoles={[
-              "SUPER_ADMIN",
-              "CITY_MANAGER",
-              "HOSTEL_MANAGER",
-              "STAFF",
-            ]}
-          >
-            <FeeDashboardPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/fees-kpis"
-        element={
-          <ProtectedRoute
-            allowedRoles={[
-              "SUPER_ADMIN",
-              "CITY_MANAGER",
-              "HOSTEL_MANAGER",
-              "STAFF",
-            ]}
-          >
-            <FeeKpiPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/fees-management"
-        element={
-          <ProtectedRoute
-            allowedRoles={[
-              "SUPER_ADMIN",
-              "CITY_MANAGER",
-              "HOSTEL_MANAGER",
-              "STAFF",
-            ]}
-          >
-            <FeeManagementPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/payment-verification"
-        element={
-          <ProtectedRoute
-            allowedRoles={[
-              "SUPER_ADMIN",
-              "CITY_MANAGER",
-              "HOSTEL_MANAGER",
-              "STAFF",
-            ]}
-          >
-            <PaymentVerificationPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/security-deposits"
-        element={
-          <ProtectedRoute
-            allowedRoles={[
-              "SUPER_ADMIN",
-              "CITY_MANAGER",
-              "HOSTEL_MANAGER",
-              "PARTNER",
-            ]}
-          >
-            <SecurityDepositPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/staff-tasks"
-        element={
-          <ProtectedRoute
-            allowedRoles={[
-              "SUPER_ADMIN",
-              "CITY_MANAGER",
-              "HOSTEL_MANAGER",
-              "STAFF",
-            ]}
-          >
-            <StaffTasksPage />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* User management */}
-      <Route
-        path="/users"
-        element={
-          <ProtectedRoute allowedRoles={["SUPER_ADMIN", "CITY_MANAGER"]}>
-            <UserManagementPage />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Fallback: unknown routes → landing page */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

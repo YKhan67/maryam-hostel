@@ -1,7 +1,6 @@
 // src/pages/FeeDashboardPage.js
 
 import React, { useEffect, useMemo, useState } from "react";
-import AppShell from "../components/AppShell";
 import api from "../api";
 
 function formatCurrency(v) {
@@ -22,33 +21,13 @@ function shiftMonth(year, month, delta) {
 }
 
 const MONTH_NAMES_SHORT = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
 const MONTH_NAMES_LONG = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
 ];
 
 export default function FeeDashboardPage() {
@@ -75,42 +54,23 @@ export default function FeeDashboardPage() {
     };
 
     return [
-      {
-        value: "current",
-        label: `Current month – ${longName} ${y}`,
-      },
-      {
-        value: "ytd",
-        label: `Year to date – ${y}`,
-      },
-      {
-        value: "range-3",
-        label: buildRangeLabel(3),
-      },
-      {
-        value: "range-6",
-        label: buildRangeLabel(6),
-      },
-      {
-        value: "range-12",
-        label: buildRangeLabel(12),
-      },
+      { value: "current", label: `Current month – ${longName} ${y}` },
+      { value: "ytd", label: `Year to date – ${y}` },
+      { value: "range-3", label: buildRangeLabel(3) },
+      { value: "range-6", label: buildRangeLabel(6) },
+      { value: "range-12", label: buildRangeLabel(12) },
     ];
   }, []);
 
   useEffect(() => {
     let isMounted = true;
-
     async function load() {
       setLoading(true);
       setError(null);
-
       let mode = "current";
       let months = undefined;
-
-      if (view === "ytd") {
-        mode = "ytd";
-      } else if (view.startsWith("range-")) {
+      if (view === "ytd") mode = "ytd";
+      else if (view.startsWith("range-")) {
         mode = "range";
         const parts = view.split("-");
         const n = Number(parts[1] || 3);
@@ -119,80 +79,46 @@ export default function FeeDashboardPage() {
 
       try {
         const params = { mode };
-        if (mode === "range" && months) {
-          params.months = months;
-        }
-
-        const resp = await api.get("fees/dashboard/current-month/", {
-          params,
-        });
-
-        if (isMounted) {
-          setData(resp.data);
-        }
+        if (mode === "range" && months) params.months = months;
+        const resp = await api.get("fees/dashboard/current-month/", { params });
+        if (isMounted) setData(resp.data);
       } catch (err) {
         console.error("Failed to load fee dashboard", err);
-        if (isMounted) {
-          setError(
-            err.response?.data?.detail ||
-              err.message ||
-              "Failed to load fee dashboard."
-          );
-        }
+        if (isMounted) setError(err.response?.data?.detail || err.message || "Failed to load fee dashboard.");
       } finally {
         if (isMounted) setLoading(false);
       }
     }
-
     load();
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [view]);
 
-  const handleViewChange = (e) => {
-    setView(e.target.value);
-  };
+  const handleViewChange = (e) => { setView(e.target.value); };
 
-  // small subtitle for the selected period (uses backend label + range)
   let rangeText = "";
   if (data) {
-    if (data.mode === "current") {
-      rangeText = `Current month – ${data.label}`;
-    } else if (data.mode === "ytd") {
-      rangeText = `Year to date – ${data.label}`;
-    } else if (data.mode === "range") {
-      rangeText = `${data.label} (${data.from} to ${data.to})`;
-    }
+    if (data.mode === "current") rangeText = `Current month – ${data.label}`;
+    else if (data.mode === "ytd") rangeText = `Year to date – ${data.label}`;
+    else if (data.mode === "range") rangeText = `${data.label} (${data.from} to ${data.to})`;
   }
 
   return (
-    <AppShell subtitle="Fee Dashboard">
-      <div className="page management-page">
+    <div className="page management-page">
         {/* Filter bar */}
         <div className="card">
           <div className="card-title">View Options</div>
           <div className="filters-row" style={{ marginTop: 8 }}>
             <div className="filter-group">
               <label className="filter-label">KPI range</label>
-              <select
-                className="filter-select"
-                value={view}
-                onChange={handleViewChange}
-              >
+              <select className="filter-select" value={view} onChange={handleViewChange}>
                 {viewOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
             </div>
           </div>
           {rangeText && (
-            <div
-              className="card-subtext"
-              style={{ marginTop: 8, fontStyle: "italic" }}
-            >
+            <div className="card-subtext" style={{ marginTop: 8, fontStyle: "italic" }}>
               {rangeText}
             </div>
           )}
@@ -211,75 +137,44 @@ export default function FeeDashboardPage() {
         )}
 
         {!loading && !error && data && (
-          <>
+          <React.Fragment>
             <div className="cards-row">
               <div className="card kpi-card">
-                <div className="card-title">
-                  Total Billed ({data.label || ""})
-                </div>
-                <div className="card-value">
-                  {formatCurrency(data.total_billed)}
-                </div>
-                <div className="card-subtext">
-                  Sum of all monthly fee amounts in the selected period
-                </div>
+                <div className="card-title">Total Billed ({data.label || ""})</div>
+                <div className="card-value">{formatCurrency(data.total_billed)}</div>
+                <div className="card-subtext">Sum of all monthly fee amounts in the selected period</div>
               </div>
-
               <div className="card kpi-card">
                 <div className="card-title">Total Collected</div>
-                <div className="card-value">
-                  {formatCurrency(data.total_collected)}
-                </div>
-                <div className="card-subtext">
-                  Fees marked as paid in the selected period
-                </div>
+                <div className="card-value">{formatCurrency(data.total_collected)}</div>
+                <div className="card-subtext">Fees marked as paid in the selected period</div>
               </div>
-
               <div className="card kpi-card">
                 <div className="card-title">Total Outstanding</div>
-                <div className="card-value">
-                  {formatCurrency(data.total_outstanding)}
-                </div>
-                <div className="card-subtext">
-                  Still to be collected from students
-                </div>
+                <div className="card-value">{formatCurrency(data.total_outstanding)}</div>
+                <div className="card-subtext">Still to be collected from students</div>
               </div>
             </div>
 
             <div className="cards-row">
               <div className="card kpi-card">
                 <div className="card-title">Fine Collected</div>
-                <div className="card-value">
-                  {formatCurrency(data.fine_collected)}
-                </div>
-                <div className="card-subtext">
-                  Late fee already charged on paid records
-                </div>
+                <div className="card-value">{formatCurrency(data.fine_collected)}</div>
+                <div className="card-subtext">Late fee already charged on paid records</div>
               </div>
-
               <div className="card kpi-card">
                 <div className="card-title">Fine Outstanding</div>
-                <div className="card-value">
-                  {formatCurrency(data.fine_outstanding)}
-                </div>
-                <div className="card-subtext">
-                  Estimated late fee on unpaid records (up to today)
-                </div>
+                <div className="card-value">{formatCurrency(data.fine_outstanding)}</div>
+                <div className="card-subtext">Estimated late fee on unpaid records (up to today)</div>
               </div>
-
               <div className="card kpi-card">
                 <div className="card-title">Total Fine (Collected + Pending)</div>
-                <div className="card-value">
-                  {formatCurrency(data.total_fine)}
-                </div>
-                <div className="card-subtext">
-                  Overall impact of fines for the selected period
-                </div>
+                <div className="card-value">{formatCurrency(data.total_fine)}</div>
+                <div className="card-subtext">Overall impact of fines for the selected period</div>
               </div>
             </div>
-          </>
+          </React.Fragment>
         )}
-      </div>
-    </AppShell>
+    </div>
   );
 }

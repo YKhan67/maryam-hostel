@@ -34,6 +34,7 @@ class Ticket(models.Model):
 
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="tickets")
     hostel = models.ForeignKey(Hostel, on_delete=models.CASCADE, related_name="tickets")
+    asset = models.ForeignKey("finance.Asset", on_delete=models.SET_NULL, null=True, blank=True, related_name="maintenance_tickets")
     category = models.CharField(max_length=20, choices=SLASetting.CATEGORY_CHOICES)
     subject = models.CharField(max_length=255)
     description = models.TextField()

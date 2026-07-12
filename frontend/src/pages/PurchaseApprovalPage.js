@@ -1,7 +1,8 @@
 // src/pages/PurchaseApprovalPage.js
-import React, { useEffect, useState } from "react";
-import AppShell from "../components/AppShell";
+import React, { useEffect, useState, useContext } from "react";
 import api from "../api";
+import { AuthContext } from "../AuthContext";
+import { usePermissions } from "../hooks/usePermissions";
 
 function formatCurrency(v) {
   if (v === null || v === undefined || isNaN(v)) return "Rs 0";
@@ -10,6 +11,10 @@ function formatCurrency(v) {
 }
 
 export default function PurchaseApprovalPage() {
+  const { user } = useContext(AuthContext);
+  const { check } = usePermissions();
+  const isReadOnly = !check("PROCUREMENT", "edit"); // Approval is an 'edit' action
+
   const [pending, setPending] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,10 +46,10 @@ export default function PurchaseApprovalPage() {
     }
   }
 
-  if (loading) return <AppShell subtitle="Approvals">Syncing Purchase Queue...</AppShell>;
+  if (loading) return <p>Syncing Purchase Queue...</p>;
 
   return (
-    <AppShell subtitle="Purchase Approval Workflow">
+    <>
       <div className="card">
         <h2 style={{ marginBottom: '24px' }}>Pending Approvals</h2>
         <div className="table-wrapper">
@@ -57,7 +62,7 @@ export default function PurchaseApprovalPage() {
                 <th>Item</th>
                 <th>Total Cost</th>
                 <th>Evidence</th>
-                <th>Actions</th>
+                {!isReadOnly && <th>Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -79,27 +84,29 @@ export default function PurchaseApprovalPage() {
                       {!p.invoice_photo && !p.items_photo && <span style={{ color: '#ccc' }}>No Photos</span>}
                     </div>
                   </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button
-                        onClick={() => handleAction(p.id, 'approve')}
-                        className="btn btn-primary"
-                        style={{ padding: '4px 10px', fontSize: '0.75rem' }}
-                      >
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => {
-                          const r = prompt("Reason for rejection:");
-                          if (r) handleAction(p.id, 'reject', r);
-                        }}
-                        className="btn"
-                        style={{ padding: '4px 10px', fontSize: '0.75rem', background: '#fee2e2', color: '#b91c1c' }}
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  </td>
+                  {!isReadOnly && (
+                    <td>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          onClick={() => handleAction(p.id, 'approve')}
+                          className="btn btn-primary"
+                          style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => {
+                            const r = prompt("Reason for rejection:");
+                            if (r) handleAction(p.id, 'reject', r);
+                          }}
+                          className="btn"
+                          style={{ padding: '4px 10px', fontSize: '0.75rem', background: '#fee2e2', color: '#b91c1c' }}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
               {pending.length === 0 && (
@@ -115,6 +122,6 @@ export default function PurchaseApprovalPage() {
             💡 <b>Note:</b> Purchases will not reflect in Stock Levels or PnL reports until they are <b>Approved</b> by an Administrator.
          </p>
       </div>
-    </AppShell>
+    </>
   );
 }

@@ -1,8 +1,9 @@
 // src/pages/FeeManagementPage.js
 
-import React, { useEffect, useState } from "react";
-import AppShell from "../components/AppShell";
+import React, { useEffect, useState, useContext } from "react";
 import api from "../api";
+import { AuthContext } from "../AuthContext";
+import { usePermissions } from "../hooks/usePermissions";
 
 function getCurrentMonthYear() {
   const d = new Date();
@@ -37,6 +38,10 @@ function getStudentLabel(s) {
 }
 
 export default function FeeManagementPage() {
+  const { user } = useContext(AuthContext);
+  const { check } = usePermissions();
+  const isReadOnly = !check("FEES", "add") && !check("FEES", "edit");
+
   const [students, setStudents] = useState([]);
   const [loadingStudents, setLoadingStudents] = useState(true);
   const [studentsError, setStudentsError] = useState(null);
@@ -189,8 +194,6 @@ export default function FeeManagementPage() {
 
       if (markScope === "STUDENT" && markStudentId) {
         payload.student_id = Number(markStudentId);
-        // If single student, we need to know WHICH fee record if not bulk
-        // For simplicity, we can add a 'fee_id' selector or assume latest
       }
 
       const resp = await api.post("fees/actions/mark-paid/", payload);
@@ -295,8 +298,12 @@ export default function FeeManagementPage() {
   };
 
   return (
-    <AppShell subtitle="Fee Management">
-      <div className="page management-page">
+    <div className="page management-page">
+        {isReadOnly && (
+           <div className="card" style={{ background: '#fef9c3', border: '1px solid #fde047', padding: '16px', marginBottom: '24px' }}>
+              <p style={{ margin: 0, color: '#854d0e', fontWeight: 600 }}>🛡️ View-Only Mode: You do not have permission to modify fee records.</p>
+           </div>
+        )}
         {loadingStudents && (
           <div className="card">
             <p>Loading students…</p>
@@ -310,439 +317,446 @@ export default function FeeManagementPage() {
         )}
 
         {/* 1) Generate monthly fees */}
-        <div className="card">
-          <div className="card-title">1. Generate Monthly Fees</div>
-          <div className="card-subtext">
-            Create monthly fee records for all students or a specific student.
-          </div>
-
-          <form onSubmit={handleGenerateFees} style={{ marginTop: 12 }}>
-            <div className="filters-row">
-              <div className="filter-group">
-                <label className="filter-label">Apply to</label>
-                <select
-                  className="filter-select"
-                  value={genScope}
-                  onChange={(e) => setGenScope(e.target.value)}
-                >
-                  <option value="ALL">All students</option>
-                  <option value="STUDENT">Specific student</option>
-                </select>
-              </div>
-
-              {genScope === "STUDENT" && (
-                <div className="filter-group">
-                  <label className="filter-label">Student</label>
-                  <select
-                    className="filter-select"
-                    value={genStudentId}
-                    onChange={(e) => setGenStudentId(e.target.value)}
-                  >
-                    <option value="">Select student</option>
-                    {studentOptions.map((s) => (
-                      <option key={s.value} value={s.value}>
-                        {s.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div className="filter-group">
-                <label className="filter-label">Month</label>
-                <select
-                  className="filter-select"
-                  value={genMonth}
-                  onChange={(e) => setGenMonth(Number(e.target.value))}
-                >
-                  {monthOptions.map((m) => (
-                    <option key={m.value} value={m.value}>
-                      {m.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="filter-group">
-                <label className="filter-label">Year</label>
-                <input
-                  type="number"
-                  className="filter-input"
-                  value={genYear}
-                  onChange={(e) => setGenYear(Number(e.target.value))}
-                />
-              </div>
+        {!isReadOnly && (
+          <div className="card">
+            <div className="card-title">1. Generate Monthly Fees</div>
+            <div className="card-subtext">
+              Create monthly fee records for all students or a specific student.
             </div>
 
-            <div style={{ marginTop: 12 }}>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={genLoading}
-              >
-                {genLoading ? "Generating…" : "Generate Fees"}
-              </button>
-            </div>
-
-            {genMessage && (
-              <p style={{ marginTop: 8, fontSize: "0.85rem" }}>{genMessage}</p>
-            )}
-          </form>
-        </div>
-
-        {/* 2) Mark fees received */}
-        <div className="card">
-          <div className="card-title">2. Mark Fees as Received</div>
-          <div className="card-subtext">
-            Mark fees as paid for all students or a specific student, either for
-            a single month or all months.
-          </div>
-
-          <form onSubmit={handleMarkPaid} style={{ marginTop: 12 }}>
-            <div className="filters-row">
-              <div className="filter-group">
-                <label className="filter-label">Apply to</label>
-                <select
-                  className="filter-select"
-                  value={markScope}
-                  onChange={(e) => setMarkScope(e.target.value)}
-                >
-                  <option value="ALL">All students</option>
-                  <option value="STUDENT">Specific student</option>
-                </select>
-              </div>
-
-              {markScope === "STUDENT" && (
+            <form onSubmit={handleGenerateFees} style={{ marginTop: 12 }}>
+              <div className="filters-row">
                 <div className="filter-group">
-                  <label className="filter-label">Student</label>
+                  <label className="filter-label">Apply to</label>
                   <select
                     className="filter-select"
-                    value={markStudentId}
-                    onChange={(e) => setMarkStudentId(e.target.value)}
+                    value={genScope}
+                    onChange={(e) => setGenScope(e.target.value)}
                   >
-                    <option value="">Select student</option>
-                    {studentOptions.map((s) => (
-                      <option key={s.value} value={s.value}>
-                        {s.label}
-                      </option>
-                    ))}
+                    <option value="ALL">All students</option>
+                    <option value="STUDENT">Specific student</option>
                   </select>
                 </div>
-              )}
 
-              {!markAllMonths && (
-                <>
+                {genScope === "STUDENT" && (
                   <div className="filter-group">
-                    <label className="filter-label">Month</label>
+                    <label className="filter-label">Student</label>
                     <select
                       className="filter-select"
-                      value={markMonth}
-                      onChange={(e) => setMarkMonth(Number(e.target.value))}
+                      value={genStudentId}
+                      onChange={(e) => setGenStudentId(e.target.value)}
                     >
-                      {monthOptions.map((m) => (
-                        <option key={m.value} value={m.value}>
-                          {m.label}
+                      <option value="">Select student</option>
+                      {studentOptions.map((s) => (
+                        <option key={s.value} value={s.value}>
+                          {s.label}
                         </option>
                       ))}
                     </select>
                   </div>
+                )}
 
-                  <div className="filter-group">
-                    <label className="filter-label">Year</label>
-                    <input
-                      type="number"
-                      className="filter-input"
-                      value={markYear}
-                      onChange={(e) => setMarkYear(Number(e.target.value))}
-                    />
-                  </div>
-                </>
-              )}
-
-              <div className="filter-group">
-                <label className="filter-label">Payment Amount (Optional)</label>
-                <input
-                  type="number"
-                  placeholder="Leave blank for full"
-                  className="filter-input"
-                  value={paymentAmount}
-                  onChange={(e) => setPaymentAmount(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div style={{ marginTop: 8 }}>
-              <label style={{ fontSize: "0.85rem" }}>
-                <input
-                  type="checkbox"
-                  checked={markAllMonths}
-                  onChange={(e) => setMarkAllMonths(e.target.checked)}
-                  style={{ marginRight: 6 }}
-                />
-                Apply to <strong>all months</strong> (ignore selected month/year)
-              </label>
-            </div>
-
-            <div style={{ marginTop: 12 }}>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={markLoading}
-              >
-                {markLoading ? "Updating…" : "Mark as Paid"}
-              </button>
-            </div>
-
-            {markMessage && (
-              <p style={{ marginTop: 8, fontSize: "0.85rem" }}>{markMessage}</p>
-            )}
-          </form>
-        </div>
-
-        {/* 3) Send WhatsApp reminders */}
-        <div className="card">
-          <div className="card-title">
-            3. Send WhatsApp for Pending Fee / Fine
-          </div>
-          <div className="card-subtext">
-            Send WhatsApp reminders to students with unpaid fees and fines for
-            the selected month or all months.
-          </div>
-
-          <form onSubmit={handleSendWhatsapp} style={{ marginTop: 12 }}>
-            <div className="filters-row">
-              <div className="filter-group">
-                <label className="filter-label">Apply to</label>
-                <select
-                  className="filter-select"
-                  value={waScope}
-                  onChange={(e) => setWaScope(e.target.value)}
-                >
-                  <option value="ALL">All students with pending fees</option>
-                  <option value="STUDENT">Specific student</option>
-                </select>
-              </div>
-
-              {waScope === "STUDENT" && (
                 <div className="filter-group">
-                  <label className="filter-label">Student</label>
+                  <label className="filter-label">Month</label>
                   <select
                     className="filter-select"
-                    value={waStudentId}
-                    onChange={(e) => setWaStudentId(e.target.value)}
+                    value={genMonth}
+                    onChange={(e) => setGenMonth(Number(e.target.value))}
                   >
-                    <option value="">Select student</option>
-                    {studentOptions.map((s) => (
-                      <option key={s.value} value={s.value}>
-                        {s.label}
+                    {monthOptions.map((m) => (
+                      <option key={m.value} value={m.value}>
+                        {m.label}
                       </option>
                     ))}
                   </select>
                 </div>
-              )}
 
-              {!waAllMonths && (
-                <>
-                  <div className="filter-group">
-                    <label className="filter-label">Month</label>
-                    <select
-                      className="filter-select"
-                      value={waMonth}
-                      onChange={(e) => setWaMonth(Number(e.target.value))}
-                    >
-                      {monthOptions.map((m) => (
-                        <option key={m.value} value={m.value}>
-                          {m.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="filter-group">
-                    <label className="filter-label">Year</label>
-                    <input
-                      type="number"
-                      className="filter-input"
-                      value={waYear}
-                      onChange={(e) => setWaYear(Number(e.target.value))}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div style={{ marginTop: 8 }}>
-              <label style={{ fontSize: "0.85rem" }}>
-                <input
-                  type="checkbox"
-                  checked={waAllMonths}
-                  onChange={(e) => setWaAllMonths(e.target.checked)}
-                  style={{ marginRight: 6 }}
-                />
-                Consider <strong>all months</strong> with pending fees
-              </label>
-            </div>
-
-            <div style={{ marginTop: 12 }}>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={waLoading}
-              >
-                {waLoading ? "Sending…" : "Send WhatsApp Reminders"}
-              </button>
-            </div>
-
-            {waMessage && (
-              <p style={{ marginTop: 8, fontSize: "0.85rem" }}>{waMessage}</p>
-            )}
-          </form>
-        </div>
-
-        {/* 4) Fine waiver */}
-        <div className="card">
-          <div className="card-title">4. Fine Waiver</div>
-          <div className="card-subtext">
-            Waive full or partial late fees for all students or a specific
-            student, for a single month or all months.
-          </div>
-
-          <form onSubmit={handleFineWaiver} style={{ marginTop: 12 }}>
-            <div className="filters-row">
-              {/* Scope */}
-              <div className="filter-group">
-                <label className="filter-label">Apply to</label>
-                <select
-                  className="filter-select"
-                  value={wvScope}
-                  onChange={(e) => setWvScope(e.target.value)}
-                >
-                  <option value="ALL">All students</option>
-                  <option value="STUDENT">Specific student</option>
-                </select>
-              </div>
-
-              {/* Student */}
-              {wvScope === "STUDENT" && (
                 <div className="filter-group">
-                  <label className="filter-label">Student</label>
-                  <select
-                    className="filter-select"
-                    value={wvStudentId}
-                    onChange={(e) => setWvStudentId(e.target.value)}
-                  >
-                    <option value="">Select student</option>
-                    {studentOptions.map((s) => (
-                      <option key={s.value} value={s.value}>
-                        {s.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Month / year */}
-              {!wvAllMonths && (
-                <>
-                  <div className="filter-group">
-                    <label className="filter-label">Month</label>
-                    <select
-                      className="filter-select"
-                      value={wvMonth}
-                      onChange={(e) => setWvMonth(Number(e.target.value))}
-                    >
-                      {monthOptions.map((m) => (
-                        <option key={m.value} value={m.value}>
-                          {m.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="filter-group">
-                    <label className="filter-label">Year</label>
-                    <input
-                      type="number"
-                      className="filter-input"
-                      value={wvYear}
-                      onChange={(e) => setWvYear(Number(e.target.value))}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div style={{ marginTop: 8 }}>
-              <label style={{ fontSize: "0.85rem" }}>
-                <input
-                  type="checkbox"
-                  checked={wvAllMonths}
-                  onChange={(e) => setWvAllMonths(e.target.checked)}
-                  style={{ marginRight: 6 }}
-                />
-                Apply to <strong>all months</strong> (ignore selected month/year)
-              </label>
-            </div>
-
-            <div
-              className="filters-row"
-              style={{ marginTop: 12, alignItems: "flex-end" }}
-            >
-              <div className="filter-group">
-                <label className="filter-label">Waiver type</label>
-                <select
-                  className="filter-select"
-                  value={wvKind}
-                  onChange={(e) => setWvKind(e.target.value)}
-                >
-                  <option value="FULL">Full fine waiver</option>
-                  <option value="PARTIAL">
-                    Partial waiver (per fee record)
-                  </option>
-                </select>
-              </div>
-
-              {wvKind === "PARTIAL" && (
-                <div className="filter-group">
-                  <label className="filter-label">Partial amount</label>
+                  <label className="filter-label">Year</label>
                   <input
                     type="number"
-                    min="0"
                     className="filter-input"
-                    value={wvAmount}
-                    onChange={(e) => setWvAmount(e.target.value)}
-                    placeholder="e.g. 500"
+                    value={genYear}
+                    onChange={(e) => setGenYear(Number(e.target.value))}
                   />
-                  <div
-                    style={{
-                      fontSize: "0.75rem",
-                      marginTop: 2,
-                      opacity: 0.8,
-                    }}
-                  >
-                    This amount will be deducted from{" "}
-                    <strong>each</strong> selected fee&apos;s fine.
-                  </div>
                 </div>
+              </div>
+
+              <div style={{ marginTop: 12 }}>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={genLoading}
+                >
+                  {genLoading ? "Generating…" : "Generate Fees"}
+                </button>
+              </div>
+
+              {genMessage && (
+                <p style={{ marginTop: 8, fontSize: "0.85rem" }}>{genMessage}</p>
               )}
+            </form>
+          </div>
+        )}
+
+        {/* 2) Mark fees received */}
+        {!isReadOnly && (
+          <div className="card">
+            <div className="card-title">2. Mark Fees as Received</div>
+            <div className="card-subtext">
+              Mark fees as paid for all students or a specific student, either for
+              a single month or all months.
             </div>
 
-            <div style={{ marginTop: 12 }}>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={wvLoading}
+            <form onSubmit={handleMarkPaid} style={{ marginTop: 12 }}>
+              <div className="filters-row">
+                <div className="filter-group">
+                  <label className="filter-label">Apply to</label>
+                  <select
+                    className="filter-select"
+                    value={markScope}
+                    onChange={(e) => setMarkScope(e.target.value)}
+                  >
+                    <option value="ALL">All students</option>
+                    <option value="STUDENT">Specific student</option>
+                  </select>
+                </div>
+
+                {markScope === "STUDENT" && (
+                  <div className="filter-group">
+                    <label className="filter-label">Student</label>
+                    <select
+                      className="filter-select"
+                      value={markStudentId}
+                      onChange={(e) => setMarkStudentId(e.target.value)}
+                    >
+                      <option value="">Select student</option>
+                      {studentOptions.map((s) => (
+                        <option key={s.value} value={s.value}>
+                          {s.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {!markAllMonths && (
+                  <React.Fragment>
+                    <div className="filter-group">
+                      <label className="filter-label">Month</label>
+                      <select
+                        className="filter-select"
+                        value={markMonth}
+                        onChange={(e) => setMarkMonth(Number(e.target.value))}
+                      >
+                        {monthOptions.map((m) => (
+                          <option key={m.value} value={m.value}>
+                            {m.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="filter-group">
+                      <label className="filter-label">Year</label>
+                      <input
+                        type="number"
+                        className="filter-input"
+                        value={markYear}
+                        onChange={(e) => setMarkYear(Number(e.target.value))}
+                      />
+                    </div>
+                  </React.Fragment>
+                )}
+
+                <div className="filter-group">
+                  <label className="filter-label">Payment Amount (Optional)</label>
+                  <input
+                    type="number"
+                    placeholder="Leave blank for full"
+                    className="filter-input"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginTop: 8 }}>
+                <label style={{ fontSize: "0.85rem" }}>
+                  <input
+                    type="checkbox"
+                    checked={markAllMonths}
+                    onChange={(e) => setMarkAllMonths(e.target.checked)}
+                    style={{ marginRight: 6 }}
+                  />
+                  Apply to <strong>all months</strong> (ignore selected month/year)
+                </label>
+              </div>
+
+              <div style={{ marginTop: 12 }}>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={markLoading}
+                >
+                  {markLoading ? "Updating…" : "Mark as Paid"}
+                </button>
+              </div>
+
+              {markMessage && (
+                <p style={{ marginTop: 8, fontSize: "0.85rem" }}>{markMessage}</p>
+              )}
+            </form>
+          </div>
+        )}
+
+        {/* 3) Send WhatsApp reminders */}
+        {!isReadOnly && (
+          <div className="card">
+            <div className="card-title">
+              3. Send WhatsApp for Pending Fee / Fine
+            </div>
+            <div className="card-subtext">
+              Send WhatsApp reminders to students with unpaid fees and fines for
+              the selected month or all months.
+            </div>
+
+            <form onSubmit={handleSendWhatsapp} style={{ marginTop: 12 }}>
+              <div className="filters-row">
+                <div className="filter-group">
+                  <label className="filter-label">Apply to</label>
+                  <select
+                    className="filter-select"
+                    value={waScope}
+                    onChange={(e) => setWaScope(e.target.value)}
+                  >
+                    <option value="ALL">All students with pending fees</option>
+                    <option value="STUDENT">Specific student</option>
+                  </select>
+                </div>
+
+                {waScope === "STUDENT" && (
+                  <div className="filter-group">
+                    <label className="filter-label">Student</label>
+                    <select
+                      className="filter-select"
+                      value={waStudentId}
+                      onChange={(e) => setWaStudentId(e.target.value)}
+                    >
+                      <option value="">Select student</option>
+                      {studentOptions.map((s) => (
+                        <option key={s.value} value={s.value}>
+                          {s.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {!waAllMonths && (
+                  <React.Fragment>
+                    <div className="filter-group">
+                      <label className="filter-label">Month</label>
+                      <select
+                        className="filter-select"
+                        value={waMonth}
+                        onChange={(e) => setWaMonth(Number(e.target.value))}
+                      >
+                        {monthOptions.map((m) => (
+                          <option key={m.value} value={m.value}>
+                            {m.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="filter-group">
+                      <label className="filter-label">Year</label>
+                      <input
+                        type="number"
+                        className="filter-input"
+                        value={waYear}
+                        onChange={(e) => setWaYear(Number(e.target.value))}
+                      />
+                    </div>
+                  </React.Fragment>
+                )}
+              </div>
+
+              <div style={{ marginTop: 8 }}>
+                <label style={{ fontSize: "0.85rem" }}>
+                  <input
+                    type="checkbox"
+                    checked={waAllMonths}
+                    onChange={(e) => setWaAllMonths(e.target.checked)}
+                    style={{ marginRight: 6 }}
+                  />
+                  Consider <strong>all months</strong> with pending fees
+                </label>
+              </div>
+
+              <div style={{ marginTop: 12 }}>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={waLoading}
+                >
+                  {waLoading ? "Sending…" : "Send WhatsApp Reminders"}
+                </button>
+              </div>
+
+              {waMessage && (
+                <p style={{ marginTop: 8, fontSize: "0.85rem" }}>{waMessage}</p>
+              )}
+            </form>
+          </div>
+        )}
+
+        {/* 4) Fine waiver */}
+        {!isReadOnly && (
+          <div className="card">
+            <div className="card-title">4. Fine Waiver</div>
+            <div className="card-subtext">
+              Waive full or partial late fees for all students or a specific
+              student, for a single month or all months.
+            </div>
+
+            <form onSubmit={handleFineWaiver} style={{ marginTop: 12 }}>
+              <div className="filters-row">
+                {/* Scope */}
+                <div className="filter-group">
+                  <label className="filter-label">Apply to</label>
+                  <select
+                    className="filter-select"
+                    value={wvScope}
+                    onChange={(e) => setWvScope(e.target.value)}
+                  >
+                    <option value="ALL">All students</option>
+                    <option value="STUDENT">Specific student</option>
+                  </select>
+                </div>
+
+                {/* Student */}
+                {wvScope === "STUDENT" && (
+                  <div className="filter-group">
+                    <label className="filter-label">Student</label>
+                    <select
+                      className="filter-select"
+                      value={wvStudentId}
+                      onChange={(e) => setWvStudentId(e.target.value)}
+                    >
+                      <option value="">Select student</option>
+                      {studentOptions.map((s) => (
+                        <option key={s.value} value={s.value}>
+                          {s.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Month / year */}
+                {!wvAllMonths && (
+                  <React.Fragment>
+                    <div className="filter-group">
+                      <label className="filter-label">Month</label>
+                      <select
+                        className="filter-select"
+                        value={wvMonth}
+                        onChange={(e) => setWvMonth(Number(e.target.value))}
+                      >
+                        {monthOptions.map((m) => (
+                          <option key={m.value} value={m.value}>
+                            {m.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="filter-group">
+                      <label className="filter-label">Year</label>
+                      <input
+                        type="number"
+                        className="filter-input"
+                        value={wvYear}
+                        onChange={(e) => setWvYear(Number(e.target.value))}
+                      />
+                    </div>
+                  </React.Fragment>
+                )}
+              </div>
+
+              <div style={{ marginTop: 8 }}>
+                <label style={{ fontSize: "0.85rem" }}>
+                  <input
+                    type="checkbox"
+                    checked={wvAllMonths}
+                    onChange={(e) => setWvAllMonths(e.target.checked)}
+                    style={{ marginRight: 6 }}
+                  />
+                  Apply to <strong>all months</strong> (ignore selected month/year)
+                </label>
+              </div>
+
+              <div
+                className="filters-row"
+                style={{ marginTop: 12, alignItems: "flex-end" }}
               >
-                {wvLoading ? "Applying…" : "Apply Fine Waiver"}
-              </button>
-            </div>
+                <div className="filter-group">
+                  <label className="filter-label">Waiver type</label>
+                  <select
+                    className="filter-select"
+                    value={wvKind}
+                    onChange={(e) => setWvKind(e.target.value)}
+                  >
+                    <option value="FULL">Full fine waiver</option>
+                    <option value="PARTIAL">
+                      Partial waiver (per fee record)
+                    </option>
+                  </select>
+                </div>
 
-            {wvMessage && (
-              <p style={{ marginTop: 8, fontSize: "0.85rem" }}>{wvMessage}</p>
-            )}
-          </form>
-        </div>
-      </div>
-    </AppShell>
+                {wvKind === "PARTIAL" && (
+                  <div className="filter-group">
+                    <label className="filter-label">Partial amount</label>
+                    <input
+                      type="number"
+                      min="0"
+                      className="filter-input"
+                      value={wvAmount}
+                      onChange={(e) => setWvAmount(e.target.value)}
+                      placeholder="e.g. 500"
+                    />
+                    <div
+                      style={{
+                        fontSize: "0.75rem",
+                        marginTop: 2,
+                        opacity: 0.8,
+                      }}
+                    >
+                      This amount will be deducted from{" "}
+                      <strong>each</strong> selected fee&apos;s fine.
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ marginTop: 12 }}>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={wvLoading}
+                >
+                  {wvLoading ? "Applying…" : "Apply Fine Waiver"}
+                </button>
+              </div>
+
+              {wvMessage && (
+                <p style={{ marginTop: 8, fontSize: "0.85rem" }}>{wvMessage}</p>
+              )}
+            </form>
+          </div>
+        )}
+    </div>
   );
 }

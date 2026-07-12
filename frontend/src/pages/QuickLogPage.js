@@ -1,7 +1,6 @@
 // src/pages/QuickLogPage.js
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import AppShell from "../components/AppShell";
 import api from "../api";
 
 export default function QuickLogPage() {
@@ -57,11 +56,11 @@ export default function QuickLogPage() {
     }
   }
 
-  if (loading) return <AppShell subtitle="Quick Log">Identifying item...</AppShell>;
-  if (!item) return <AppShell subtitle="Quick Log">Item not found.</AppShell>;
+  if (loading) return <p>Identifying item...</p>;
+  if (!item) return <p>Item not found.</p>;
 
   return (
-    <AppShell subtitle={`Quick Log: ${item.name}`}>
+    <>
       <div className="card" style={{ maxWidth: '500px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div style={{ fontSize: '3rem', marginBottom: '12px' }}>📦</div>
@@ -129,6 +128,6 @@ export default function QuickLogPage() {
           </button>
         </form>
       </div>
-    </AppShell>
+    </>
   );
 }

@@ -1,6 +1,5 @@
 // src/pages/VisualAuditPage.js
 import React, { useEffect, useState } from "react";
-import AppShell from "../components/AppShell";
 import api from "../api";
 
 export default function VisualAuditPage() {
@@ -41,10 +40,10 @@ export default function VisualAuditPage() {
     }
   }
 
-  if (loading) return <AppShell subtitle="Audit">Loading Visual Evidence...</AppShell>;
+  if (loading) return <p>Loading Visual Evidence...</p>;
 
   return (
-    <AppShell subtitle="Visual Proof & Audit Trail">
+    <>
       <div className="card" style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <h2 style={{ margin: 0 }}>Visual Audit Gallery</h2>
@@ -129,6 +128,6 @@ export default function VisualAuditPage() {
       )}
 
       <div style={{ height: '60px' }}></div>
-    </AppShell>
+    </>
   );
 }

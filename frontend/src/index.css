@@ -32,10 +32,11 @@ a {
 }
 
 .app-shell {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: radial-gradient(circle at top, #fdf7ec 0, #f5f5f7 40%, #f5f5f7 100%);
+  overflow: hidden;
 }
 
 .app-header {
@@ -118,6 +119,7 @@ a {
 .app-main {
   flex: 1;
   padding: 24px 16px 32px;
+  overflow-y: auto;
 }
 
 .app-main-inner {

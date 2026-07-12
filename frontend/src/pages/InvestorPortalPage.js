@@ -1,6 +1,5 @@
 // src/pages/InvestorPortalPage.js
 import React, { useEffect, useState, useContext } from "react";
-import AppShell from "../components/AppShell";
 import api from "../api";
 import { AuthContext } from "../AuthContext";
 
@@ -12,7 +11,7 @@ function formatCurrency(v) {
 
 export default function InvestorPortalPage() {
   const { user } = useContext(AuthContext);
-  const [pnlData, setPnlData] = useState([]);
+  const [dashboardData, setDashboardData] = useState(null);
   const [occupancyData, setOccupancyData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +26,8 @@ export default function InvestorPortalPage() {
         api.get("inventory/branch_pnl/"),
         api.get("management/kpis/")
       ]);
-      setPnlData(pnlRes.data);
+      // The new Unified Engine returns { matrix: [], summary: {} }
+      setDashboardData(pnlRes.data);
       setOccupancyData(kpiRes.data.beds);
     } catch (err) {
       console.error("Failed to load investor data", err);
@@ -41,16 +41,19 @@ export default function InvestorPortalPage() {
     window.open(url, "_blank");
   };
 
-  if (loading) return <AppShell subtitle="Investor Portal">Syncing Financial Records...</AppShell>;
+  if (loading) return <p>Syncing Financial Records...</p>;
 
-  const totalIncome = pnlData.reduce((acc, curr) => acc + curr.income, 0);
-  const totalExpenses = pnlData.reduce((acc, curr) => acc + curr.expenses, 0);
-  const totalNet = totalIncome - totalExpenses;
+  // Use the pre-calculated summary from the backend (Engine 7.1)
+  const summary = dashboardData?.summary || {};
+  const matrix = dashboardData?.matrix || [];
+
+  const totalIncome = summary.total_revenue || 0;
+  const totalExpenses = (summary.total_logistics || 0) + (summary.total_payroll || 0);
+  const totalNet = summary.net_margin || 0;
 
   return (
-    <AppShell subtitle="Investor & Partner Portal">
-
-      {/* 1. Global Performance (Super Admin) or Branch Summary (Partner) */}
+    <>
+      {/* 1. Global Performance */}
       <div className="cards-row" style={{ marginBottom: '32px' }}>
         <div className="card kpi-card">
           <div className="card-title">Portfolio Revenue</div>
@@ -60,7 +63,7 @@ export default function InvestorPortalPage() {
         <div className="card kpi-card">
           <div className="card-title">Operational Burn</div>
           <div className="card-value" style={{ color: 'var(--danger)' }}>{formatCurrency(totalExpenses)}</div>
-          <div className="card-subtext">Total procurement and logistics cost</div>
+          <div className="card-subtext">Groceries + Payroll cost</div>
         </div>
         <div className="card kpi-card">
           <div className="card-title">Net Profitability</div>
@@ -95,27 +98,26 @@ export default function InvestorPortalPage() {
               <tr>
                 <th>Branch Name</th>
                 <th>Revenue</th>
-                <th>Expenses</th>
+                <th>Groceries</th>
+                <th>Payroll</th>
                 <th>Net Profit</th>
-                <th>Profit Margin</th>
-                <th>Status</th>
+                <th>Margin</th>
               </tr>
             </thead>
             <tbody>
-              {pnlData.map(branch => (
+              {matrix.map(branch => (
                 <tr key={branch.hostel_id}>
                   <td style={{ fontWeight: 700 }}>{branch.hostel_name}</td>
                   <td style={{ color: 'var(--success)', fontWeight: 600 }}>{formatCurrency(branch.income)}</td>
-                  <td style={{ color: 'var(--danger)', fontWeight: 600 }}>{formatCurrency(branch.expenses)}</td>
+                  <td>{formatCurrency(branch.groceries)}</td>
+                  <td style={{ color: 'var(--brand-gold)' }}>{formatCurrency(branch.payroll_burn)}</td>
                   <td style={{ fontWeight: 800 }}>{formatCurrency(branch.net_profit)}</td>
                   <td style={{ fontWeight: 700 }}>{branch.profit_margin}%</td>
-                  <td>
-                    <span className={`badge ${branch.profit_margin > 20 ? 'badge-success' : 'badge-warning'}`}>
-                      {branch.profit_margin > 0 ? 'PROFITABLE' : 'BREAK-EVEN'}
-                    </span>
-                  </td>
                 </tr>
               ))}
+              {matrix.length === 0 && (
+                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px' }}>No financial data available for this cycle.</td></tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -127,12 +129,12 @@ export default function InvestorPortalPage() {
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>
           {totalNet > 0
             ? "Your portfolio is maintaining a healthy cash flow. Reinvesting 10% of net profits into facility maintenance is recommended to maintain premium occupancy rates."
-            : "Operational costs are currently equal to or higher than revenue. We recommend a review of procurement prices in the 'Smart Re-order' sheet to optimize margins."
+            : "Operational costs are currently equal to or higher than revenue. We recommend a review of procurement prices to optimize margins."
           }
         </p>
       </div>
 
       <div style={{ height: '60px' }}></div>
-    </AppShell>
+    </>
   );
 }

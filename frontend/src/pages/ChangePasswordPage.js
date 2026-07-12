@@ -1,6 +1,5 @@
 // src/pages/ChangePasswordPage.js
 import React, { useState } from "react";
-import AppShell from "../components/AppShell";
 import api from "../api";
 
 export default function ChangePasswordPage() {
@@ -35,8 +34,7 @@ export default function ChangePasswordPage() {
   }
 
   return (
-    <AppShell subtitle="Account Security">
-      <div className="card" style={{ maxWidth: '500px', margin: '0 auto' }}>
+    <div className="card" style={{ maxWidth: '500px', margin: '0 auto' }}>
         <h2 style={{ marginBottom: '24px' }}>Change Your Password</h2>
 
         {message && (
@@ -86,7 +84,6 @@ export default function ChangePasswordPage() {
             {submitting ? "Processing..." : "Update Password"}
           </button>
         </form>
-      </div>
-    </AppShell>
+    </div>
   );
 }
