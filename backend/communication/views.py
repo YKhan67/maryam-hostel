@@ -1,7 +1,5 @@
-import json
 import logging
 from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from rest_framework import viewsets, permissions
 from rest_framework.views import APIView
@@ -121,9 +119,7 @@ class WhatsAppWebhookView(APIView):
             staff_query = staff_query.filter(role='STAFF') # Or specialized role if added
         elif ticket.category == 'FEES':
             staff_query = staff_query.filter(role='HOSTEL_MANAGER')
-            
-        staff_member = staff_query.first()
-        
+
         # Fallback number if no staff found or for demo
         notify_phone = "923312754995" 
         

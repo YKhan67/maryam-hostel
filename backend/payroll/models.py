@@ -1,6 +1,7 @@
+# backend/payroll/models.py
+
 from django.db import models
 from django.conf import settings
-from hostels.models import Hostel
 
 User = settings.AUTH_USER_MODEL
 
@@ -11,25 +12,35 @@ class EmployeeProfile(models.Model):
     PAY_TYPE_CHOICES = [
         ('MONTHLY', 'Fixed Monthly'),
         ('PER_TASK', 'Paid Per Task/Ticket'),
-    ]
+    ]   
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="employee_profile")
     designation = models.CharField(max_length=100)
     pay_type = models.CharField(max_length=20, choices=PAY_TYPE_CHOICES, default='MONTHLY')
-    
+
+    # National identity and documentation
+    nic_number = models.CharField(max_length=30, null=True, blank=True)
+    nic_front_picture = models.ImageField(upload_to="employee/nic_front/", blank=True, null=True)
+    nic_back_picture = models.ImageField(upload_to="employee/nic_back/", blank=True, null=True)
+    profile_picture = models.ImageField(upload_to="employee/profile/", blank=True, null=True)
+
+    # Contact Information
+    mobile = models.CharField(max_length=20, blank=True, null=True)
+    whatsapp = models.CharField(max_length=20, blank=True, null=True)
+
     # Salary Details
     base_salary = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     housing_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     fuel_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     other_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    
+
     # Task Rates (for PER_TASK employees)
     rate_per_task = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Amount per resolved ticket")
-    
+
     # Banking
     bank_name = models.CharField(max_length=100, blank=True)
     iban = models.CharField(max_length=34, blank=True)
-    
+
     joined_on = models.DateField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
 

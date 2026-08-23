@@ -1,5 +1,5 @@
 // src/pages/PayrollSlipsPage.js
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api";
 import { AuthContext } from "../AuthContext";
@@ -13,11 +13,7 @@ export default function PayrollSlipsPage() {
   const [record, setRecord] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadSlips();
-  }, [recordId]);
-
-  async function loadSlips() {
+  const loadSlips = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get(`payroll/records/${recordId}/`);
@@ -27,7 +23,11 @@ export default function PayrollSlipsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [recordId]);
+
+  useEffect(() => {
+    loadSlips();
+  }, [loadSlips]);
 
   const downloadPDF = async (slipId) => {
     try {

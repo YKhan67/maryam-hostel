@@ -4,6 +4,21 @@ import React, { useContext, useEffect, useState } from "react";
 import api from "../api";
 import { AuthContext } from "../AuthContext";
 
+// Helper function to get image URL
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+  
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || 
+      imagePath.startsWith('data:') || imagePath.startsWith('blob:')) {
+    return imagePath;
+  }
+  
+  let baseURL = api.defaults.baseURL || '';
+  baseURL = baseURL.replace(/\/api\/?$/, '');
+  const path = imagePath.startsWith('/') ? imagePath : '/' + imagePath;
+  return `${baseURL}${path}`;
+};
+
 export default function StudentDashboard() {
   const { user } = useContext(AuthContext);
   const [data, setData] = useState(null);
@@ -17,10 +32,24 @@ export default function StudentDashboard() {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwords, setPasswords] = useState({ old_password: '', new_password: '', confirm_password: '' });
   const [passwordSubmitting, setPasswordSubmitting] = useState(false);
+  const [currentMeals, setCurrentMeals] = useState(null);
+  const [mealLoading, setMealLoading] = useState(true);
 
   useEffect(() => {
     fetchLedger();
+    fetchTodayMeals();
   }, []);
+
+  async function fetchTodayMeals() {
+    try {
+      const res = await api.get("meal-menu/today/");
+      setCurrentMeals(res.data);
+    } catch (err) {
+      console.error("Error fetching meals:", err);
+    } finally {
+      setMealLoading(false);
+    }
+  }
 
   async function fetchLedger() {
     setLoading(true);
@@ -54,7 +83,7 @@ export default function StudentDashboard() {
       });
 
       setMessage("Payment proof uploaded successfully. Management will verify it.");
-      fetchLedger(); // Refresh to show pending status
+      fetchLedger();
     } catch (err) {
       console.error("Error uploading payment proof:", err);
       setMessage("Failed to upload payment proof.");
@@ -123,15 +152,149 @@ export default function StudentDashboard() {
   if (!data) return <p>Initializing data sync...</p>;
 
   const { summary, ledger, tickets } = data;
+  
+  // Calculate payment percentage
+  const totalPayable = summary.amount_due || 0;
+  const totalPaid = summary.amount_paid || 0;
+  const paymentPercentage = totalPayable > 0 ? (totalPaid / totalPayable) * 100 : 0;
+
+  // Calculate next due date (assuming 5th of each month)
+  const today = new Date();
+  let nextDueDate = new Date(today.getFullYear(), today.getMonth(), 5);
+  if (today.getDate() > 5) {
+    nextDueDate = new Date(today.getFullYear(), today.getMonth() + 1, 5);
+  }
+  const daysUntilDue = Math.ceil((nextDueDate - today) / (1000 * 60 * 60 * 24));
+
+  const getMealEmoji = (mealType) => {
+    switch(mealType) {
+      case 'BREAKFAST': return '🌅';
+      case 'LUNCH': return '☀️';
+      case 'DINNER': return '🌙';
+      default: return '🍽️';
+    }
+  };
 
   return (
     <div className="student-dashboard-wrapper">
+      {/* Announcements Banner */}
+      <div className="card" style={{ 
+        background: '#eff6ff', 
+        border: '1px solid #bfdbfe',
+        marginBottom: '24px',
+        padding: '12px 16px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '1.5rem' }}>📢</span>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Important Notice</div>
+            <div style={{ fontSize: '0.85rem', color: '#1e40af' }}>
+              Fee submission deadline is the 5th of every month. Next due date: {nextDueDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Stats Cards */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
+        gap: '12px', 
+        marginBottom: '24px' 
+      }}>
+        <div className="card" style={{ padding: '12px', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 700, opacity: 0.6, textTransform: 'uppercase' }}>Total Paid</div>
+          <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#34d399' }}>
+            {formatPKR(totalPaid)}
+          </div>
+        </div>
+        <div className="card" style={{ padding: '12px', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 700, opacity: 0.6, textTransform: 'uppercase' }}>Total Due</div>
+          <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#fbbf24' }}>
+            {formatPKR(totalPayable)}
+          </div>
+        </div>
+        <div className="card" style={{ padding: '12px', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 700, opacity: 0.6, textTransform: 'uppercase' }}>Support Tickets</div>
+          <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#3b82f6' }}>
+            {tickets.filter(t => t.status !== 'RESOLVED').length}
+          </div>
+        </div>
+        <div className="card" style={{ padding: '12px', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 700, opacity: 0.6, textTransform: 'uppercase' }}>Days Until Due</div>
+          <div style={{ 
+            fontSize: '1.2rem', 
+            fontWeight: 800, 
+            color: daysUntilDue <= 3 ? '#dc2626' : daysUntilDue <= 7 ? '#f59e0b' : '#34d399'
+          }}>
+            {daysUntilDue}
+          </div>
+        </div>
+      </div>
+
+      {/* MEAL MENU SECTION - NEW */}
+      <div className="card" style={{ marginBottom: '24px', background: 'linear-gradient(135deg, #f8fafc 0%, #e8f5e9 100%)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h4 style={{ margin: 0 }}>🍽️ Today's Meals</h4>
+          <button 
+            onClick={() => window.open('/meal-menu', '_blank')}
+            className="btn btn-soft" 
+            style={{ fontSize: '0.7rem', padding: '4px 12px' }}
+          >
+            📅 Weekly Menu
+          </button>
+        </div>
+        
+        {mealLoading ? (
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Loading today's menu...</p>
+        ) : currentMeals ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
+            {currentMeals.map((meal, index) => (
+              <div key={index} style={{ 
+                textAlign: 'center', 
+                padding: '16px', 
+                background: 'white', 
+                borderRadius: '12px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                border: '1px solid #e2e8f0'
+              }}>
+                <div style={{ fontSize: '2rem' }}>{getMealEmoji(meal.meal_type)}</div>
+                <div style={{ fontSize: '0.7rem', fontWeight: 700, marginTop: '4px' }}>
+                  {meal.meal_type.charAt(0) + meal.meal_type.slice(1).toLowerCase()}
+                </div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, marginTop: '4px' }}>{meal.name}</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{meal.description || ''}</div>
+                {meal.dietary_tags && (
+                  <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', marginTop: '6px' }}>
+                    {meal.dietary_tags.split(',').map((tag, i) => (
+                      <span key={i} style={{ 
+                        fontSize: '0.5rem', 
+                        padding: '2px 6px', 
+                        borderRadius: '999px', 
+                        background: '#e2e8f0',
+                        color: '#475569'
+                      }}>
+                        {tag.trim()}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+            No meals scheduled for today. Check back later!
+          </p>
+        )}
+      </div>
+
       {/* 1. FINANCIAL SUMMARY BANNER */}
       <div className="card" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', color: '#fff' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <h2 style={{ margin: '0 0 8px 0', fontSize: '1.5rem' }}>Welcome back, {user?.first_name || user?.username}! 👋</h2>
-            <p style={{ opacity: 0.8, marginBottom: '24px', fontSize: '0.9rem' }}>
+            <p style={{ opacity: 0.8, marginBottom: '8px', fontSize: '0.9rem' }}>
               Hostel: <b>{summary.hostel_name}</b> • Room: <b>{summary.room_number}</b> • Bed: <b>{summary.bed_number}</b>
             </p>
           </div>
@@ -142,16 +305,80 @@ export default function StudentDashboard() {
           )}
         </div>
 
+        {/* Payment Progress Bar */}
+        <div style={{ marginTop: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
+            <span>Payment Progress</span>
+            <span>{paymentPercentage.toFixed(0)}%</span>
+          </div>
+          <div style={{ height: '8px', background: 'rgba(255,255,255,0.2)', borderRadius: '4px', overflow: 'hidden' }}>
+            <div style={{ 
+              width: `${paymentPercentage}%`, 
+              height: '100%', 
+              background: paymentPercentage >= 80 ? '#34d399' : '#fbbf24',
+              transition: 'width 0.5s ease'
+            }}></div>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginTop: '16px', marginBottom: '18px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase', marginBottom: '8px' }}>Student Photo</div>
+            {summary.student_picture ? (
+              <img 
+                src={getImageUrl(summary.student_picture)} 
+                alt="Student" 
+                style={{ width: '54px', height: '54px', objectFit: 'cover', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.4)' }}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '';
+                  e.target.style.display = 'none';
+                }}
+              />
+            ) : (
+              <div style={{ width: '54px', height: '54px', borderRadius: '50%', background: 'rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}>👤</div>
+            )}
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase', marginBottom: '8px' }}>NIC #</div>
+            <div style={{ fontSize: '1rem', fontWeight: 700 }}>{summary.nic_number || 'N/A'}</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase', marginBottom: '8px' }}>Month</div>
+            <div style={{ fontSize: '1rem', fontWeight: 700 }}>{summary.month || 'N/A'}</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase', marginBottom: '8px' }}>Status</div>
+            <div style={{ fontSize: '1rem', fontWeight: 700 }}>{summary.status || 'N/A'}</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase', marginBottom: '8px' }}>Security Deposit</div>
+            <div style={{ fontSize: '1rem', fontWeight: 700 }}>{formatPKR(summary.security_deposit || 0)}</div>
+          </div>
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
           <div style={{ background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase', marginBottom: '8px' }}>Total Outstanding</div>
-            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#fbbf24' }}>{formatPKR(summary.total_outstanding)}</div>
-            <div style={{ fontSize: '0.7rem', marginTop: '4px', opacity: 0.6 }}>Includes unpaid fees and fines</div>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase', marginBottom: '8px' }}>Amount Due</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#fbbf24' }}>{formatPKR(summary.amount_due || 0)}</div>
+            <div style={{ fontSize: '0.7rem', marginTop: '4px', opacity: 0.6 }}>Current outstanding + utility bill</div>
           </div>
           <div style={{ background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase', marginBottom: '8px' }}>Total Paid All-Time</div>
-            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#34d399' }}>{formatPKR(summary.total_paid)}</div>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase', marginBottom: '8px' }}>Amount Paid</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#34d399' }}>{formatPKR(summary.amount_paid || 0)}</div>
             <div style={{ fontSize: '0.7rem', marginTop: '4px', opacity: 0.6 }}>Successfully verified payments</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase', marginBottom: '8px' }}>Utilities Bill</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{formatPKR(summary.utilities_bill || 0)}</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase', marginBottom: '8px' }}>Fine</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{formatPKR(summary.fine || 0)}</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', gridColumn: '1 / -1' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase', marginBottom: '8px' }}>Total</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 800 }}>{formatPKR(summary.total || 0)}</div>
           </div>
         </div>
       </div>
@@ -162,7 +389,21 @@ export default function StudentDashboard() {
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Account Ledger</h3>
-            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)' }}>DATE-WISE HISTORY</span>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button 
+                className="btn btn-soft" 
+                style={{ fontSize: '0.7rem', padding: '4px 12px' }}
+                onClick={() => {
+                  if (ledger.length > 0) {
+                    // Simple print of ledger
+                    window.print();
+                  }
+                }}
+              >
+                📥 Print
+              </button>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)' }}>DATE-WISE HISTORY</span>
+            </div>
           </div>
 
           {message && (
@@ -320,6 +561,16 @@ export default function StudentDashboard() {
                   <p style={{ fontSize: '0.85rem' }}>Need a repair or have a question? Click "Raise Issue" above.</p>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Emergency Contacts */}
+          <div className="card" style={{ marginTop: '24px', background: '#fef2f2', border: '1px solid #fecaca' }}>
+            <h4 style={{ margin: '0 0 8px 0', color: '#dc2626' }}>🆘 Emergency Contacts</h4>
+            <div style={{ fontSize: '0.85rem' }}>
+              <div><b>Security:</b> 0333-1234567</div>
+              <div><b>Management:</b> 0333-7654321</div>
+              <div><b>Fire/Emergency:</b> 1122</div>
             </div>
           </div>
 

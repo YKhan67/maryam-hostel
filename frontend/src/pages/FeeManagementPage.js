@@ -1,8 +1,7 @@
 // src/pages/FeeManagementPage.js
 
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, Fragment } from "react";
 import api from "../api";
-import { AuthContext } from "../AuthContext";
 import { usePermissions } from "../hooks/usePermissions";
 
 function getCurrentMonthYear() {
@@ -38,7 +37,6 @@ function getStudentLabel(s) {
 }
 
 export default function FeeManagementPage() {
-  const { user } = useContext(AuthContext);
   const { check } = usePermissions();
   const isReadOnly = !check("FEES", "add") && !check("FEES", "edit");
 
@@ -81,7 +79,7 @@ export default function FeeManagementPage() {
   const [wvYear, setWvYear] = useState(currentYear);
   const [wvMonth, setWvMonth] = useState(currentMonth);
   const [wvAllMonths, setWvAllMonths] = useState(false);
-  const [wvKind, setWvKind] = useState("FULL"); // "FULL" | "PARTIAL"
+  const [wvKind, setWvKind] = useState("FULL");
   const [wvAmount, setWvAmount] = useState("");
   const [wvLoading, setWvLoading] = useState(false);
   const [wvMessage, setWvMessage] = useState("");
@@ -144,7 +142,7 @@ export default function FeeManagementPage() {
   }));
 
   // ─────────────────────────────────
-  // 1) Generate fees
+  // 1) Generate fees - FIXED URL
   // ─────────────────────────────────
   const handleGenerateFees = async (e) => {
     e.preventDefault();
@@ -161,6 +159,7 @@ export default function FeeManagementPage() {
         payload.student_id = Number(genStudentId);
       }
 
+      // FIX: Remove /api/ prefix since api baseURL already includes it
       const resp = await api.post("fees/actions/generate-fees/", payload);
       setGenMessage(
         `Done. Created: ${resp.data.created ?? 0}, existing skipped: ${
@@ -178,7 +177,7 @@ export default function FeeManagementPage() {
   };
 
   // ─────────────────────────────────
-  // 2) Mark fees paid
+  // 2) Mark fees paid - FIXED URL
   // ─────────────────────────────────
   const handleMarkPaid = async (e) => {
     e.preventDefault();
@@ -196,7 +195,8 @@ export default function FeeManagementPage() {
         payload.student_id = Number(markStudentId);
       }
 
-      const resp = await api.post("fees/actions/mark-paid/", payload);
+      // FIX: Remove /api/ prefix
+      await api.post("fees/actions/mark-paid/", payload);
       setMarkMessage(`Done. Records updated.`);
       setPaymentAmount("");
     } catch (err) {
@@ -212,7 +212,7 @@ export default function FeeManagementPage() {
   };
 
   // ─────────────────────────────────
-  // 3) Send WhatsApp pending
+  // 3) Send WhatsApp pending - FIXED URL
   // ─────────────────────────────────
   const handleSendWhatsapp = async (e) => {
     e.preventDefault();
@@ -232,6 +232,7 @@ export default function FeeManagementPage() {
         payload.student_id = Number(waStudentId);
       }
 
+      // FIX: Remove /api/ prefix
       const resp = await api.post(
         "fees/actions/send-whatsapp-pending/",
         payload
@@ -254,7 +255,7 @@ export default function FeeManagementPage() {
   };
 
   // ─────────────────────────────────
-  // 4) Fine waiver
+  // 4) Fine waiver - FIXED URL
   // ─────────────────────────────────
   const handleFineWaiver = async (e) => {
     e.preventDefault();
@@ -265,7 +266,7 @@ export default function FeeManagementPage() {
       const payload = {
         scope: wvScope,
         all_months: wvAllMonths,
-        kind: wvKind, // "FULL" or "PARTIAL"
+        kind: wvKind,
       };
 
       if (!wvAllMonths) {
@@ -279,6 +280,7 @@ export default function FeeManagementPage() {
         payload.partial_amount = Number(wvAmount || 0);
       }
 
+      // FIX: Remove /api/ prefix
       const resp = await api.post("fees/actions/waive-fine/", payload);
       setWvMessage(
         `Done. Updated fines on ${resp.data.updated ?? 0} record(s) (total matched: ${
@@ -441,7 +443,7 @@ export default function FeeManagementPage() {
                 )}
 
                 {!markAllMonths && (
-                  <React.Fragment>
+                  <Fragment>
                     <div className="filter-group">
                       <label className="filter-label">Month</label>
                       <select
@@ -466,7 +468,7 @@ export default function FeeManagementPage() {
                         onChange={(e) => setMarkYear(Number(e.target.value))}
                       />
                     </div>
-                  </React.Fragment>
+                  </Fragment>
                 )}
 
                 <div className="filter-group">
@@ -554,7 +556,7 @@ export default function FeeManagementPage() {
                 )}
 
                 {!waAllMonths && (
-                  <React.Fragment>
+                  <Fragment>
                     <div className="filter-group">
                       <label className="filter-label">Month</label>
                       <select
@@ -579,7 +581,7 @@ export default function FeeManagementPage() {
                         onChange={(e) => setWaYear(Number(e.target.value))}
                       />
                     </div>
-                  </React.Fragment>
+                  </Fragment>
                 )}
               </div>
 
@@ -623,7 +625,6 @@ export default function FeeManagementPage() {
 
             <form onSubmit={handleFineWaiver} style={{ marginTop: 12 }}>
               <div className="filters-row">
-                {/* Scope */}
                 <div className="filter-group">
                   <label className="filter-label">Apply to</label>
                   <select
@@ -636,7 +637,6 @@ export default function FeeManagementPage() {
                   </select>
                 </div>
 
-                {/* Student */}
                 {wvScope === "STUDENT" && (
                   <div className="filter-group">
                     <label className="filter-label">Student</label>
@@ -655,9 +655,8 @@ export default function FeeManagementPage() {
                   </div>
                 )}
 
-                {/* Month / year */}
                 {!wvAllMonths && (
-                  <React.Fragment>
+                  <Fragment>
                     <div className="filter-group">
                       <label className="filter-label">Month</label>
                       <select
@@ -682,7 +681,7 @@ export default function FeeManagementPage() {
                         onChange={(e) => setWvYear(Number(e.target.value))}
                       />
                     </div>
-                  </React.Fragment>
+                  </Fragment>
                 )}
               </div>
 

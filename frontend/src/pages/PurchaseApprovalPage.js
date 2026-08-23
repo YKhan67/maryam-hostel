@@ -1,7 +1,6 @@
 // src/pages/PurchaseApprovalPage.js
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../api";
-import { AuthContext } from "../AuthContext";
 import { usePermissions } from "../hooks/usePermissions";
 
 function formatCurrency(v) {
@@ -10,8 +9,17 @@ function formatCurrency(v) {
   return `Rs ${num.toLocaleString("en-PK", { maximumFractionDigits: 0 })}`;
 }
 
+function resolveMediaUrl(url) {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+  if (/^\/\//.test(url)) return window.location.protocol + url;
+  const base = api.defaults.baseURL && /^https?:\/\//i.test(api.defaults.baseURL)
+    ? api.defaults.baseURL
+    : window.location.origin;
+  return new URL(url, base).toString();
+}
+
 export default function PurchaseApprovalPage() {
-  const { user } = useContext(AuthContext);
   const { check } = usePermissions();
   const isReadOnly = !check("PROCUREMENT", "edit"); // Approval is an 'edit' action
 
@@ -76,10 +84,10 @@ export default function PurchaseApprovalPage() {
                   <td>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       {p.invoice_photo && (
-                        <a href={p.invoice_photo} target="_blank" rel="noreferrer" className="badge badge-warning">Invoice</a>
+                        <a href={resolveMediaUrl(p.invoice_photo)} target="_blank" rel="noreferrer" className="badge badge-warning">Invoice</a>
                       )}
                       {p.items_photo && (
-                        <a href={p.items_photo} target="_blank" rel="noreferrer" className="badge badge-success">Items</a>
+                        <a href={resolveMediaUrl(p.items_photo)} target="_blank" rel="noreferrer" className="badge badge-success">Items</a>
                       )}
                       {!p.invoice_photo && !p.items_photo && <span style={{ color: '#ccc' }}>No Photos</span>}
                     </div>

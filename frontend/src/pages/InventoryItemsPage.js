@@ -27,6 +27,7 @@ export default function InventoryItemsPage() {
       document.body.appendChild(link);
       link.click();
       link.remove();
+      window.URL.revokeObjectURL(url);
     } catch (err) { alert("Failed to download secure QR code."); }
   };
 
@@ -40,16 +41,19 @@ export default function InventoryItemsPage() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (err) { alert("Failed to generate PDF."); }
+      window.URL.revokeObjectURL(url);
+    } catch (err) { alert("Failed to generate all QR labels."); }
   };
 
   if (loading) return <p>Loading Items...</p>;
 
   return (
     <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
           <div><h2 style={{ margin: 0 }}>Item Management</h2><p className="card-subtext">Print QR codes for instant logging.</p></div>
-          <button onClick={printAllLabels} className="btn btn-primary" style={{ padding: '10px 20px', fontSize: '0.9rem' }}>🖨️ Print All Labels (PDF)</button>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <button onClick={printAllLabels} className="btn btn-primary" style={{ padding: '10px 20px', fontSize: '0.9rem' }}>🖨️ Regenerate All Item QR Labels</button>
+          </div>
         </div>
 
         <div className="table-wrapper">

@@ -1,6 +1,5 @@
 from celery import shared_task
 from datetime import date
-from decimal import Decimal
 from django.utils import timezone
 from .models import MonthlyFee, FeeHead
 from hostels.models import StudentProfile

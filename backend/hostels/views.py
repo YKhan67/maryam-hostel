@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from datetime import date
 from django.db.models import Sum
 from rest_framework.views import APIView

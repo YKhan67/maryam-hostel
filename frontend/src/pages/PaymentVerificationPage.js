@@ -1,5 +1,5 @@
 // src/pages/PaymentVerificationPage.js
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import api from "../api";
 import { formatPKR } from "../utils/formatPKR";
 
@@ -13,9 +13,7 @@ export default function PaymentVerificationPage() {
   const [remarks, setRemarks] = useState("");
   const [processing, setProcessing] = useState(false);
 
-  useEffect(() => { fetchProofs(); }, [filter]);
-
-  async function fetchProofs() {
+  const fetchProofs = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get("payment_proofs/");
@@ -23,7 +21,9 @@ export default function PaymentVerificationPage() {
       setProofs(data.filter(p => p.status === filter));
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
-  }
+  }, [filter]);
+
+  useEffect(() => { fetchProofs(); }, [fetchProofs]);
 
   async function handleAction(status) {
     if (!selectedProof) return;

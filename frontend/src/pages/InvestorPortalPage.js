@@ -1,7 +1,6 @@
 // src/pages/InvestorPortalPage.js
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../api";
-import { AuthContext } from "../AuthContext";
 
 function formatCurrency(v) {
   if (v === null || v === undefined || isNaN(v)) return "Rs 0";
@@ -10,7 +9,6 @@ function formatCurrency(v) {
 }
 
 export default function InvestorPortalPage() {
-  const { user } = useContext(AuthContext);
   const [dashboardData, setDashboardData] = useState(null);
   const [occupancyData, setOccupancyData] = useState(null);
   const [loading, setLoading] = useState(true);

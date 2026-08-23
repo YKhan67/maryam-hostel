@@ -1,3 +1,93 @@
-from django.test import TestCase
+from datetime import date
+from decimal import Decimal
 
-# Create your tests here.
+from django.test import TestCase
+from django.urls import reverse
+from rest_framework.test import APIClient
+
+from accounts.models import User
+from fees.models import FeeHead, FeeRule, MonthlyFee
+from hostels.models import City, Hostel, StudentProfile, StudentUtilityCharge
+
+
+class StudentAndParentLedgerSummaryTests(TestCase):
+    def setUp(self):
+        city = City.objects.create(name="Lahore", country="Pakistan")
+        hostel = Hostel.objects.create(name="Maryam Girls Hostel", code="MGH", city=city)
+
+        self.user = User.objects.create_user(
+            username="student01",
+            password="StrongPass123",
+            first_name="Ayesha",
+            last_name="Khan",
+            role="STUDENT",
+            hostel=hostel,
+        )
+
+        self.student = StudentProfile.objects.create(
+            user=self.user,
+            hostel=hostel,
+            mobile="03001234567",
+            whatsapp="03001234567",
+            guardian_name="Zahid Khan",
+            guardian_phone="03007654321",
+            parent_phone="03007654321",
+            parent_whatsapp="03007654321",
+            college_name="Punjab College",
+            nic_number="4210112345678",
+            joined_on=date(2024, 1, 15),
+            parent_link_token="secure-token-123",
+        )
+
+        StudentUtilityCharge.objects.create(student=self.student, name="Water", amount=Decimal("250.00"), is_active=True)
+
+        self.fee_head = FeeHead.objects.create(name="Room Rent", default_amount=Decimal("5000.00"))
+        FeeRule.objects.create(fee_head=self.fee_head, due_day=4, late_fee_type="FIXED", fixed_amount=Decimal("100.00"))
+        MonthlyFee.objects.create(
+            student=self.student,
+            fee_head=self.fee_head,
+            month=date(2025, 1, 1),
+            amount=Decimal("5000.00"),
+            is_paid=False,
+        )
+
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_student_ledger_summary_has_visible_fields(self):
+        response = self.client.get(reverse("fees-student-ledger"))
+        self.assertEqual(response.status_code, 200)
+
+        summary = response.data["summary"]
+        for key in [
+            "student_picture",
+            "nic_number",
+            "month",
+            "status",
+            "security_deposit",
+            "amount_due",
+            "amount_paid",
+            "utilities_bill",
+            "fine",
+            "total",
+        ]:
+            self.assertIn(key, summary)
+
+    def test_parent_portal_summary_has_visible_fields(self):
+        response = self.client.get(reverse("fees-parent-ledger", kwargs={"token": "secure-token-123"}))
+        self.assertEqual(response.status_code, 200)
+
+        summary = response.data["summary"]
+        for key in [
+            "student_picture",
+            "nic_number",
+            "month",
+            "status",
+            "security_deposit",
+            "amount_due",
+            "amount_paid",
+            "utilities_bill",
+            "fine",
+            "total",
+        ]:
+            self.assertIn(key, summary)

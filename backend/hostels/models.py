@@ -1,10 +1,9 @@
-from django.db import models
+from decimal import Decimal
+from datetime import date
 
-# Create your models here.
-
-# backend/hostels/models.py
 from django.db import models
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
 User = settings.AUTH_USER_MODEL
 
@@ -76,7 +75,6 @@ class Bed(models.Model):
 
     def __str__(self):
         return f"{self.room} - Bed {self.label}"
-
 class StudentProfile(models.Model):
     """
     Separate profile linked to User with role=STUDENT.
@@ -86,27 +84,106 @@ class StudentProfile(models.Model):
     bed = models.OneToOneField(Bed, on_delete=models.PROTECT, related_name="student", null=True, blank=True)
 
     # Personal
-    mobile = models.CharField(max_length=20, blank=True)
-    whatsapp = models.CharField(max_length=20, blank=True)
-    guardian_name = models.CharField(max_length=100, blank=True)
-    guardian_phone = models.CharField(max_length=20, blank=True)
-    
-    # Parent/Guardian for Notifications
-    parent_phone = models.CharField(max_length=20, blank=True, help_text="For automated fee alerts")
-    parent_whatsapp = models.CharField(max_length=20, blank=True, help_text="For automated receipts")
+    mobile = models.CharField(max_length=20)
+    whatsapp = models.CharField(max_length=20)
+    guardian_name = models.CharField(max_length=100)
+    guardian_phone = models.CharField(max_length=20)
+    guardian_nic_number = models.CharField(max_length=30, blank=True)
 
-    college_name = models.CharField(max_length=150, blank=True)
+    # Parent/Guardian for Notifications
+    parent_name = models.CharField(max_length=100, blank=True)
+    parent_phone = models.CharField(max_length=20, help_text="For automated fee alerts")
+    parent_whatsapp = models.CharField(max_length=20, help_text="For automated receipts")
+    parent_nic_number = models.CharField(max_length=30, blank=True)
+
+    college_name = models.CharField(max_length=150)
+    nic_number = models.CharField(max_length=30)
+    nic_front_picture = models.ImageField(upload_to="student/nic_front/", blank=True, null=True)
+    nic_back_picture = models.ImageField(upload_to="student/nic_back/", blank=True, null=True)
+    profile_picture = models.ImageField(upload_to="student/profile/", blank=True, null=True)
+
+    monthly_rent = models.DecimalField(max_digits=10, decimal_places=2, default=0, blank=True, null=True)
+
+
     course = models.CharField(max_length=150, blank=True)
     year = models.CharField(max_length=20, blank=True)
 
     is_active = models.BooleanField(default=True)
-    joined_on = models.DateField(null=True, blank=True)
+    joined_on = models.DateField()
     left_on = models.DateField(null=True, blank=True)
 
     # Secure Parent Access
     parent_link_token = models.CharField(max_length=100, unique=True, null=True, blank=True)
 
+    @property
+    def active_utilities(self):
+        return self.utilities.filter(is_active=True)
+
+    def calculate_active_utility_bill(self):
+        total = 0
+        for utility in self.active_utilities.all():
+            total += float(utility.amount or 0)
+        return total
+
+    def clean(self):
+        super().clean()
+        if self.joined_on and self.left_on and self.left_on < self.joined_on:
+            raise ValidationError({"left_on": "Left on must be on or after joined on."})
     def save(self, *args, **kwargs):
+        """
+        Saves the profile, with enhanced logic to preserve fields like monthly_rent 
+        and security_deposit when updating from an API/Serializer payload,
+        preventing accidental overwrites.
+        """
+        # Local import to avoid a circular import (fees.models imports from hostels.models)
+        from fees.models import SecurityDeposit
+
+        # Get the update_data payload from kwargs
+        update_data = kwargs.get('update_data', {})
+        
+        # --- Monthly Rent Update Logic (Preservation) ---
+        if 'monthly_rent' in update_data:
+            rent_value = update_data['monthly_rent']
+            try:
+                if isinstance(rent_value, str):
+                    # Clean string input from frontend (removes commas/currency symbols)
+                    clean_value = float(rent_value.replace(',', '').replace('$', ''))
+                    new_rent = float(clean_value)
+                else:
+                    new_rent = float(rent_value)
+                
+                # Only update if the new value is different OR if the current value is None/default 0 and a non-zero value is provided
+                if abs(new_rent - self.monthly_rent) > 0.001 or self.monthly_rent is None:
+                    self.monthly_rent = new_rent
+                    print(f"INFO: [Model Hook] Monthly rent successfully updated from {self.monthly_rent} to {new_rent}.")
+                else:
+                    print("INFO: [Model Hook] Monthly rent value matched existing value; no update needed.")
+            except (ValueError, TypeError):
+                print("WARNING: [Model Hook] Could not process monthly_rent from payload, preserving existing value.")
+
+        # --- Security Deposit Update Logic (Preservation) ---
+        if 'security_deposit' in update_data:
+            deposit_value = update_data['security_deposit']
+            try:
+                clean_deposit = Decimal(str(deposit_value))
+                
+                # If security_deposit already exists (via ForeignKey), update it
+                if self.security_deposit:
+                    self.security_deposit.amount = clean_deposit
+                    print(f"INFO: [Model Hook] Security deposit updated from {self.security_deposit.amount} to {clean_deposit}.")
+                else:
+                    # No existing deposit, create a new one
+                    self.security_deposit = SecurityDeposit(
+                        student=self,
+                        amount=clean_deposit,
+                        date_paid=date.today(),
+                        status="HELD"
+                    )
+                    print(f"INFO: [Model Hook] New SecurityDeposit created with amount {clean_deposit}.")
+            except (ValueError, TypeError):
+                print("WARNING: [Model Hook] Could not process security_deposit from payload, preserving existing value.")
+
+        self.full_clean()
         if not self.parent_link_token:
             import uuid
             self.parent_link_token = uuid.uuid4().hex
@@ -114,4 +191,19 @@ class StudentProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.get_full_name() or self.user.username} - {self.hostel.code if self.hostel else 'No Hostel'}"
+
+
+class StudentUtilityCharge(models.Model):
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="utilities")
+    name = models.CharField(max_length=100)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return f"{self.student.user.username} - {self.name} ({self.amount})"
 

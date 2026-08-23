@@ -1,9 +1,13 @@
-from rest_framework import viewsets, permissions, status
+# backend/accounts/views.py
+
+from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import JSONParser, FormParser
 from django.db.models import Q
+from .parsers import CustomMultiPartParser
 
 from .models import User, ModulePermission
 from .serializers import (
@@ -14,7 +18,7 @@ from .serializers import (
 class ModulePermissionViewSet(viewsets.ModelViewSet):
     queryset = ModulePermission.objects.all()
     serializer_class = ModulePermissionSerializer
-    permission_classes = [permissions.IsAuthenticated] # We will check role inside
+    permission_classes = [permissions.IsAuthenticated]
 
     @action(detail=False, methods=['post'])
     def bulk_update(self, request):
@@ -64,6 +68,8 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = User.objects.all().order_by("-id")
     permission_classes = [IsAuthenticated]
+    # Use our custom parser instead of the default
+    parser_classes = [CustomMultiPartParser, FormParser, JSONParser]
 
     def get_serializer_class(self):
         if self.action in ("create", "update", "partial_update"):

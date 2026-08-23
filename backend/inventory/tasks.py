@@ -1,5 +1,5 @@
 from celery import shared_task
-from django.db.models import Sum, F
+from django.db.models import Sum
 from django.db.models.functions import Coalesce
 from .models import Item, Purchase, Consumption
 from fees.whatsapp import send_whatsapp_text

@@ -3,22 +3,19 @@ import re
 import csv
 import qrcode
 import logging
-from datetime import date, timedelta, datetime
-from decimal import Decimal
+from datetime import date
 
-from django.shortcuts import render
-from django.db.models import Sum, Avg, F, DecimalField, Q, Case, When
+from django.db.models import Sum, Avg, F
 from django.http import HttpResponse
-from django.conf import settings
 from django.utils import timezone
 
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, parsers
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
-# Critical Imports
+# Hardware/AI Dependencies
 try:
     from PIL import Image
 except ImportError:
@@ -28,7 +25,7 @@ try:
 except ImportError:
     pytesseract = None
 
-from reportlab.pdfgen import canvas
+# PDF Dependencies
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image as RLImage, Spacer
@@ -37,8 +34,9 @@ from reportlab.lib.units import inch
 
 from .models import Category, Unit, Item, Vendor, Purchase, Consumption
 from hostels.models import Hostel, StudentProfile
-from fees.models import MonthlyFee, Receipt
-from payroll.models import SalarySlip # Moved to top to avoid import lags
+from fees.models import Receipt
+from payroll.models import SalarySlip
+from finance.models import Asset
 
 from .serializers import (
     CategorySerializer, UnitSerializer, ItemSerializer,
@@ -53,75 +51,74 @@ class IsHostelManagerOrAbove(permissions.BasePermission):
                request.user.role in ["SUPER_ADMIN", "CITY_MANAGER", "HOSTEL_MANAGER", "PARTNER", "STAFF"]
 
 class InventorySummaryView(APIView):
+    """
+    Dashboard Compatibility View.
+    """
     permission_classes = [IsAuthenticated]
-    def get(self, request): return Response({"detail": "Deprecated"}, status=301)
+    def get(self, request):
+        return Response({"status": "Redirecting", "engine": "6.0"}, status=200)
 
 class BranchProfitLossView(APIView):
     """
-    ENGINE 7.1: The Final Bridge.
-    Uses strict Year/Month integer extraction.
+    ENGINE 6.0: Integer-Lock Logic.
+    Extracts data strictly by Year and Month integers.
     """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        user = request.user
         today = timezone.localdate()
-        
-        # 1. Parse Integers
         try:
             year = int(request.query_params.get("year", today.year))
-            month_param = request.query_params.get("month")
-            month = int(month_param) if month_param else today.month
+            month_p = request.query_params.get("month")
+            month = int(month_p) if month_p else today.month
             period = request.query_params.get("period", "CURRENT_MONTH")
         except:
             year, month, period = today.year, today.month, "CURRENT_MONTH"
 
-        # 2. Scope
-        user = request.user
         if user.role in ["HOSTEL_MANAGER", "PARTNER", "STAFF"] and user.hostel:
             hostels = Hostel.objects.filter(id=user.hostel.id)
         else:
             h_id = request.query_params.get("hostel_id")
             hostels = Hostel.objects.filter(id=h_id) if h_id else Hostel.objects.all()
         
+        def apply_filters(qs, date_field):
+            if period == "YTD": return qs.filter(**{f"{date_field}__year": year, f"{date_field}__month__lte": today.month})
+            elif period == "SPECIFIC": return qs.filter(**{f"{date_field}__year": year, f"{date_field}__month": month})
+            else: return qs.filter(**{f"{date_field}__year": today.year, f"{date_field}__month": today.month})
+
         matrix = []
         t_rev, t_log, t_pay, t_stu = 0.0, 0.0, 0.0, 0
 
         for h in hostels:
-            # INCOME FILTER
-            r_qs = Receipt.objects.filter(fee__student__hostel=h)
-            if period == "YTD": r_qs = r_qs.filter(date_issued__year=year, date_issued__month__lte=today.month)
-            elif period == "SPECIFIC": r_qs = r_qs.filter(date_issued__year=year, date_issued__month=month)
-            else: r_qs = r_qs.filter(date_issued__year=today.year, date_issued__month=today.month)
-            branch_rev = float(r_qs.aggregate(s=Sum('amount'))['s'] or 0)
+            # Income
+            r_qs = apply_filters(Receipt.objects.filter(fee__student__hostel=h), "date_issued__date")
+            rev_val = float(r_qs.aggregate(s=Sum('amount'))['s'] or 0)
             
-            # LOGISTICS FILTER
-            p_qs = Purchase.objects.filter(hostel=h, status='APPROVED')
-            if period == "YTD": p_qs = p_qs.filter(date__year=year, date__month__lte=today.month)
-            elif period == "SPECIFIC": p_qs = p_qs.filter(date__year=year, date__month=month)
-            else: p_qs = p_qs.filter(date__year=today.year, date__month=today.month)
-            branch_log = float(p_qs.annotate(c=F('quantity')*F('price_per_unit')).aggregate(s=Sum('c'))['s'] or 0)
+            # Logistics
+            p_qs = apply_filters(Purchase.objects.filter(hostel=h, status='APPROVED'), "date")
+            logi_val = float(p_qs.annotate(c=F('quantity')*F('price_per_unit')).aggregate(s=Sum('c'))['s'] or 0)
+
+            # CapEx (Assets)
+            a_qs = apply_filters(Asset.objects.filter(hostel=h), "purchase_date")
+            asset_val = float(a_qs.aggregate(s=Sum('purchase_price'))['s'] or 0)
             
-            # PAYROLL FILTER
-            py_qs = SalarySlip.objects.filter(employee__user__hostel=h, is_disbursed=True)
-            if period == "YTD": py_qs = py_qs.filter(disbursed_at__year=year, disbursed_at__month__lte=today.month)
-            elif period == "SPECIFIC": py_qs = py_qs.filter(disbursed_at__year=year, disbursed_at__month=month)
-            else: py_qs = py_qs.filter(disbursed_at__year=today.year, disbursed_at__month=today.month)
-            branch_pay = float(py_qs.aggregate(s=Sum('net_salary'))['s'] or 0)
+            # Payroll
+            py_qs = apply_filters(SalarySlip.objects.filter(employee__user__hostel=h, is_disbursed=True), "disbursed_at__date")
+            payr_val = float(py_qs.aggregate(s=Sum('net_salary'))['s'] or 0)
             
             s_count = StudentProfile.objects.filter(hostel=h, is_active=True).count()
-
-            t_rev += branch_rev; t_log += branch_log; t_pay += branch_pay; t_stu += s_count
+            t_rev += rev_val; t_log += (logi_val + asset_val); t_pay += payr_val; t_stu += s_count
 
             matrix.append({
-                "hostel_id": h.id, "hostel_name": h.name, "income": branch_rev, "groceries": branch_log,
-                "payroll_burn": branch_pay, "net_profit": branch_rev - (branch_log + branch_pay),
-                "profit_margin": round(((branch_rev - (branch_log + branch_pay)) / branch_rev * 100), 1) if branch_rev > 0 else 0
+                "hostel_id": h.id, "hostel_name": h.name, "income": rev_val, "groceries": logi_val + asset_val,
+                "payroll_burn": payr_val, "net_profit": rev_val - (logi_val + asset_val + payr_val),
+                "profit_margin": round(((rev_val - (logi_val + asset_val + payr_val)) / rev_val * 100), 1) if rev_val > 0 else 0
             })
 
         students_den = t_stu if t_stu > 0 else 1
         return Response({
-            "version": "7.1",
-            "server_time": datetime.now().strftime("%H:%M:%S"),
+            "version": "6.0",
             "matrix": matrix,
             "summary": {
                 "total_revenue": t_rev, "total_logistics": t_log, "total_payroll": t_pay,
@@ -131,7 +128,6 @@ class BranchProfitLossView(APIView):
             }
         })
 
-# --- Utility Views ---
 class InventoryListView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
@@ -140,7 +136,19 @@ class InventoryListView(APIView):
         if user.role in ["HOSTEL_MANAGER", "PARTNER", "STAFF"] and user.hostel: qs = qs.filter(hostel=user.hostel)
         if from_d: qs = qs.filter(date__gte=from_d)
         if to_d: qs = qs.filter(date__lte=to_d)
-        return Response([{"id": p.id, "date": p.date, "hostel": p.hostel.name, "vendor": p.vendor.name, "item": p.item.name, "quantity": float(p.quantity), "unit": p.item.unit.name, "total_cost": float(p.quantity * p.price_per_unit), "status": p.status} for p in qs.order_by("-date")])
+        return Response([{
+            "id": p.id,
+            "date": p.date,
+            "hostel": p.hostel.name,
+            "vendor": p.vendor.name,
+            "item": p.item.name,
+            "quantity": float(p.quantity),
+            "unit": p.item.unit.name,
+            "total_cost": float(p.quantity * p.price_per_unit),
+            "status": p.status,
+            "invoice_photo": p.invoice_photo.url if p.invoice_photo else None,
+            "items_photo": p.items_photo.url if p.items_photo else None,
+        } for p in qs.order_by("-date")])
 
 class InventoryExportCSVView(APIView):
     permission_classes = [IsAuthenticated]
@@ -189,34 +197,12 @@ class SmartReorderSheetView(APIView):
 class ConsumptionAnalyticsView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
-        user = request.user; today = date.today(); this_month_start = date(today.year, today.month, 1)
-        six_months_ago = this_month_start - timedelta(days=180)
-        items = Item.objects.filter(is_active=True); abnormal_items = []
+        user = request.user; today = date.today(); start = date(today.year, today.month, 1); items = Item.objects.filter(is_active=True); results = []
         for item in items:
-            # 6 Month History
-            history = Consumption.objects.filter(item=item, date__gte=six_months_ago, date__lt=this_month_start)
-            if user.role in ["HOSTEL_MANAGER", "PARTNER", "STAFF"] and user.hostel: history = history.filter(hostel=user.hostel)
-            total_hist = history.aggregate(s=Sum('quantity'))['s'] or 0
-            avg_monthly = float(total_hist) / 6.0
-            
-            # Current Month
-            current = Consumption.objects.filter(item=item, date__gte=this_month_start)
-            if user.role in ["HOSTEL_MANAGER", "PARTNER", "STAFF"] and user.hostel: current = current.filter(hostel=user.hostel)
-            total_current = float(current.aggregate(s=Sum('quantity'))['s'] or 0)
-            
-            # Spike Detection (30% above average)
-            if avg_monthly > 0 and total_current > (avg_monthly * 1.3):
-                spike = round(((total_current - avg_monthly) / avg_monthly) * 100, 1)
-                abnormal_items.append({
-                    "item": item.name, 
-                    "avg_monthly": avg_monthly, 
-                    "current_month": total_current, 
-                    "spike_percentage": spike
-                })
-        return Response({
-            "abnormal_consumption": abnormal_items, 
-            "period": f"{this_month_start:%B %Y}"
-        })
+            cur = Consumption.objects.filter(item=item, date__gte=start)
+            if user.role in ["HOSTEL_MANAGER", "PARTNER", "STAFF"] and user.hostel: cur = cur.filter(hostel=user.hostel)
+            results.append({"item": item.name, "current_month": float(cur.aggregate(s=Sum('quantity'))['s'] or 0)})
+        return Response({"abnormal_consumption": results})
 
 class ExportPnLReportView(APIView):
     permission_classes = [IsAuthenticated]
@@ -226,9 +212,78 @@ class GeneratePurchaseOrderView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request, pk):
         purchase = Purchase.objects.select_related('item', 'vendor', 'hostel').get(pk=pk)
-        response = HttpResponse(content_type='application/pdf'); response['Content-Disposition'] = f'attachment; filename="PO_{purchase.id}.pdf"'
-        doc = SimpleDocTemplate(response, pagesize=A4); elements = []; styles = getSampleStyleSheet(); elements.append(Paragraph("<b>PURCHASE ORDER</b>", styles['Title'])); table_data = [["Code", "Item", "Qty", "Price", "Total"], [purchase.item.code, purchase.item.name, f"{purchase.quantity}", f"Rs {purchase.price_per_unit}", f"Rs {purchase.total_cost}"]]
-        t = Table(table_data); t.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,0), colors.grey), ('GRID', (0,0), (-1,-1), 1, colors.black)])); elements.append(t); doc.build(elements); return response
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="PO_{purchase.id}.pdf"'
+
+        doc = SimpleDocTemplate(response, pagesize=A4)
+        elements = []
+        styles = getSampleStyleSheet()
+
+        elements.append(Paragraph("<b>PURCHASE ORDER</b>", styles['Title']))
+        elements.append(Spacer(1, 12))
+
+        header_data = [
+            [Paragraph("<b>Purchase ID</b>", styles['Normal']), str(purchase.id)],
+            [Paragraph("<b>Date</b>", styles['Normal']), str(purchase.date)],
+            [Paragraph("<b>Hostel</b>", styles['Normal']), purchase.hostel.name],
+            [Paragraph("<b>Vendor</b>", styles['Normal']), purchase.vendor.name],
+            [Paragraph("<b>Invoice No</b>", styles['Normal']), purchase.invoice_no or "-"],
+        ]
+        header_table = Table(header_data, colWidths=[2.2 * inch, 4 * inch])
+        header_table.setStyle(TableStyle([
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('TEXTCOLOR', (0,0), (-1,-1), colors.black),
+            ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+            ('FONTSIZE', (0,0), (-1,-1), 10),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ]))
+        elements.append(header_table)
+        elements.append(Spacer(1, 12))
+
+        table_data = [["Code", "Item", "Qty", "Price", "Total"],
+                      [purchase.item.code, purchase.item.name, f"{purchase.quantity}", f"Rs {purchase.price_per_unit}", f"Rs {purchase.total_cost}"]]
+        t = Table(table_data, colWidths=[1.2*inch, 2.6*inch, 0.8*inch, 1.2*inch, 1.2*inch])
+        t.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.grey),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+            ('ALIGN', (2,0), (-1,-1), 'RIGHT'),
+            ('GRID', (0,0), (-1,-1), 1, colors.black),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTNAME', (0,1), (-1,-1), 'Helvetica'),
+            ('FONTSIZE', (0,0), (-1,-1), 10),
+            ('BOTTOMPADDING', (0,0), (-1,0), 8),
+        ]))
+        elements.append(t)
+        elements.append(Spacer(1, 16))
+
+        if purchase.invoice_photo or purchase.items_photo:
+            elements.append(Paragraph("<b>Attached Photos</b>", styles['Heading2']))
+            elements.append(Spacer(1, 8))
+            image_cells = []
+            if purchase.invoice_photo:
+                try:
+                    image_cells.append(RLImage(purchase.invoice_photo.path, width=3*inch, height=3*inch))
+                except Exception:
+                    image_cells.append(Paragraph("Invoice photo not available.", styles['Normal']))
+            if purchase.items_photo:
+                try:
+                    image_cells.append(RLImage(purchase.items_photo.path, width=3*inch, height=3*inch))
+                except Exception:
+                    image_cells.append(Paragraph("Items photo not available.", styles['Normal']))
+
+            if image_cells:
+                photo_table = Table([image_cells], colWidths=[3*inch] * len(image_cells))
+                photo_table.setStyle(TableStyle([('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('ALIGN', (0,0), (-1,-1), 'CENTER')]))
+                elements.append(photo_table)
+                elements.append(Spacer(1, 8))
+                caption_data = [[Paragraph('<b>Invoice Photo</b>', styles['Normal']) if purchase.invoice_photo else '', Paragraph('<b>Items Photo</b>', styles['Normal']) if purchase.items_photo else '']]
+                caption_table = Table(caption_data, colWidths=[3*inch] * len(image_cells))
+                caption_table.setStyle(TableStyle([('ALIGN', (0,0), (-1,-1), 'CENTER')]))
+                elements.append(caption_table)
+                elements.append(Spacer(1, 12))
+
+        doc.build(elements)
+        return response
 
 class SendPOWhatsAppView(APIView):
     permission_classes = [IsAuthenticated]
@@ -259,11 +314,32 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class UnitViewSet(viewsets.ModelViewSet):
     queryset = Unit.objects.all().order_by("name"); serializer_class = UnitSerializer; permission_classes = [IsHostelManagerOrAbove]
 class ItemViewSet(viewsets.ModelViewSet):
-    queryset = Item.objects.filter(is_active=True).order_by("name"); serializer_class = ItemSerializer; permission_classes = [IsHostelManagerOrAbove]
+    queryset = Item.objects.filter(is_active=True).order_by("name")
+    serializer_class = ItemSerializer
+    permission_classes = [IsHostelManagerOrAbove]
+
+    @action(detail=True, methods=['get'], url_path='qr_code')
+    def qr_code(self, request, pk=None):
+        item = self.get_object()
+        qr = qrcode.QRCode(version=1, box_size=10, border=2)
+        qr.add_data(f"https://maryamhostel.com/item/{item.id}/")
+        qr.make(fit=True)
+        qr_img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
+        buf = io.BytesIO()
+        qr_img.save(buf, format='PNG')
+        buf.seek(0)
+        response = HttpResponse(buf, content_type='image/png')
+        response['Content-Disposition'] = f'attachment; filename="QR_Item_{item.id}.png"'
+        return response
+
 class VendorViewSet(viewsets.ModelViewSet):
     queryset = Vendor.objects.all().order_by("name"); serializer_class = VendorSerializer; permission_classes = [IsHostelManagerOrAbove]
 class PurchaseViewSet(viewsets.ModelViewSet):
-    queryset = Purchase.objects.select_related("hostel", "vendor", "item").all().order_by("-date"); serializer_class = PurchaseSerializer; permission_classes = [IsHostelManagerOrAbove]
+    queryset = Purchase.objects.select_related("hostel", "vendor", "item").all().order_by("-date")
+    serializer_class = PurchaseSerializer
+    permission_classes = [IsHostelManagerOrAbove]
+    parser_classes = [parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser]
+
     def get_queryset(self):
         qs = super().get_queryset(); user = self.request.user
         if user.role in ["HOSTEL_MANAGER", "PARTNER", "STAFF"] and user.hostel: return qs.filter(hostel=user.hostel)
@@ -275,7 +351,11 @@ class PurchaseViewSet(viewsets.ModelViewSet):
     def reject(self, request, pk=None):
         p = self.get_object(); p.status = 'REJECTED'; p.rejection_remarks = request.data.get("remarks", ""); p.save(); return Response({"status": "OK"})
 class ConsumptionViewSet(viewsets.ModelViewSet):
-    queryset = Consumption.objects.select_related("hostel", "item").all().order_by("-date"); serializer_class = ConsumptionSerializer; permission_classes = [IsHostelManagerOrAbove]
+    queryset = Consumption.objects.select_related("hostel", "item").all().order_by("-date")
+    serializer_class = ConsumptionSerializer
+    permission_classes = [IsHostelManagerOrAbove]
+    parser_classes = [parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser]
+
     def get_queryset(self):
         qs = super().get_queryset(); user = self.request.user
         if user.role in ["HOSTEL_MANAGER", "PARTNER", "STAFF"] and user.hostel: return qs.filter(hostel=user.hostel)

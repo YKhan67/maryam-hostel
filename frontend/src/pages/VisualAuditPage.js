@@ -1,17 +1,23 @@
 // src/pages/VisualAuditPage.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import api from "../api";
+
+function resolveMediaUrl(url) {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+  if (/^\/\//.test(url)) return window.location.protocol + url;
+  const base = api.defaults.baseURL && /^https?:\/\//i.test(api.defaults.baseURL)
+    ? api.defaults.baseURL
+    : window.location.origin;
+  return new URL(url, base).toString();
+}
 
 export default function VisualAuditPage() {
   const [logs, setLogs] = useState([]);
   const [filter, setFilter] = useState("ALL"); // ALL, PURCHASES, CONSUMPTIONS
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadAuditLogs();
-  }, [filter]);
-
-  async function loadAuditLogs() {
+  const loadAuditLogs = useCallback(async () => {
     setLoading(true);
     try {
       let data = [];
@@ -38,7 +44,11 @@ export default function VisualAuditPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [filter]);
+
+  useEffect(() => {
+    loadAuditLogs();
+  }, [loadAuditLogs]);
 
   if (loading) return <p>Loading Visual Evidence...</p>;
 
@@ -80,19 +90,19 @@ export default function VisualAuditPage() {
             <div style={{ display: 'flex', flexWrap: 'wrap' }}>
               {log.invoice_photo && (
                 <div style={{ flex: '1 1 50%', height: '200px', borderRight: '1px solid #eee' }}>
-                  <img src={log.invoice_photo} alt="Invoice" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={resolveMediaUrl(log.invoice_photo)} alt="Invoice" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   <div style={{ position: 'absolute', bottom: 5, left: 5, background: 'rgba(0,0,0,0.5)', color: '#fff', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px' }}>INVOICE</div>
                 </div>
               )}
               {log.items_photo && (
                 <div style={{ flex: '1 1 50%', height: '200px' }}>
-                  <img src={log.items_photo} alt="Items" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={resolveMediaUrl(log.items_photo)} alt="Items" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   <div style={{ position: 'absolute', bottom: 5, right: 5, background: 'rgba(0,0,0,0.5)', color: '#fff', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px' }}>RECEIVED ITEMS</div>
                 </div>
               )}
               {log.photo && (
                 <div style={{ width: '100%', height: '250px' }}>
-                  <img src={log.photo} alt="Consumption" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={resolveMediaUrl(log.photo)} alt="Consumption" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   <div style={{ position: 'absolute', bottom: 5, left: 5, background: 'rgba(0,0,0,0.5)', color: '#fff', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px' }}>CONSUMPTION PROOF</div>
                 </div>
               )}

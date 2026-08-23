@@ -1,11 +1,10 @@
 // src/pages/InventoryPage.js
 
-import React, { useEffect, useMemo, useState, useContext } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import api from "../api";
-import { AuthContext } from "../AuthContext";
 import { usePermissions } from "../hooks/usePermissions";
-import { exportInventoryToExcel, exportInventoryToPdf } from "../utils/exportHelpers";
+import { exportInventoryToPdf } from "../utils/exportHelpers";
 
 function formatCurrency(v) {
   if (v === null || v === undefined || isNaN(v)) return "Rs 0";
@@ -37,7 +36,7 @@ const PurchaseEntryForm = ({ hostels, items, vendors, onCancel, onRefresh }) => 
     if (invoicePhoto) data.append("invoice_photo", invoicePhoto);
     if (itemsPhoto) data.append("items_photo", itemsPhoto);
     try {
-      await api.post("purchases/", data, { headers: { "Content-Type": "multipart/form-data" } });
+      await api.post("purchases/", data);
       alert("Purchase submitted for approval!");
       onRefresh(); onCancel();
     } catch (err) { alert("Failed to submit purchase."); }
@@ -46,21 +45,22 @@ const PurchaseEntryForm = ({ hostels, items, vendors, onCancel, onRefresh }) => 
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-      <select className="form-input" required onChange={e => setFormData({...formData, hostel: e.target.value})}>
+      <select className="form-input" required value={formData.hostel} onChange={e => setFormData({...formData, hostel: e.target.value})}>
         <option value="">Select Hostel</option>
         {hostels.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
       </select>
-      <select className="form-input" required onChange={e => setFormData({...formData, item: e.target.value})}>
+      <select className="form-input" required value={formData.item} onChange={e => setFormData({...formData, item: e.target.value})}>
         <option value="">Select Item</option>
         {items.map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
       </select>
-      <select className="form-input" required onChange={e => setFormData({...formData, vendor: e.target.value})}>
+      <select className="form-input" required value={formData.vendor} onChange={e => setFormData({...formData, vendor: e.target.value})}>
         <option value="">Select Vendor</option>
         {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
       </select>
       <input type="date" className="form-input" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} required />
-      <input type="number" placeholder="Quantity" className="form-input" required onChange={e => setFormData({...formData, quantity: e.target.value})} />
-      <input type="number" placeholder="Price Per Unit" className="form-input" required onChange={e => setFormData({...formData, price_per_unit: e.target.value})} />
+      <input type="number" placeholder="Quantity" className="form-input" value={formData.quantity} required onChange={e => setFormData({...formData, quantity: e.target.value})} />
+      <input type="number" placeholder="Price Per Unit" className="form-input" value={formData.price_per_unit} required onChange={e => setFormData({...formData, price_per_unit: e.target.value})} />
+      <input type="text" placeholder="Invoice Number" className="form-input" value={formData.invoice_no} onChange={e => setFormData({...formData, invoice_no: e.target.value})} />
       <div className="filter-group"><label className="filter-label">Invoice Photo</label><input type="file" accept="image/*" onChange={e => setInvoicePhoto(e.target.files[0])} /></div>
       <div className="filter-group"><label className="filter-label">Items Photo</label><input type="file" accept="image/*" onChange={e => setItemsPhoto(e.target.files[0])} /></div>
       <div style={{ gridColumn: 'span 2', display: 'flex', gap: '10px' }}>
@@ -77,6 +77,7 @@ const ConsumptionEntryForm = ({ hostels, items, onCancel, onRefresh }) => {
     quantity: "", remarks: ""
   });
   const [photo, setPhoto] = useState(null);
+  const [scanMessage, setScanMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -86,21 +87,53 @@ const ConsumptionEntryForm = ({ hostels, items, onCancel, onRefresh }) => {
     Object.keys(formData).forEach(key => data.append(key, formData[key]));
     if (photo) data.append("photo", photo);
     try {
-      await api.post("consumptions/", data, { headers: { "Content-Type": "multipart/form-data" } });
+      await api.post("consumptions/", data);
       alert("Usage logged successfully!");
       onRefresh(); onCancel();
     } catch (err) { alert("Failed to log usage."); }
     finally { setSubmitting(false); }
   };
 
+  const handleScanQrFile = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setScanMessage("");
+
+    if (!window.BarcodeDetector) {
+      setScanMessage("Your browser does not support QR scanning. Please use Chrome, Edge, or Safari.");
+      return;
+    }
+
+    try {
+      const imageBitmap = await createImageBitmap(file);
+      const detector = new window.BarcodeDetector({ formats: ["qr_code"] });
+      const results = await detector.detect(imageBitmap);
+      if (!results.length) {
+        setScanMessage("No QR code detected. Please try again.");
+        return;
+      }
+      const qrValue = results[0].rawValue;
+      const match = qrValue.match(/\/item\/(\d+)\/?$/i);
+      if (match) {
+        setFormData(prev => ({ ...prev, item: match[1] }));
+        setScanMessage(`Scanned item id ${match[1]}. Please verify the selected item before submitting.`);
+      } else {
+        setScanMessage("QR code scanned, but it does not contain an item reference.");
+      }
+    } catch (error) {
+      console.error("QR scan failed", error);
+      setScanMessage("Failed to decode QR code. Try another image or use a different browser.");
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-        <select className="form-input" required onChange={e => setFormData({...formData, hostel: e.target.value})}>
+        <select className="form-input" required value={formData.hostel} onChange={e => setFormData({...formData, hostel: e.target.value})}>
           <option value="">Select Hostel</option>
           {hostels.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
         </select>
-        <select className="form-input" required onChange={e => setFormData({...formData, item: e.target.value})}>
+        <select className="form-input" required value={formData.item} onChange={e => setFormData({...formData, item: e.target.value})}>
           <option value="">Select Item</option>
           {items.map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
         </select>
@@ -108,6 +141,14 @@ const ConsumptionEntryForm = ({ hostels, items, onCancel, onRefresh }) => {
         <input type="number" placeholder="Quantity Removed" className="form-input" required onChange={e => setFormData({...formData, quantity: e.target.value})} />
       </div>
       <div className="filter-group"><label className="filter-label">Proof Photo (Optional)</label><input type="file" accept="image/*" capture="environment" onChange={e => setPhoto(e.target.files[0])} /></div>
+      <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <label className="form-label">Scan Item QR Code</label>
+        <label className="btn btn-soft" style={{ cursor: 'pointer', width: 'fit-content' }}>
+          📷 Scan QR
+          <input type="file" hidden accept="image/*" capture="environment" onChange={handleScanQrFile} />
+        </label>
+        {scanMessage && <span style={{ color: '#475569', fontSize: '0.85rem' }}>{scanMessage}</span>}
+      </div>
       <textarea className="form-input" placeholder="Remarks" onChange={e => setFormData({...formData, remarks: e.target.value})} />
       <div style={{ display: 'flex', gap: '10px' }}>
         <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? "Logging..." : "Confirm Removal"}</button>
@@ -118,7 +159,6 @@ const ConsumptionEntryForm = ({ hostels, items, onCancel, onRefresh }) => {
 };
 
 export default function InventoryPage() {
-  const { user } = useContext(AuthContext);
   const { check } = usePermissions();
   const isReadOnly = !check("INVENTORY", "add") && !check("INVENTORY", "edit");
 
@@ -126,8 +166,8 @@ export default function InventoryPage() {
   const [hostels, setHostels] = useState([]);
   const [items, setItems] = useState([]);
   const [vendors, setVendors] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [, setLoading] = useState(true);
+  const [, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [hostelFilter, setHostelFilter] = useState("ALL");
   const [showPurchaseForm, setShowPurchaseForm] = useState(false);
@@ -174,10 +214,30 @@ export default function InventoryPage() {
     const formData = new FormData(); formData.append("image", file);
     try {
       setLoading(true);
-      const res = await api.post("inventory/ocr/", formData, { headers: { "Content-Type": "multipart/form-data" } });
+      const res = await api.post("inventory/ocr/", formData);
       alert(`AI Detected Total: Rs ${res.data.detected_total}`);
     } catch (err) { alert("AI Scan failed."); }
     finally { setLoading(false); }
+  };
+
+  const downloadPurchaseOrder = async (purchaseId) => {
+    try {
+      setLoading(true);
+      const response = await api.get(`inventory/purchases/${purchaseId}/po/`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `PO_${purchaseId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to download PO', err);
+      alert('Failed to download purchase order. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -208,7 +268,7 @@ export default function InventoryPage() {
               <thead><tr><th>Date</th><th>Branch</th><th>Vendor</th><th>Item</th><th>Qty</th><th>Total</th><th>Status</th>{!isReadOnly && <th>PO</th>}</tr></thead>
               <tbody>
                 {filteredRows.map(row => (
-                  <tr key={row.id}><td>{formatDate(row.date)}</td><td>{row.hostel}</td><td>{row.vendor}</td><td>{row.item}</td><td>{row.quantity} {row.unit}</td><td style={{ fontWeight: 700 }}>{formatCurrency(row.total_cost)}</td><td><span className={`badge ${row.status === 'APPROVED' ? 'badge-success' : row.status === 'REJECTED' ? 'badge-danger' : 'badge-warning'}`}>{row.status || 'PENDING'}</span></td>{!isReadOnly && <td><button onClick={() => window.open(`${api.defaults.baseURL}inventory/purchases/${row.id}/po/`, "_blank")} className="btn btn-soft" style={{ padding: '4px 8px', fontSize: '0.7rem' }}>📄 PO</button></td>}</tr>
+                  <tr key={row.id}><td>{formatDate(row.date)}</td><td>{row.hostel}</td><td>{row.vendor}</td><td>{row.item}</td><td>{row.quantity} {row.unit}</td><td style={{ fontWeight: 700 }}>{formatCurrency(row.total_cost)}</td><td><span className={`badge ${row.status === 'APPROVED' ? 'badge-success' : row.status === 'REJECTED' ? 'badge-danger' : 'badge-warning'}`}>{row.status || 'PENDING'}</span></td>{!isReadOnly && <td><button onClick={() => downloadPurchaseOrder(row.id)} className="btn btn-soft" style={{ padding: '4px 8px', fontSize: '0.7rem' }}>📄 PO</button></td>}</tr>
                 ))}
               </tbody>
             </table>

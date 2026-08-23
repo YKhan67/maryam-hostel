@@ -1,8 +1,7 @@
 // src/pages/ManagementDashboard.js
 
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../api";
-import { AuthContext } from "../AuthContext";
 import { usePermissions } from "../hooks/usePermissions";
 import "../styles/admin-menu.css";
 
@@ -13,7 +12,6 @@ function formatCurrency(v) {
 }
 
 export default function ManagementDashboard() {
-  const { user } = useContext(AuthContext);
   const { check } = usePermissions();
 
   const [period, setPeriod] = useState("CURRENT_MONTH");

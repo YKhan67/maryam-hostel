@@ -20,7 +20,6 @@ import ProcurementPage from "./pages/ProcurementPage";
 import PurchaseApprovalPage from "./pages/PurchaseApprovalPage";
 import VisualAuditPage from "./pages/VisualAuditPage";
 import InvestorPortalPage from "./pages/InvestorPortalPage";
-import QuickLogPage from "./pages/QuickLogPage";
 import EmployeeProfilePage from "./pages/EmployeeProfilePage";
 import AdvanceLedgerPage from "./pages/AdvanceLedgerPage";
 import PayrollDashboardPage from "./pages/PayrollDashboardPage";
@@ -36,6 +35,9 @@ import FeeManagementPage from "./pages/FeeManagementPage";
 import PaymentVerificationPage from "./pages/PaymentVerificationPage";
 import SecurityDepositPage from "./pages/SecurityDepositPage";
 import StaffTasksPage from "./pages/StaffTasksPage";
+
+import MealMenuPage from "./pages/MealMenuPage";
+import MealManagementPage from "./pages/MealManagementPage";
 
 function AppRoutes() {
   // Access Tiers
@@ -83,6 +85,19 @@ function AppRoutes() {
         {/* System Administration (Absolute Restricted) */}
         <Route path="/users" element={<ProtectedRoute allowedRoles={["SUPER_ADMIN", "CITY_MANAGER"]}><UserManagementPage /></ProtectedRoute>} />
         <Route path="/permissions" element={<ProtectedRoute allowedRoles={["SUPER_ADMIN"]}><PermissionsManagementPage /></ProtectedRoute>} />
+      
+        <Route path="/meal-menu" element={
+        <ProtectedRoute allowedRoles={["STUDENT", "STAFF", "HOSTEL_MANAGER", "CITY_MANAGER", "SUPER_ADMIN", "PARTNER"]}>
+        <MealMenuPage />
+        </ProtectedRoute>
+        } />
+
+        <Route path="/meal-management" element={
+        <ProtectedRoute allowedRoles={["HOSTEL_MANAGER", "CITY_MANAGER", "SUPER_ADMIN"]}>
+        <MealManagementPage />
+        </ProtectedRoute>
+        } />
+        
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

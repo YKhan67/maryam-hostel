@@ -6,7 +6,7 @@ import random
 
 from django.db import models
 from django.conf import settings
-from hostels.models import StudentProfile, Hostel
+from hostels.models import StudentProfile
 
 User = settings.AUTH_USER_MODEL
 
@@ -121,7 +121,6 @@ class PaymentProof(models.Model):
                 amount=total_payable,
                 defaults={'payment_method': "Bank Transfer (Verified Proof)"}
             )
-
 class SecurityDeposit(models.Model):
     STATUS_CHOICES = [("HELD", "Held by Hostel"), ("REFUNDED", "Refunded to Student"), ("FORFEITED", "Forfeited")]
     student = models.OneToOneField(StudentProfile, on_delete=models.CASCADE, related_name="security_deposit")

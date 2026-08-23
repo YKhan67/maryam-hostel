@@ -1,11 +1,9 @@
 // src/pages/StaffTasksPage.js
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../api";
-import { AuthContext } from "../AuthContext";
 import { usePermissions } from "../hooks/usePermissions";
 
 export default function StaffTasksPage() {
-  const { user } = useContext(AuthContext);
   const { check } = usePermissions();
   const isReadOnly = !check("TASKS", "edit");
 

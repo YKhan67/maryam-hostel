@@ -9,7 +9,18 @@ class EmployeeProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EmployeeProfile
-        fields = "__all__"
+        fields = [
+            "id", "user", "username", "full_name", "designation", "pay_type",
+            "nic_number", "nic_front_picture", "nic_back_picture", "profile_picture",
+            "base_salary", "housing_allowance", "fuel_allowance", "other_allowance",
+            "rate_per_task", "bank_name", "iban", "joined_on", "hostel_name", "is_active"
+        ]
+
+    def validate(self, attrs):
+        nic_number = attrs.get("nic_number", getattr(self.instance, "nic_number", None))
+        if nic_number is None or not str(nic_number).strip():
+            raise serializers.ValidationError({"nic_number": "NIC number is required."})
+        return attrs
 
 class SalaryAdvanceSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source="employee.user.get_full_name", read_only=True)

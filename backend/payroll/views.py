@@ -1,5 +1,4 @@
-from rest_framework import viewsets, permissions, status
-from rest_framework.views import APIView
+from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -13,12 +12,10 @@ from .serializers import (
 )
 from .services import generate_monthly_payroll
 
-from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
-import io
 
 class EmployeeProfileViewSet(viewsets.ModelViewSet):
     queryset = EmployeeProfile.objects.all()
@@ -89,8 +86,8 @@ class SalarySlipViewSet(viewsets.ModelViewSet):
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="PaySlip_{slip.id}.pdf"'
         doc = SimpleDocTemplate(response, pagesize=A4); elements = []; styles = getSampleStyleSheet()
-        elements.append(Paragraph(f"<b>MARYAM GIRLS HOSTEL</b>", styles['Title']))
-        elements.append(Paragraph(f"Official Pay-slip", styles['Heading2'])); elements.append(Spacer(1, 20))
+        elements.append(Paragraph("<b>MARYAM GIRLS HOSTEL</b>", styles['Title']))
+        elements.append(Paragraph("Official Pay-slip", styles['Heading2'])); elements.append(Spacer(1, 20))
         data = [
             ["Name:", slip.employee.user.get_full_name(), "Month:", slip.payroll_master.month.strftime("%B %Y")],
             ["Earnings:", f"Rs {slip.net_salary:,.0f}", "Status:", "VERIFIED"]

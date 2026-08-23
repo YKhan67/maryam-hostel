@@ -1,5 +1,5 @@
 // src/pages/ParentPortalPage.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { formatPKR } from "../utils/formatPKR";
@@ -19,12 +19,15 @@ export default function ParentPortalPage() {
     window.location.hostname.startsWith("192.168.")
       ? `http://${window.location.hostname}:8000/api/`
       : "/api/";
+  const mediaBaseUrl = API_BASE_URL.replace(/\/api\/?$/, "");
 
-  useEffect(() => {
-    fetchParentData();
-  }, [token]);
+  const resolveMediaUrl = (path) => {
+    if (!path) return null;
+    if (path.startsWith("http")) return path;
+    return `${mediaBaseUrl}${path}`;
+  };
 
-  async function fetchParentData() {
+  const fetchParentData = useCallback(async () => {
     setLoading(true);
     try {
       const res = await axios.get(`${API_BASE_URL}fees/parent-ledger/${token}/`);
@@ -35,7 +38,11 @@ export default function ParentPortalPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [API_BASE_URL, token]);
+
+  useEffect(() => {
+    fetchParentData();
+  }, [fetchParentData]);
 
   if (loading) {
     return (
@@ -70,18 +77,58 @@ export default function ParentPortalPage() {
 
         {/* Student Summary */}
         <div className="card" style={{ background: 'linear-gradient(135deg, #5f6065 0%, #3f3f46 100%)', color: '#fff', marginBottom: '24px' }}>
-          <h2 style={{ margin: '0 0 4px 0', fontSize: '1.5rem' }}>{data.student_name}</h2>
-          <p style={{ opacity: 0.8, marginBottom: '20px', fontSize: '0.9rem' }}>
-            {data.hostel_name} • Room {data.room_number}
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '20px' }}>
+            {data.student_picture && (
+              <img
+                src={resolveMediaUrl(data.student_picture)}
+                alt={data.student_name}
+                style={{ width: '72px', height: '72px', objectFit: 'cover', borderRadius: '50%', border: '3px solid rgba(255,255,255,0.4)' }}
+              />
+            )}
+            <div>
+              <h2 style={{ margin: '0 0 4px 0', fontSize: '1.5rem' }}>{data.student_name}</h2>
+              <p style={{ opacity: 0.8, margin: 0, fontSize: '0.9rem' }}>
+                {data.hostel_name} • Room {data.room_number}
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '16px' }}>
             <div style={{ background: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '12px' }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Balance Due</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fbbf24' }}>{formatPKR(data.summary.total_outstanding)}</div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>NIC #</div>
+              <div style={{ fontSize: '1rem', fontWeight: 700 }}>{data.nic_number || 'N/A'}</div>
             </div>
             <div style={{ background: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '12px' }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Total Paid</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#34d399' }}>{formatPKR(data.summary.total_paid)}</div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Month</div>
+              <div style={{ fontSize: '1rem', fontWeight: 700 }}>{data.month || 'N/A'}</div>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '12px' }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Status</div>
+              <div style={{ fontSize: '1rem', fontWeight: 700 }}>{data.status || 'N/A'}</div>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '12px' }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Security Deposit</div>
+              <div style={{ fontSize: '1rem', fontWeight: 700 }}>{formatPKR(data.security_deposit || 0)}</div>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '12px' }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Amount Due</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fbbf24' }}>{formatPKR(data.amount_due || 0)}</div>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '12px' }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Amount Paid</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#34d399' }}>{formatPKR(data.amount_paid || 0)}</div>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '12px' }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Utilities Bill</div>
+              <div style={{ fontSize: '1rem', fontWeight: 700 }}>{formatPKR(data.utilities_bill || 0)}</div>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '12px' }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Fine</div>
+              <div style={{ fontSize: '1rem', fontWeight: 700 }}>{formatPKR(data.fine || 0)}</div>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '12px', gridColumn: '1 / -1' }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Total</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{formatPKR(data.total || 0)}</div>
             </div>
           </div>
         </div>

@@ -16,10 +16,6 @@ export default function AppShell({ children, subtitle }) {
   const navClass = ({ isActive }) =>
     "sidebar-link" + (isActive ? " sidebar-link-active" : "");
 
-  const handleLinkClick = (e) => {
-    // No-op for now, but this component stays mounted so scroll is preserved
-  };
-
   return (
     <div className="app-shell">
       {/* Top header */}

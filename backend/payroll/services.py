@@ -1,5 +1,5 @@
 from datetime import date
-from django.db.models import Sum, Q
+from django.db.models import Sum
 from .models import EmployeeProfile, SalaryAdvance, PayrollRecord, SalarySlip
 from communication.models import Ticket
 
