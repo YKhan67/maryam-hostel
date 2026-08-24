@@ -13,40 +13,23 @@ from hostels.views import (
     RoomViewSet, BedViewSet, StudentProfileViewSet, ManagementKPIView
 )
 from inventory.views import (
-    CategoryViewSet,
-    UnitViewSet,
-    ItemViewSet,
-    VendorViewSet,
-    PurchaseViewSet,
-    ConsumptionViewSet,
-    InventorySummaryView,
-    InventoryListView,
-    InventoryExportCSVView,
-    VendorPriceTrendView,
-    SavingsSuggestionsView,
-    SmartReorderSheetView,
-    ConsumptionAnalyticsView,
-    BranchProfitLossView,
-    ExportPnLReportView,
-    ReceiptOCRView,
-    GeneratePurchaseOrderView,
-    SendPOWhatsAppView,
-    GenerateAllItemLabelsPDFView,
+    CategoryViewSet, UnitViewSet, ItemViewSet, VendorViewSet,
+    PurchaseViewSet, ConsumptionViewSet, InventorySummaryView,
+    InventoryListView, InventoryExportCSVView, VendorPriceTrendView,
+    SavingsSuggestionsView, SmartReorderSheetView, ConsumptionAnalyticsView,
+    BranchProfitLossView, ExportPnLReportView, ReceiptOCRView,
+    GeneratePurchaseOrderView, SendPOWhatsAppView, GenerateAllItemLabelsPDFView,
 )
-
 from fees.views import (
     FeeHeadViewSet, FeeRuleViewSet, MonthlyFeeViewSet, PaymentProofViewSet,
 )
-
 from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
+    TokenObtainPairView, TokenRefreshView,
 )
-
 from django.conf import settings
 from django.conf.urls.static import static
 
-# Custom Logout View to allow GET requests (Fixes 405 error in Django 5.x)
+# Custom Logout View
 def logout_view(request):
     logout(request)
     return redirect("/")
@@ -81,11 +64,13 @@ router.register(r"monthly_fees", MonthlyFeeViewSet, basename="monthlyfee")
 router.register(r"payment_proofs", PaymentProofViewSet, basename="paymentproof")
 
 urlpatterns = [
-    # Override logout first to handle the GET request from admin logout link
     path("admin/logout/", logout_view),
-
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
+    
+    # Food App
+    path("api/food/", include("food.urls")),  # <-- Make sure this line exists
+    
     path("api/me/", MeView.as_view(), name="me"),
     path("api/change-password/", ChangePasswordView.as_view(), name="change-password"),
     path("api/auth/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),

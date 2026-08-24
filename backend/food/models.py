@@ -2,7 +2,6 @@
 
 from django.db import models
 from django.conf import settings
-from django.utils import timezone
 from hostels.models import Hostel, StudentProfile
 from inventory.models import Item
 
@@ -28,7 +27,6 @@ class Meal(models.Model):
     dietary_tags = models.CharField(max_length=200, blank=True, help_text="e.g., Vegetarian, Gluten-Free, Halal")
     preparation_time = models.PositiveIntegerField(default=30, help_text="Time in minutes")
     
-    # Nutritional info (optional but useful)
     calories = models.PositiveIntegerField(default=0, help_text="Calories per serving")
     protein = models.DecimalField(max_digits=6, decimal_places=2, default=0, help_text="Protein in grams")
     
@@ -48,7 +46,14 @@ class MealRecipe(models.Model):
     unit = models.CharField(max_length=20, default='kg', help_text="e.g., kg, g, pieces, liters")
     estimated_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Estimated cost per unit")
     
-    # Optional: substitute ingredients
+    # Waste factor as percentage (0.01 = 1%)
+    waste_factor = models.DecimalField(
+        max_digits=5, 
+        decimal_places=4, 
+        default=0.015, 
+        help_text="Waste percentage (e.g., 0.015 for 1.5%, max 5%)"
+    )
+    
     substitute_item = models.ForeignKey(Item, on_delete=models.SET_NULL, null=True, blank=True, related_name='substitute_ingredients')
     
     class Meta:
@@ -73,9 +78,8 @@ class DailyMenu(models.Model):
     meal_type = models.CharField(max_length=20, choices=MEAL_TYPE_CHOICES)
     meal = models.ForeignKey(Meal, on_delete=models.PROTECT, related_name='daily_menus')
     
-    # Additional info
-    special_note = models.TextField(blank=True, help_text="e.g., Special occasion, dietary alternatives")
-    is_featured = models.BooleanField(default=False, help_text="Highlight on the dashboard")
+    special_note = models.TextField(blank=True)
+    is_featured = models.BooleanField(default=False)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -95,11 +99,40 @@ class WeeklyMenuTemplate(models.Model):
     description = models.TextField(blank=True)
     hostel = models.ForeignKey(Hostel, on_delete=models.CASCADE, related_name='menu_templates')
     
-    # For each day of week, store meal IDs (simplified)
+    # Monday
     monday_breakfast = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='mon_breakfast')
     monday_lunch = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='mon_lunch')
     monday_dinner = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='mon_dinner')
-    # ... repeat for all days (Tuesday, Wednesday, etc.)
+    
+    # Tuesday
+    tuesday_breakfast = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='tue_breakfast')
+    tuesday_lunch = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='tue_lunch')
+    tuesday_dinner = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='tue_dinner')
+    
+    # Wednesday
+    wednesday_breakfast = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='wed_breakfast')
+    wednesday_lunch = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='wed_lunch')
+    wednesday_dinner = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='wed_dinner')
+    
+    # Thursday
+    thursday_breakfast = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='thu_breakfast')
+    thursday_lunch = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='thu_lunch')
+    thursday_dinner = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='thu_dinner')
+    
+    # Friday
+    friday_breakfast = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='fri_breakfast')
+    friday_lunch = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='fri_lunch')
+    friday_dinner = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='fri_dinner')
+    
+    # Saturday
+    saturday_breakfast = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='sat_breakfast')
+    saturday_lunch = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='sat_lunch')
+    saturday_dinner = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='sat_dinner')
+    
+    # Sunday
+    sunday_breakfast = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='sun_breakfast')
+    sunday_lunch = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='sun_lunch')
+    sunday_dinner = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='sun_dinner')
     
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -112,7 +145,7 @@ class MealFeedback(models.Model):
     """Student feedback on meals"""
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='meal_feedback')
     daily_menu = models.ForeignKey(DailyMenu, on_delete=models.CASCADE, related_name='feedback')
-    rating = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)], help_text="1-5 stars")
+    rating = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)])
     comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -141,10 +174,14 @@ class GroceryRequirement(models.Model):
     unit = models.CharField(max_length=20)
     estimated_cost = models.DecimalField(max_digits=10, decimal_places=2)
     actual_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='DRAFT')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    notes = models.TextField(blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    class Meta:
+        ordering = ['-created_at']
+    
     def __str__(self):
-        return f"{self.item.name} - {self.quantity_needed} {self.unit} ({self.start_date} to {self.end_date})"
+        return f"{self.item.name} - {self.quantity_needed} {self.unit} ({self.get_status_display()})"

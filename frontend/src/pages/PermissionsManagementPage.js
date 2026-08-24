@@ -3,9 +3,58 @@ import React, { useEffect, useState } from "react";
 import api from "../api";
 
 const ROLES = ["SUPER_ADMIN", "CITY_MANAGER", "HOSTEL_MANAGER", "PARTNER", "STAFF", "STUDENT"];
+
+// Modules organized by sidebar hierarchy
 const MODULES = [
-  "DASHBOARD", "INVENTORY", "PROCUREMENT", "VISUAL_AUDIT", "INVENTORY_KPI",
-  "PAYROLL", "EMPLOYEES", "ASSETS", "FEES", "USER_MGMT", "TASKS", "BALANCE_SHEET"
+  // Strategic Management
+  { id: "DASHBOARD", label: "📊 Management Dashboard", group: "Strategic Management" },
+  { id: "BALANCE_SHEET", label: "⚖️ Balance Sheet", group: "Strategic Management" },
+  
+  // Meal Management
+  { id: "MEAL_MENU", label: "📋 Meal Menu", group: "🍽️ Meal Management" },
+  { id: "MEAL_MANAGEMENT", label: "📅 Schedule Manager", group: "🍽️ Meal Management" },
+  { id: "MEAL_FEEDBACK", label: "⭐ Meal Feedback", group: "🍽️ Meal Management" },
+  { id: "RECIPE_MANAGEMENT", label: "📋 Recipe Management", group: "🍽️ Meal Management" },
+  { id: "GROCERY_MANAGEMENT", label: "🛒 Grocery Management", group: "🍽️ Meal Management" },
+  
+  // Hostel Operations
+  { id: "TASKS", label: "🛠️ Staff Tasks", group: "Hostel Operations" },
+  
+  // HR & Payroll
+  { id: "PAYROLL", label: "💸 Payroll Master", group: "HR & Payroll" },
+  { id: "EMPLOYEES", label: "👥 Employee Profiles", group: "HR & Payroll" },
+  
+  // Logistics & Assets
+  { id: "ASSETS", label: "🚜 Fixed Assets", group: "Logistics & Assets" },
+  { id: "INVENTORY", label: "📦 Inventory Logs", group: "Logistics & Assets" },
+  { id: "PROCUREMENT", label: "🛒 Smart Re-order", group: "Logistics & Assets" },
+  { id: "VISUAL_AUDIT", label: "📷 Visual Audit", group: "Logistics & Assets" },
+  { id: "INVENTORY_KPI", label: "📈 Inventory KPIs", group: "Logistics & Assets" },
+  
+  // Fee Management
+  { id: "FEES", label: "🧾 Fee Controls", group: "Fee Management" },
+  
+  // System (Super Admin only)
+  { id: "USER_MGMT", label: "👤 User Management", group: "System" },
+];
+
+// Group modules by their group
+const groupedModules = MODULES.reduce((acc, module) => {
+  if (!acc[module.group]) {
+    acc[module.group] = [];
+  }
+  acc[module.group].push(module);
+  return acc;
+}, {});
+
+const GROUP_ORDER = [
+  "Strategic Management",
+  "🍽️ Meal Management",
+  "Hostel Operations",
+  "HR & Payroll",
+  "Logistics & Assets",
+  "Fee Management",
+  "System"
 ];
 
 export default function PermissionsManagementPage() {
@@ -41,22 +90,23 @@ export default function PermissionsManagementPage() {
     }
   }
 
-  const getPermission = (role, module, userId = null) => {
+  // FIXED: Correct parameter order - role, module, userId
+  const getPermission = (role, moduleId, userId = null) => {
     if (userId) {
-      const found = permissions.find(p => p.user === parseInt(userId) && p.module_name === module);
+      const found = permissions.find(p => p.user === parseInt(userId) && p.module_name === moduleId);
       return found || {
         user: parseInt(userId), 
-        module_name: module, 
+        module_name: moduleId, 
         can_view: false, 
         can_add: false, 
         can_edit: false, 
         can_delete: false
       };
     }
-    const found = permissions.find(p => p.role === role && !p.user && p.module_name === module);
+    const found = permissions.find(p => p.role === role && !p.user && p.module_name === moduleId);
     return found || {
       role, 
-      module_name: module, 
+      module_name: moduleId, 
       can_view: false, 
       can_add: false, 
       can_edit: false, 
@@ -64,11 +114,12 @@ export default function PermissionsManagementPage() {
     };
   };
 
-  const togglePermission = (module, field, role = null, userId = null) => {
+  // FIXED: Correct parameter order - moduleId, field, role, userId
+  const togglePermission = (moduleId, field, role = null, userId = null) => {
     let updated = [...permissions];
     const match = userId
-      ? p => p.user === parseInt(userId) && p.module_name === module
-      : p => p.role === role && !p.user && p.module_name === module;
+      ? p => p.user === parseInt(userId) && p.module_name === moduleId
+      : p => p.role === role && !p.user && p.module_name === moduleId;
 
     const existingIdx = updated.findIndex(match);
 
@@ -76,7 +127,7 @@ export default function PermissionsManagementPage() {
       updated[existingIdx] = { ...updated[existingIdx], [field]: !updated[existingIdx][field] };
     } else {
       const newPermission = {
-        module_name: module,
+        module_name: moduleId,
         can_view: false, 
         can_add: false, 
         can_edit: false, 
@@ -239,7 +290,14 @@ export default function PermissionsManagementPage() {
           <table className="table" style={{ borderCollapse: 'separate', borderSpacing: 0, minWidth: '800px' }}>
             <thead>
               <tr>
-                <th style={{ background: '#f8fafc', position: 'sticky', left: 0, zIndex: 10, minWidth: '150px' }}>
+                <th style={{ 
+                  background: '#f8fafc', 
+                  position: 'sticky', 
+                  left: 0, 
+                  zIndex: 10, 
+                  minWidth: '180px',
+                  textAlign: 'left'
+                }}>
                   Module / Feature
                 </th>
                 {targetType === 'ROLE' ? (
@@ -256,84 +314,116 @@ export default function PermissionsManagementPage() {
               </tr>
             </thead>
             <tbody>
-              {MODULES.map(mod => (
-                <tr key={mod}>
-                  <td style={{ 
-                    fontWeight: 700, 
-                    background: '#fff', 
-                    position: 'sticky', 
-                    left: 0, 
-                    zIndex: 5, 
-                    borderRight: '2px solid #f1f5f9',
-                    minWidth: '150px'
-                  }}>
-                    {mod.replace('_', ' ')}
-                  </td>
-
-                  {targetType === 'ROLE' ? (
-                    ROLES.map(role => {
-                      const p = getPermission(role, mod);
+              {GROUP_ORDER.map(groupName => {
+                const modulesInGroup = groupedModules[groupName] || [];
+                if (modulesInGroup.length === 0) return null;
+                
+                return (
+                  <React.Fragment key={groupName}>
+                    {/* Group Header Row */}
+                    <tr>
+                      <td 
+                        colSpan={targetType === 'ROLE' ? ROLES.length + 1 : 2}
+                        style={{ 
+                          background: '#f1f5f9', 
+                          fontWeight: 800, 
+                          fontSize: '0.75rem',
+                          textTransform: 'uppercase',
+                          color: '#475569',
+                          padding: '8px 16px',
+                          borderBottom: '2px solid #e2e8f0'
+                        }}
+                      >
+                        {groupName}
+                      </td>
+                    </tr>
+                    {/* Module Rows */}
+                    {modulesInGroup.map(module => {
+                      const moduleId = module.id;
                       return (
-                        <td key={`${role}-${mod}`} style={{ padding: '12px' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }}>
-                             <PermToggle 
-                               label="VIEW" 
-                               active={p.can_view} 
-                               onClick={() => togglePermission(mod, 'can_view', role)} 
-                             />
-                             <PermToggle 
-                               label="ADD" 
-                               active={p.can_add} 
-                               onClick={() => togglePermission(mod, 'can_add', role)} 
-                             />
-                             <PermToggle 
-                               label="EDIT" 
-                               active={p.can_edit} 
-                               onClick={() => togglePermission(mod, 'can_edit', role)} 
-                             />
-                             <PermToggle 
-                               label="DEL" 
-                               active={p.can_delete} 
-                               onClick={() => togglePermission(mod, 'can_delete', role)} 
-                             />
-                          </div>
-                        </td>
+                        <tr key={moduleId}>
+                          <td style={{ 
+                            fontWeight: 600, 
+                            background: '#fff', 
+                            position: 'sticky', 
+                            left: 0, 
+                            zIndex: 5, 
+                            borderRight: '2px solid #f1f5f9',
+                            minWidth: '150px',
+                            paddingLeft: '32px',
+                            fontSize: '0.85rem'
+                          }}>
+                            {module.label}
+                          </td>
+
+                          {targetType === 'ROLE' ? (
+                            ROLES.map(role => {
+                              const p = getPermission(role, moduleId);
+                              return (
+                                <td key={`${role}-${moduleId}`} style={{ padding: '8px' }}>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
+                                    <PermToggle 
+                                      label="VIEW" 
+                                      active={p.can_view} 
+                                      onClick={() => togglePermission(moduleId, 'can_view', role)} 
+                                    />
+                                    <PermToggle 
+                                      label="ADD" 
+                                      active={p.can_add} 
+                                      onClick={() => togglePermission(moduleId, 'can_add', role)} 
+                                    />
+                                    <PermToggle 
+                                      label="EDIT" 
+                                      active={p.can_edit} 
+                                      onClick={() => togglePermission(moduleId, 'can_edit', role)} 
+                                    />
+                                    <PermToggle 
+                                      label="DEL" 
+                                      active={p.can_delete} 
+                                      onClick={() => togglePermission(moduleId, 'can_delete', role)} 
+                                    />
+                                  </div>
+                                </td>
+                              );
+                            })
+                          ) : (
+                            <td style={{ padding: '8px' }}>
+                               {selectedUser ? (
+                                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                     <PermToggle 
+                                       label="VIEW" 
+                                       active={getPermission(null, moduleId, selectedUser).can_view} 
+                                       onClick={() => togglePermission(moduleId, 'can_view', null, selectedUser)} 
+                                     />
+                                     <PermToggle 
+                                       label="ADD" 
+                                       active={getPermission(null, moduleId, selectedUser).can_add} 
+                                       onClick={() => togglePermission(moduleId, 'can_add', null, selectedUser)} 
+                                     />
+                                     <PermToggle 
+                                       label="EDIT" 
+                                       active={getPermission(null, moduleId, selectedUser).can_edit} 
+                                       onClick={() => togglePermission(moduleId, 'can_edit', null, selectedUser)} 
+                                     />
+                                     <PermToggle 
+                                       label="DEL" 
+                                       active={getPermission(null, moduleId, selectedUser).can_delete} 
+                                       onClick={() => togglePermission(moduleId, 'can_delete', null, selectedUser)} 
+                                     />
+                                  </div>
+                               ) : (
+                                  <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem' }}>
+                                    Select a user to manage overrides
+                                  </div>
+                               )}
+                            </td>
+                          )}
+                        </tr>
                       );
-                    })
-                  ) : (
-                    <td style={{ padding: '12px' }}>
-                       {selectedUser ? (
-                          <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                             <PermToggle 
-                               label="VIEW" 
-                               active={getPermission(null, mod, selectedUser).can_view} 
-                               onClick={() => togglePermission(mod, 'can_view', null, selectedUser)} 
-                             />
-                             <PermToggle 
-                               label="ADD" 
-                               active={getPermission(null, mod, selectedUser).can_add} 
-                               onClick={() => togglePermission(mod, 'can_add', null, selectedUser)} 
-                             />
-                             <PermToggle 
-                               label="EDIT" 
-                               active={getPermission(null, mod, selectedUser).can_edit} 
-                               onClick={() => togglePermission(mod, 'can_edit', null, selectedUser)} 
-                             />
-                             <PermToggle 
-                               label="DEL" 
-                               active={getPermission(null, mod, selectedUser).can_delete} 
-                               onClick={() => togglePermission(mod, 'can_delete', null, selectedUser)} 
-                             />
-                          </div>
-                       ) : (
-                          <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem' }}>
-                            Select a user to manage overrides
-                          </div>
-                       )}
-                    </td>
-                  )}
-                </tr>
-              ))}
+                    })}
+                  </React.Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -375,12 +465,12 @@ function PermToggle({ label, active, onClick }) {
     <div
       onClick={onClick}
       style={{
-        fontSize: '0.6rem',
+        fontSize: '0.55rem',
         fontWeight: 800,
-        padding: '4px 10px',
+        padding: '3px 8px',
         borderRadius: '4px',
         cursor: 'pointer',
-        minWidth: '45px',
+        minWidth: '38px',
         textAlign: 'center',
         background: active ? '#22c55e' : '#f1f5f9',
         color: active ? '#fff' : '#94a3b8',

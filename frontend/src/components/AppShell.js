@@ -55,6 +55,9 @@ export default function AppShell({ children, subtitle }) {
                 <NavLink to="/student" className={navClass}>
                   🏠 My Dashboard
                 </NavLink>
+                <NavLink to="/meal-menu" className={navClass}>
+                  🍽️ Meal Menu
+                </NavLink>
                 <NavLink to="/change-password" className={navClass}>
                   🔒 Change Password
                 </NavLink>
@@ -91,6 +94,34 @@ export default function AppShell({ children, subtitle }) {
                 <NavLink to="/change-password" className={navClass}>
                   🔒 Change Password
                 </NavLink>
+
+                {/* Meal Management Section - Separate from Strategic */}
+                <div className="sidebar-section-title" style={{ marginTop: 12 }}>
+                  🍽️ Meal Management
+                </div>
+                <NavLink to="/meal-menu" className={navClass}>
+                  📋 Meal Menu
+                </NavLink>
+                {(check("USER_MGMT") || user.role === "SUPER_ADMIN" || user.role === "HOSTEL_MANAGER") && (
+                  <NavLink to="/meal-management" className={navClass}>
+                    📅 Schedule Manager
+                  </NavLink>
+                )}
+                {(check("USER_MGMT") || user.role === "SUPER_ADMIN" || user.role === "HOSTEL_MANAGER") && (
+                  <NavLink to="/meal-feedback" className={navClass}>
+                    ⭐ Meal Feedback
+                  </NavLink>
+                )}
+                {(check("USER_MGMT") || user.role === "SUPER_ADMIN" || user.role === "HOSTEL_MANAGER") && (
+                  <NavLink to="/grocery-management" className={navClass}>
+                    🛒 Grocery Management
+                  </NavLink>
+                )}
+                {(check("USER_MGMT") || user.role === "SUPER_ADMIN" || user.role === "HOSTEL_MANAGER") && (
+                  <NavLink to="/recipe-management" className={navClass}>
+                    📋 Recipe Management
+                  </NavLink>
+                )}
 
                 <div className="sidebar-section-title" style={{ marginTop: 12 }}>
                   Hostel Operations

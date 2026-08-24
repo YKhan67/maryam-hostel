@@ -4,7 +4,9 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     MealCategoryViewSet, MealViewSet, DailyMenuViewSet,
-    WeeklyMenuTemplateViewSet, MealFeedbackViewSet, GroceryRequirementViewSet
+    WeeklyMenuTemplateViewSet, MealFeedbackViewSet, GroceryRequirementViewSet,
+    ExportMealTemplateView, ImportMealExcelView,
+    ExportRecipeTemplateView, ImportRecipeExcelView
 )
 
 router = DefaultRouter()
@@ -17,4 +19,8 @@ router.register(r'grocery', GroceryRequirementViewSet, basename='grocery-require
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('export-template/', ExportMealTemplateView.as_view(), name='export-template'),
+    path('import-excel/', ImportMealExcelView.as_view(), name='import-excel'),
+    path('recipes/export-template/', ExportRecipeTemplateView.as_view(), name='export-recipe-template'),
+    path('recipes/import-excel/', ImportRecipeExcelView.as_view(), name='import-recipe-excel'),
 ]

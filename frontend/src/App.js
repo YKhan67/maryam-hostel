@@ -29,6 +29,13 @@ import BalanceSheetPage from "./pages/BalanceSheetPage";
 import UserManagementPage from "./pages/UserManagementPage";
 import PermissionsManagementPage from "./pages/PermissionsManagementPage";
 
+// Meal Menu Pages
+import MealMenuPage from "./pages/MealMenuPage";
+import MealManagementPage from "./pages/MealManagementPage";
+import MealFeedbackPage from "./pages/MealFeedbackPage";
+import GroceryManagementPage from "./pages/GroceryManagementPage";
+import RecipeManagementPage from "./pages/RecipeManagementPage";
+
 import FeeDashboardPage from "./pages/FeeDashboardPage";
 import FeeKpiPage from "./pages/FeeKpiPage";
 import FeeManagementPage from "./pages/FeeManagementPage";
@@ -36,14 +43,12 @@ import PaymentVerificationPage from "./pages/PaymentVerificationPage";
 import SecurityDepositPage from "./pages/SecurityDepositPage";
 import StaffTasksPage from "./pages/StaffTasksPage";
 
-import MealMenuPage from "./pages/MealMenuPage";
-import MealManagementPage from "./pages/MealManagementPage";
-
 function AppRoutes() {
   // Access Tiers
   const EXEC_LEVEL = ["SUPER_ADMIN", "CITY_MANAGER", "PARTNER"]; // For Financials/HR
   const BRANCH_MGMT = ["SUPER_ADMIN", "CITY_MANAGER", "HOSTEL_MANAGER", "PARTNER"]; // For Assets/Procurement
   const STAFF_LEVEL = ["SUPER_ADMIN", "CITY_MANAGER", "HOSTEL_MANAGER", "STAFF", "PARTNER"]; // For Day-to-Day Ops
+  const ALL_USERS = ["STUDENT", "STAFF", "HOSTEL_MANAGER", "CITY_MANAGER", "SUPER_ADMIN", "PARTNER"];
 
   return (
     <Routes>
@@ -54,9 +59,36 @@ function AppRoutes() {
       <Route element={<MainLayout />}>
         {/* Basic Access */}
         <Route path="/student" element={<ProtectedRoute allowedRoles={["STUDENT"]}><StudentDashboard /></ProtectedRoute>} />
-        <Route path="/change-password" element={<ProtectedRoute allowedRoles={["STUDENT", "STAFF", "HOSTEL_MANAGER", "CITY_MANAGER", "SUPER_ADMIN", "PARTNER"]}><ChangePasswordPage /></ProtectedRoute>} />
+        <Route path="/change-password" element={<ProtectedRoute allowedRoles={ALL_USERS}><ChangePasswordPage /></ProtectedRoute>} />
         <Route path="/management" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><ManagementDashboard /></ProtectedRoute>} />
         <Route path="/staff-tasks" element={<ProtectedRoute allowedRoles={STAFF_LEVEL}><StaffTasksPage /></ProtectedRoute>} />
+
+        {/* Meal Menu Routes */}
+        <Route path="/meal-menu" element={
+          <ProtectedRoute allowedRoles={ALL_USERS}>
+            <MealMenuPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/meal-management" element={
+          <ProtectedRoute allowedRoles={["HOSTEL_MANAGER", "CITY_MANAGER", "SUPER_ADMIN"]}>
+            <MealManagementPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/meal-feedback" element={
+          <ProtectedRoute allowedRoles={["HOSTEL_MANAGER", "CITY_MANAGER", "SUPER_ADMIN"]}>
+            <MealFeedbackPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/grocery-management" element={
+          <ProtectedRoute allowedRoles={["HOSTEL_MANAGER", "CITY_MANAGER", "SUPER_ADMIN"]}>
+            <GroceryManagementPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/recipe-management" element={
+          <ProtectedRoute allowedRoles={["HOSTEL_MANAGER", "CITY_MANAGER", "SUPER_ADMIN"]}>
+            <RecipeManagementPage />
+          </ProtectedRoute>
+        } />
 
         {/* Logistics & Assets (Branch Mgmt + Partner View) */}
         <Route path="/inventory" element={<ProtectedRoute allowedRoles={STAFF_LEVEL}><InventoryPage /></ProtectedRoute>} />
@@ -85,19 +117,6 @@ function AppRoutes() {
         {/* System Administration (Absolute Restricted) */}
         <Route path="/users" element={<ProtectedRoute allowedRoles={["SUPER_ADMIN", "CITY_MANAGER"]}><UserManagementPage /></ProtectedRoute>} />
         <Route path="/permissions" element={<ProtectedRoute allowedRoles={["SUPER_ADMIN"]}><PermissionsManagementPage /></ProtectedRoute>} />
-      
-        <Route path="/meal-menu" element={
-        <ProtectedRoute allowedRoles={["STUDENT", "STAFF", "HOSTEL_MANAGER", "CITY_MANAGER", "SUPER_ADMIN", "PARTNER"]}>
-        <MealMenuPage />
-        </ProtectedRoute>
-        } />
-
-        <Route path="/meal-management" element={
-        <ProtectedRoute allowedRoles={["HOSTEL_MANAGER", "CITY_MANAGER", "SUPER_ADMIN"]}>
-        <MealManagementPage />
-        </ProtectedRoute>
-        } />
-        
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

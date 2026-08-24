@@ -1,3 +1,5 @@
+# backend/backend/settings.py
+
 from pathlib import Path
 from datetime import timedelta
 
@@ -39,6 +41,8 @@ INSTALLED_APPS = [
     # Third-party apps
     "corsheaders",
     "rest_framework",
+    "django_celery_results",
+    "django_celery_beat",
 
     # Project apps
     "accounts",
@@ -48,11 +52,7 @@ INSTALLED_APPS = [
     "communication",
     "payroll",
     "finance",
-    "django_celery_results",
-    "django_celery_beat",
-
-    #Food Menu
-    'food',
+    "food",  # Meal Menu System
 ]
 
 MIDDLEWARE = [
@@ -110,7 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'Asia/Karachi'
+TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
@@ -194,7 +194,6 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
-CELERY_CACHE_BACKEND = 'django-cache'
 
 # Celery Beat Schedule
 from celery.schedules import crontab
@@ -206,10 +205,10 @@ CELERY_BEAT_SCHEDULE = {
     },
     'check-low-stock-every-morning': {
         'task': 'inventory.tasks.check_low_stock_alerts',
-        'schedule': crontab(hour=9, minute=0), # Check every morning at 9 AM
+        'schedule': crontab(hour=9, minute=0),
     },
     'run-depreciation-monthly': {
         'task': 'finance.tasks.run_monthly_depreciation',
-        'schedule': crontab(0, 0, day_of_month='1'), # 1st of every month
+        'schedule': crontab(0, 0, day_of_month='1'),
     },
 }

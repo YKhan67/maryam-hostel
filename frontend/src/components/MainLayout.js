@@ -19,6 +19,7 @@ export default function MainLayout() {
   if (location.pathname.includes("fees")) subtitle = "Fee Management";
   if (location.pathname.includes("payroll")) subtitle = "Payroll Master";
   if (location.pathname.includes("asset")) subtitle = "Asset Registry";
+  if (location.pathname.includes("meal")) subtitle = "Meal Menu Management";
 
   return (
     <AppShell subtitle={subtitle}>
