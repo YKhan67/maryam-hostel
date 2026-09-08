@@ -1,0 +1,5002 @@
+{
+  "tables": [
+    "accounts_modulepermission",
+    "accounts_user",
+    "accounts_user_groups",
+    "accounts_user_user_permissions",
+    "auth_group",
+    "auth_group_permissions",
+    "auth_permission",
+    "bi_customreport",
+    "bi_customreportresult",
+    "bi_reporttemplate",
+    "bi_savedreport",
+    "communication_slasetting",
+    "communication_ticket",
+    "django_admin_log",
+    "django_celery_beat_clockedschedule",
+    "django_celery_beat_crontabschedule",
+    "django_celery_beat_intervalschedule",
+    "django_celery_beat_periodictask",
+    "django_celery_beat_periodictasks",
+    "django_celery_beat_solarschedule",
+    "django_celery_results_chordcounter",
+    "django_celery_results_groupresult",
+    "django_celery_results_taskresult",
+    "django_content_type",
+    "django_migrations",
+    "django_session",
+    "fees_feehead",
+    "fees_feerule",
+    "fees_monthlyfee",
+    "fees_paymentproof",
+    "fees_receipt",
+    "fees_securitydeposit",
+    "fees_studentutilitybill",
+    "finance_asset",
+    "finance_assetcategory",
+    "finance_liability",
+    "finance_partnercapital",
+    "food_dailymenu",
+    "food_groceryrequirement",
+    "food_meal",
+    "food_mealcategory",
+    "food_mealfeedback",
+    "food_mealrecipe",
+    "food_weeklymenutemplate",
+    "hostels_bed",
+    "hostels_building",
+    "hostels_city",
+    "hostels_floor",
+    "hostels_hostel",
+    "hostels_room",
+    "hostels_studentprofile",
+    "hostels_studentutilitycharge",
+    "inventory_category",
+    "inventory_consumption",
+    "inventory_item",
+    "inventory_purchase",
+    "inventory_unit",
+    "inventory_vendor",
+    "payroll_employeeprofile",
+    "payroll_payrollrecord",
+    "payroll_salaryadvance",
+    "payroll_salaryslip",
+    "sqlite_sequence"
+  ],
+  "fields": {
+    "django_admin_log": [
+      {
+        "name": "id",
+        "type": "AutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "action_time",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "user",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "content_type",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "django_content_type"
+      },
+      {
+        "name": "object_id",
+        "type": "TextField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "object_repr",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 200
+      },
+      {
+        "name": "action_flag",
+        "type": "PositiveSmallIntegerField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "change_message",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      }
+    ],
+    "auth_permission": [
+      {
+        "name": "id",
+        "type": "AutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 255
+      },
+      {
+        "name": "content_type",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "django_content_type"
+      },
+      {
+        "name": "codename",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      }
+    ],
+    "auth_group": [
+      {
+        "name": "id",
+        "type": "AutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 150
+      },
+      {
+        "name": "permissions",
+        "type": "ManyToManyField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "many_to_many": "auth_permission"
+      }
+    ],
+    "django_content_type": [
+      {
+        "name": "id",
+        "type": "AutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "app_label",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      },
+      {
+        "name": "model",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      }
+    ],
+    "django_session": [
+      {
+        "name": "session_key",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 40
+      },
+      {
+        "name": "session_data",
+        "type": "TextField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "expire_date",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      }
+    ],
+    "django_celery_results_taskresult": [
+      {
+        "name": "id",
+        "type": "AutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "task_id",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "Celery ID for the Task that was run",
+        "max_length": 255
+      },
+      {
+        "name": "periodic_task_name",
+        "type": "CharField",
+        "null": true,
+        "blank": false,
+        "default": null,
+        "help_text": "Name of the Periodic Task which was run",
+        "max_length": 255
+      },
+      {
+        "name": "task_name",
+        "type": "CharField",
+        "null": true,
+        "blank": false,
+        "default": null,
+        "help_text": "Name of the Task which was run",
+        "max_length": 255
+      },
+      {
+        "name": "task_args",
+        "type": "TextField",
+        "null": true,
+        "blank": false,
+        "default": null,
+        "help_text": "JSON representation of the positional arguments used with the task"
+      },
+      {
+        "name": "task_kwargs",
+        "type": "TextField",
+        "null": true,
+        "blank": false,
+        "default": null,
+        "help_text": "JSON representation of the named arguments used with the task"
+      },
+      {
+        "name": "status",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "PENDING",
+        "help_text": "Current state of the task being run",
+        "max_length": 50
+      },
+      {
+        "name": "worker",
+        "type": "CharField",
+        "null": true,
+        "blank": false,
+        "default": null,
+        "help_text": "Worker that executes the task",
+        "max_length": 100
+      },
+      {
+        "name": "content_type",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "Content type of the result data",
+        "max_length": 128
+      },
+      {
+        "name": "content_encoding",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "The encoding used to save the task result data",
+        "max_length": 64
+      },
+      {
+        "name": "result",
+        "type": "TextField",
+        "null": true,
+        "blank": false,
+        "default": null,
+        "help_text": "The data returned by the task.  Use content_encoding and content_type fields to read."
+      },
+      {
+        "name": "date_created",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "Datetime field when the task result was created in UTC",
+        "auto_now": false,
+        "auto_now_add": true
+      },
+      {
+        "name": "date_started",
+        "type": "DateTimeField",
+        "null": true,
+        "blank": false,
+        "default": null,
+        "help_text": "Datetime field when the task was started in UTC",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "date_done",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "Datetime field when the task was completed in UTC",
+        "auto_now": true,
+        "auto_now_add": false
+      },
+      {
+        "name": "traceback",
+        "type": "TextField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "Text of the traceback if the task generated one"
+      },
+      {
+        "name": "meta",
+        "type": "TextField",
+        "null": true,
+        "blank": false,
+        "default": null,
+        "help_text": "JSON meta information about the task, such as information on child tasks"
+      }
+    ],
+    "django_celery_results_chordcounter": [
+      {
+        "name": "id",
+        "type": "AutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "group_id",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "Celery ID for the Chord header group",
+        "max_length": 255
+      },
+      {
+        "name": "sub_tasks",
+        "type": "TextField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "JSON serialized list of task result tuples. use .group_result() to decode"
+      },
+      {
+        "name": "count",
+        "type": "PositiveIntegerField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "Starts at len(chord header) and decrements after each task is finished"
+      }
+    ],
+    "django_celery_results_groupresult": [
+      {
+        "name": "id",
+        "type": "AutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "group_id",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "Celery ID for the Group that was run",
+        "max_length": 255
+      },
+      {
+        "name": "date_created",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "Datetime field when the group result was created in UTC",
+        "auto_now": false,
+        "auto_now_add": true
+      },
+      {
+        "name": "date_done",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "Datetime field when the group was completed in UTC",
+        "auto_now": true,
+        "auto_now_add": false
+      },
+      {
+        "name": "content_type",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "Content type of the result data",
+        "max_length": 128
+      },
+      {
+        "name": "content_encoding",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "The encoding used to save the task result data",
+        "max_length": 64
+      },
+      {
+        "name": "result",
+        "type": "TextField",
+        "null": true,
+        "blank": false,
+        "default": null,
+        "help_text": "The data returned by the task.  Use content_encoding and content_type fields to read."
+      }
+    ],
+    "django_celery_beat_solarschedule": [
+      {
+        "name": "id",
+        "type": "AutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "event",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "The type of solar event when the job should run",
+        "max_length": 24
+      },
+      {
+        "name": "latitude",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "Run the task when the event happens at this latitude",
+        "max_digits": 9,
+        "decimal_places": 6
+      },
+      {
+        "name": "longitude",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "Run the task when the event happens at this longitude",
+        "max_digits": 9,
+        "decimal_places": 6
+      }
+    ],
+    "django_celery_beat_intervalschedule": [
+      {
+        "name": "id",
+        "type": "AutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "every",
+        "type": "IntegerField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "Number of interval periods to wait before running the task again"
+      },
+      {
+        "name": "period",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "The type of period between task runs (Example: days)",
+        "max_length": 24
+      }
+    ],
+    "django_celery_beat_clockedschedule": [
+      {
+        "name": "id",
+        "type": "AutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "clocked_time",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "Run the task at clocked time",
+        "auto_now": false,
+        "auto_now_add": false
+      }
+    ],
+    "django_celery_beat_crontabschedule": [
+      {
+        "name": "id",
+        "type": "AutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "minute",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "*",
+        "help_text": "Cron Minutes to Run. Use \"*\" for \"all\". (Example: \"0,30\")",
+        "max_length": 240
+      },
+      {
+        "name": "hour",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "*",
+        "help_text": "Cron Hours to Run. Use \"*\" for \"all\". (Example: \"8,20\")",
+        "max_length": 96
+      },
+      {
+        "name": "day_of_month",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "*",
+        "help_text": "Cron Days Of The Month to Run. Use \"*\" for \"all\". (Example: \"1,15\")",
+        "max_length": 124
+      },
+      {
+        "name": "month_of_year",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "*",
+        "help_text": "Cron Months (1-12) Of The Year to Run. Use \"*\" for \"all\". (Example: \"1,12\")",
+        "max_length": 64
+      },
+      {
+        "name": "day_of_week",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "*",
+        "help_text": "Cron Days Of The Week to Run. Use \"*\" for \"all\", Sunday is 0 or 7, Monday is 1. (Example: \"0,5\")",
+        "max_length": 64
+      },
+      {
+        "name": "timezone",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "Timezone to Run the Cron Schedule on. Default is UTC.",
+        "max_length": 63
+      }
+    ],
+    "django_celery_beat_periodictasks": [
+      {
+        "name": "ident",
+        "type": "SmallIntegerField",
+        "null": false,
+        "blank": false,
+        "default": "1",
+        "help_text": ""
+      },
+      {
+        "name": "last_update",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      }
+    ],
+    "django_celery_beat_periodictask": [
+      {
+        "name": "id",
+        "type": "AutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "Short Description For This Task",
+        "max_length": 200
+      },
+      {
+        "name": "task",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "The Name of the Celery Task that Should be Run.  (Example: \"proj.tasks.import_contacts\")",
+        "max_length": 200
+      },
+      {
+        "name": "interval",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "Interval Schedule to run the task on.  Set only one schedule type, leave the others null.",
+        "foreign_key": "django_celery_beat_intervalschedule"
+      },
+      {
+        "name": "crontab",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "Crontab Schedule to run the task on.  Set only one schedule type, leave the others null.",
+        "foreign_key": "django_celery_beat_crontabschedule"
+      },
+      {
+        "name": "solar",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "Solar Schedule to run the task on.  Set only one schedule type, leave the others null.",
+        "foreign_key": "django_celery_beat_solarschedule"
+      },
+      {
+        "name": "clocked",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "Clocked Schedule to run the task on.  Set only one schedule type, leave the others null.",
+        "foreign_key": "django_celery_beat_clockedschedule"
+      },
+      {
+        "name": "args",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": "[]",
+        "help_text": "JSON encoded positional arguments (Example: [\"arg1\", \"arg2\"])"
+      },
+      {
+        "name": "kwargs",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": "{}",
+        "help_text": "JSON encoded keyword arguments (Example: {\"argument\": \"value\"})"
+      },
+      {
+        "name": "queue",
+        "type": "CharField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "Queue defined in CELERY_TASK_QUEUES. Leave None for default queuing.",
+        "max_length": 200
+      },
+      {
+        "name": "exchange",
+        "type": "CharField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "Override Exchange for low-level AMQP routing",
+        "max_length": 200
+      },
+      {
+        "name": "routing_key",
+        "type": "CharField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "Override Routing Key for low-level AMQP routing",
+        "max_length": 200
+      },
+      {
+        "name": "headers",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": "{}",
+        "help_text": "JSON encoded message headers for the AMQP message."
+      },
+      {
+        "name": "priority",
+        "type": "PositiveIntegerField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "Priority Number between 0 and 255. Supported by: RabbitMQ, Redis (priority reversed, 0 is highest)."
+      },
+      {
+        "name": "expires",
+        "type": "DateTimeField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "Datetime after which the schedule will no longer trigger the task to run",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "expire_seconds",
+        "type": "PositiveIntegerField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "Timedelta with seconds which the schedule will no longer trigger the task to run"
+      },
+      {
+        "name": "one_off",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": "If True, the schedule will only run the task a single time"
+      },
+      {
+        "name": "start_time",
+        "type": "DateTimeField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "Datetime when the schedule should begin triggering the task to run",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "enabled",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "True",
+        "help_text": "Set to False to disable the schedule"
+      },
+      {
+        "name": "last_run_at",
+        "type": "DateTimeField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "Datetime that the schedule last triggered the task to run. Reset to None if enabled is set to False.",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "total_run_count",
+        "type": "PositiveIntegerField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "Running count of how many times the schedule has triggered the task"
+      },
+      {
+        "name": "date_changed",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "Datetime that this PeriodicTask was last modified",
+        "auto_now": true,
+        "auto_now_add": false
+      },
+      {
+        "name": "description",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "Detailed description about the details of this Periodic Task"
+      }
+    ],
+    "accounts_user": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "password",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 128
+      },
+      {
+        "name": "last_login",
+        "type": "DateTimeField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "is_superuser",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": "Designates that this user has all permissions without explicitly assigning them."
+      },
+      {
+        "name": "username",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+        "max_length": 150
+      },
+      {
+        "name": "first_name",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 150
+      },
+      {
+        "name": "last_name",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 150
+      },
+      {
+        "name": "email",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 254
+      },
+      {
+        "name": "is_staff",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": "Designates whether the user can log into this admin site."
+      },
+      {
+        "name": "is_active",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "True",
+        "help_text": "Designates whether this user should be treated as active. Unselect this instead of deleting accounts."
+      },
+      {
+        "name": "date_joined",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "role",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "STUDENT",
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "hostel",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "groups",
+        "type": "ManyToManyField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "The groups this user belongs to. A user will get all permissions granted to each of their groups.",
+        "many_to_many": "auth_group"
+      },
+      {
+        "name": "user_permissions",
+        "type": "ManyToManyField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "Specific permissions for this user.",
+        "many_to_many": "auth_permission"
+      }
+    ],
+    "accounts_modulepermission": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "role",
+        "type": "CharField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "user",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "module_name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 50
+      },
+      {
+        "name": "can_view",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      },
+      {
+        "name": "can_add",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      },
+      {
+        "name": "can_edit",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      },
+      {
+        "name": "can_delete",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      }
+    ],
+    "hostels_city": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      },
+      {
+        "name": "state",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      },
+      {
+        "name": "country",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "Pakistan",
+        "help_text": "",
+        "max_length": 100
+      }
+    ],
+    "hostels_hostel": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 150
+      },
+      {
+        "name": "code",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "city",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_city"
+      },
+      {
+        "name": "address",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "phone",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 50
+      },
+      {
+        "name": "is_active",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "True",
+        "help_text": ""
+      }
+    ],
+    "hostels_building": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "hostel",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      }
+    ],
+    "hostels_floor": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "building",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_building"
+      },
+      {
+        "name": "number",
+        "type": "IntegerField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": ""
+      }
+    ],
+    "hostels_room": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "floor",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_floor"
+      },
+      {
+        "name": "number",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "room_type",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "TRIPLE",
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "is_ac",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      },
+      {
+        "name": "base_rent",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      }
+    ],
+    "hostels_bed": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "room",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_room"
+      },
+      {
+        "name": "label",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 10
+      },
+      {
+        "name": "is_occupied",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      }
+    ],
+    "hostels_studentprofile": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "user",
+        "type": "OneToOneField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "hostel",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "bed",
+        "type": "OneToOneField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_bed"
+      },
+      {
+        "name": "mobile",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "whatsapp",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "guardian_name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      },
+      {
+        "name": "guardian_phone",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "guardian_nic_number",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 30
+      },
+      {
+        "name": "parent_name",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      },
+      {
+        "name": "parent_phone",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "For automated fee alerts",
+        "max_length": 20
+      },
+      {
+        "name": "parent_whatsapp",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "For automated receipts",
+        "max_length": 20
+      },
+      {
+        "name": "parent_nic_number",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 30
+      },
+      {
+        "name": "college_name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 150
+      },
+      {
+        "name": "nic_number",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 30
+      },
+      {
+        "name": "nic_front_picture",
+        "type": "FileField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "nic_back_picture",
+        "type": "FileField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "profile_picture",
+        "type": "FileField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "monthly_rent",
+        "type": "DecimalField",
+        "null": true,
+        "blank": true,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "course",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 150
+      },
+      {
+        "name": "year",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "is_active",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "True",
+        "help_text": ""
+      },
+      {
+        "name": "joined_on",
+        "type": "DateField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "left_on",
+        "type": "DateField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "parent_link_token",
+        "type": "CharField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      }
+    ],
+    "hostels_studentutilitycharge": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "student",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_studentprofile"
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      },
+      {
+        "name": "amount",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "is_active",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "True",
+        "help_text": ""
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      },
+      {
+        "name": "updated_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": true,
+        "auto_now_add": false
+      }
+    ],
+    "inventory_category": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      }
+    ],
+    "inventory_unit": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 50
+      }
+    ],
+    "inventory_item": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "code",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 50
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 150
+      },
+      {
+        "name": "category",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "inventory_category"
+      },
+      {
+        "name": "unit",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "inventory_unit"
+      },
+      {
+        "name": "reorder_level",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "Alert when stock falls below this",
+        "max_digits": 12,
+        "decimal_places": 3
+      },
+      {
+        "name": "is_active",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "True",
+        "help_text": ""
+      }
+    ],
+    "inventory_vendor": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 150
+      },
+      {
+        "name": "contact_person",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      },
+      {
+        "name": "phone",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 50
+      },
+      {
+        "name": "whatsapp",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 50
+      },
+      {
+        "name": "address",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      }
+    ],
+    "inventory_purchase": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "hostel",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "date",
+        "type": "DateField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "vendor",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "inventory_vendor"
+      },
+      {
+        "name": "invoice_no",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      },
+      {
+        "name": "invoice_photo",
+        "type": "FileField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "items_photo",
+        "type": "FileField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "item",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "inventory_item"
+      },
+      {
+        "name": "quantity",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_digits": 12,
+        "decimal_places": 3
+      },
+      {
+        "name": "price_per_unit",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_digits": 12,
+        "decimal_places": 2
+      },
+      {
+        "name": "status",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "PENDING",
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "approved_by",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "rejection_remarks",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      }
+    ],
+    "inventory_consumption": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "hostel",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "date",
+        "type": "DateField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "item",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "inventory_item"
+      },
+      {
+        "name": "quantity",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_digits": 12,
+        "decimal_places": 3
+      },
+      {
+        "name": "photo",
+        "type": "FileField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "remarks",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      }
+    ],
+    "fees_feehead": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      },
+      {
+        "name": "description",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "is_recurring",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "True",
+        "help_text": ""
+      },
+      {
+        "name": "frequency",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "MONTHLY",
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "default_amount",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      }
+    ],
+    "fees_feerule": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "fee_head",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "fees_feehead"
+      },
+      {
+        "name": "due_day",
+        "type": "PositiveIntegerField",
+        "null": false,
+        "blank": false,
+        "default": "4",
+        "help_text": ""
+      },
+      {
+        "name": "late_fee_type",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "FIXED",
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "fixed_amount",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "per_day_amount",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      }
+    ],
+    "fees_monthlyfee": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "student",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_studentprofile"
+      },
+      {
+        "name": "fee_head",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "fees_feehead"
+      },
+      {
+        "name": "month",
+        "type": "DateField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "amount",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "amount_paid",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "is_paid",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      },
+      {
+        "name": "is_partially_paid",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      },
+      {
+        "name": "late_fee_applied",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "fine_was_waived",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      },
+      {
+        "name": "fine_waived_amount",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      }
+    ],
+    "fees_studentutilitybill": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "student",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_studentprofile"
+      },
+      {
+        "name": "month",
+        "type": "DateField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "amount",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "amount_paid",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "is_paid",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      }
+    ],
+    "fees_receipt": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "receipt_no",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 50
+      },
+      {
+        "name": "fee",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "fees_monthlyfee"
+      },
+      {
+        "name": "amount",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "date_issued",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      },
+      {
+        "name": "payment_method",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "Bank Transfer",
+        "help_text": "",
+        "max_length": 50
+      }
+    ],
+    "fees_paymentproof": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "fee",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "fees_monthlyfee"
+      },
+      {
+        "name": "uploaded_by",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "uploaded_on",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      },
+      {
+        "name": "file",
+        "type": "FileField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "status",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "PENDING",
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "remarks",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      }
+    ],
+    "fees_securitydeposit": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "student",
+        "type": "OneToOneField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_studentprofile"
+      },
+      {
+        "name": "amount",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "date_paid",
+        "type": "DateField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "status",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "HELD",
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "refund_date",
+        "type": "DateField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "remarks",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      }
+    ],
+    "communication_slasetting": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "category",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "response_time_hours",
+        "type": "PositiveIntegerField",
+        "null": false,
+        "blank": false,
+        "default": "3",
+        "help_text": "Hours until escalation"
+      }
+    ],
+    "communication_ticket": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "student",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_studentprofile"
+      },
+      {
+        "name": "hostel",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "asset",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "finance_asset"
+      },
+      {
+        "name": "category",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "subject",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 255
+      },
+      {
+        "name": "description",
+        "type": "TextField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "status",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "OPEN",
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "assigned_to",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      },
+      {
+        "name": "updated_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": true,
+        "auto_now_add": false
+      },
+      {
+        "name": "resolved_at",
+        "type": "DateTimeField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "is_escalated",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      },
+      {
+        "name": "last_reminded_at",
+        "type": "DateTimeField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      }
+    ],
+    "payroll_employeeprofile": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "user",
+        "type": "OneToOneField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "designation",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      },
+      {
+        "name": "pay_type",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "MONTHLY",
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "nic_number",
+        "type": "CharField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 30
+      },
+      {
+        "name": "nic_front_picture",
+        "type": "FileField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "nic_back_picture",
+        "type": "FileField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "profile_picture",
+        "type": "FileField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "mobile",
+        "type": "CharField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "whatsapp",
+        "type": "CharField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "base_salary",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 12,
+        "decimal_places": 2
+      },
+      {
+        "name": "housing_allowance",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 12,
+        "decimal_places": 2
+      },
+      {
+        "name": "fuel_allowance",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 12,
+        "decimal_places": 2
+      },
+      {
+        "name": "other_allowance",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 12,
+        "decimal_places": 2
+      },
+      {
+        "name": "rate_per_task",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "Amount per resolved ticket",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "bank_name",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      },
+      {
+        "name": "iban",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 34
+      },
+      {
+        "name": "joined_on",
+        "type": "DateField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "is_active",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "True",
+        "help_text": ""
+      }
+    ],
+    "payroll_salaryadvance": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "employee",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "payroll_employeeprofile"
+      },
+      {
+        "name": "amount",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "date_given",
+        "type": "DateField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      },
+      {
+        "name": "is_deducted",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": "True if already subtracted from a pay-slip"
+      },
+      {
+        "name": "remarks",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      }
+    ],
+    "payroll_payrollrecord": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "month",
+        "type": "DateField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "First day of the month",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "status",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "DRAFT",
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "total_net_payout",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 15,
+        "decimal_places": 2
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      },
+      {
+        "name": "authorized_by",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "accounts_user"
+      }
+    ],
+    "payroll_salaryslip": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "payroll_master",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "payroll_payrollrecord"
+      },
+      {
+        "name": "employee",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "payroll_employeeprofile"
+      },
+      {
+        "name": "base_pay",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_digits": 12,
+        "decimal_places": 2
+      },
+      {
+        "name": "allowances",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 12,
+        "decimal_places": 2
+      },
+      {
+        "name": "task_count",
+        "type": "IntegerField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "Count of tickets resolved this month"
+      },
+      {
+        "name": "task_pay",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 12,
+        "decimal_places": 2
+      },
+      {
+        "name": "bonus",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 12,
+        "decimal_places": 2
+      },
+      {
+        "name": "deductions",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "Total absences/fines",
+        "max_digits": 12,
+        "decimal_places": 2
+      },
+      {
+        "name": "advance_deduction",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "",
+        "max_digits": 12,
+        "decimal_places": 2
+      },
+      {
+        "name": "net_salary",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_digits": 12,
+        "decimal_places": 2
+      },
+      {
+        "name": "receipt_no",
+        "type": "CharField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 50
+      },
+      {
+        "name": "is_disbursed",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      },
+      {
+        "name": "disbursed_at",
+        "type": "DateTimeField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      }
+    ],
+    "finance_assetcategory": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      },
+      {
+        "name": "depreciation_rate_annual",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "10.0",
+        "help_text": "Percentage value (0-100)",
+        "max_digits": 5,
+        "decimal_places": 2
+      }
+    ],
+    "finance_asset": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 200
+      },
+      {
+        "name": "category",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "finance_assetcategory"
+      },
+      {
+        "name": "hostel",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "serial_number",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      },
+      {
+        "name": "quantity",
+        "type": "PositiveIntegerField",
+        "null": false,
+        "blank": false,
+        "default": "1",
+        "help_text": ""
+      },
+      {
+        "name": "purchase_date",
+        "type": "DateField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "purchase_price",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_digits": 12,
+        "decimal_places": 2
+      },
+      {
+        "name": "current_value",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "Book value after depreciation",
+        "max_digits": 12,
+        "decimal_places": 2
+      },
+      {
+        "name": "warranty_expiry",
+        "type": "DateField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "status",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "ACTIVE",
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "sale_price",
+        "type": "DecimalField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_digits": 12,
+        "decimal_places": 2
+      },
+      {
+        "name": "sold_date",
+        "type": "DateField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "remarks",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      },
+      {
+        "name": "updated_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": true,
+        "auto_now_add": false
+      }
+    ],
+    "finance_partnercapital": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "partner",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "hostel",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "amount",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_digits": 15,
+        "decimal_places": 2
+      },
+      {
+        "name": "date_invested",
+        "type": "DateField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "remarks",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      }
+    ],
+    "finance_liability": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 200
+      },
+      {
+        "name": "type",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "CREDIT",
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "hostel",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "total_amount",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_digits": 15,
+        "decimal_places": 2
+      },
+      {
+        "name": "remaining_amount",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_digits": 15,
+        "decimal_places": 2
+      },
+      {
+        "name": "due_date",
+        "type": "DateField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "is_settled",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      }
+    ],
+    "food_mealcategory": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 50
+      },
+      {
+        "name": "emoji",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "\ud83c\udf7d\ufe0f",
+        "help_text": "",
+        "max_length": 10
+      },
+      {
+        "name": "description",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "is_active",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "True",
+        "help_text": ""
+      }
+    ],
+    "food_meal": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      },
+      {
+        "name": "description",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "category",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_mealcategory"
+      },
+      {
+        "name": "dietary_tags",
+        "type": "CharField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "e.g., Vegetarian, Gluten-Free, Halal",
+        "max_length": 200
+      },
+      {
+        "name": "preparation_time",
+        "type": "PositiveIntegerField",
+        "null": false,
+        "blank": false,
+        "default": "30",
+        "help_text": "Time in minutes"
+      },
+      {
+        "name": "calories",
+        "type": "PositiveIntegerField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "Calories per serving"
+      },
+      {
+        "name": "protein",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "Protein in grams",
+        "max_digits": 6,
+        "decimal_places": 2
+      },
+      {
+        "name": "is_active",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "True",
+        "help_text": ""
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      },
+      {
+        "name": "updated_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": true,
+        "auto_now_add": false
+      }
+    ],
+    "food_mealrecipe": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "meal",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "item",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "inventory_item"
+      },
+      {
+        "name": "quantity_required",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "1",
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "unit",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "kg",
+        "help_text": "e.g., kg, g, pieces, liters",
+        "max_length": 20
+      },
+      {
+        "name": "estimated_cost",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0",
+        "help_text": "Estimated cost per unit",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "waste_factor",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": "0.015",
+        "help_text": "Waste percentage (e.g., 0.015 for 1.5%, max 5%)",
+        "max_digits": 5,
+        "decimal_places": 4
+      },
+      {
+        "name": "substitute_item",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "inventory_item"
+      }
+    ],
+    "food_dailymenu": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "hostel",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "date",
+        "type": "DateField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "meal_type",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "meal",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "special_note",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "is_featured",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      },
+      {
+        "name": "updated_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": true,
+        "auto_now_add": false
+      },
+      {
+        "name": "created_by",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "accounts_user"
+      }
+    ],
+    "food_weeklymenutemplate": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 100
+      },
+      {
+        "name": "description",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "hostel",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "monday_breakfast",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "monday_lunch",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "monday_dinner",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "tuesday_breakfast",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "tuesday_lunch",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "tuesday_dinner",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "wednesday_breakfast",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "wednesday_lunch",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "wednesday_dinner",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "thursday_breakfast",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "thursday_lunch",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "thursday_dinner",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "friday_breakfast",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "friday_lunch",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "friday_dinner",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "saturday_breakfast",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "saturday_lunch",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "saturday_dinner",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "sunday_breakfast",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "sunday_lunch",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "sunday_dinner",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "is_active",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "True",
+        "help_text": ""
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      }
+    ],
+    "food_mealfeedback": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "student",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_studentprofile"
+      },
+      {
+        "name": "daily_menu",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "food_dailymenu"
+      },
+      {
+        "name": "rating",
+        "type": "PositiveSmallIntegerField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "comment",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      }
+    ],
+    "food_groceryrequirement": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "hostel",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "start_date",
+        "type": "DateField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "end_date",
+        "type": "DateField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      },
+      {
+        "name": "item",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "inventory_item"
+      },
+      {
+        "name": "quantity_needed",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "unit",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "estimated_cost",
+        "type": "DecimalField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "actual_cost",
+        "type": "DecimalField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_digits": 10,
+        "decimal_places": 2
+      },
+      {
+        "name": "status",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": "PENDING",
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "notes",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      },
+      {
+        "name": "updated_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": true,
+        "auto_now_add": false
+      }
+    ],
+    "bi_reporttemplate": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 200
+      },
+      {
+        "name": "report_type",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 50
+      },
+      {
+        "name": "description",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "config",
+        "type": "JSONField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "is_active",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "True",
+        "help_text": ""
+      },
+      {
+        "name": "created_by",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      },
+      {
+        "name": "updated_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": true,
+        "auto_now_add": false
+      }
+    ],
+    "bi_savedreport": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "template",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "bi_reporttemplate"
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 200
+      },
+      {
+        "name": "filters",
+        "type": "JSONField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "data",
+        "type": "JSONField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "created_by",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      },
+      {
+        "name": "last_run",
+        "type": "DateTimeField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      }
+    ],
+    "bi_customreport": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "name",
+        "type": "CharField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "max_length": 200
+      },
+      {
+        "name": "description",
+        "type": "TextField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "tables",
+        "type": "JSONField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "fields",
+        "type": "JSONField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "filters",
+        "type": "JSONField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "group_by",
+        "type": "JSONField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "sort_by",
+        "type": "JSONField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "date_range",
+        "type": "JSONField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "distinct",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      },
+      {
+        "name": "is_scheduled",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      },
+      {
+        "name": "schedule_frequency",
+        "type": "CharField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "max_length": 20
+      },
+      {
+        "name": "schedule_time",
+        "type": "TimeField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "schedule_recipients",
+        "type": "JSONField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "is_shared",
+        "type": "BooleanField",
+        "null": false,
+        "blank": false,
+        "default": "False",
+        "help_text": ""
+      },
+      {
+        "name": "shared_with_roles",
+        "type": "JSONField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "created_by",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "created_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      },
+      {
+        "name": "updated_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": true,
+        "auto_now_add": false
+      },
+      {
+        "name": "last_run",
+        "type": "DateTimeField",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": false
+      }
+    ],
+    "bi_customreportresult": [
+      {
+        "name": "id",
+        "type": "BigAutoField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "report",
+        "type": "ForeignKey",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "bi_customreport"
+      },
+      {
+        "name": "data",
+        "type": "JSONField",
+        "null": false,
+        "blank": false,
+        "default": null,
+        "help_text": ""
+      },
+      {
+        "name": "generated_by",
+        "type": "ForeignKey",
+        "null": true,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "generated_at",
+        "type": "DateTimeField",
+        "null": false,
+        "blank": true,
+        "default": null,
+        "help_text": "",
+        "auto_now": false,
+        "auto_now_add": true
+      }
+    ],
+    "accounts_user_groups": [
+      {
+        "name": "id",
+        "type": "INTEGER",
+        "null": true,
+        "default": null,
+        "primary_key": true
+      },
+      {
+        "name": "user_id",
+        "type": "bigint",
+        "null": true,
+        "default": null,
+        "primary_key": false
+      },
+      {
+        "name": "group_id",
+        "type": "INTEGER",
+        "null": true,
+        "default": null,
+        "primary_key": false
+      }
+    ],
+    "accounts_user_user_permissions": [
+      {
+        "name": "id",
+        "type": "INTEGER",
+        "null": true,
+        "default": null,
+        "primary_key": true
+      },
+      {
+        "name": "user_id",
+        "type": "bigint",
+        "null": true,
+        "default": null,
+        "primary_key": false
+      },
+      {
+        "name": "permission_id",
+        "type": "INTEGER",
+        "null": true,
+        "default": null,
+        "primary_key": false
+      }
+    ],
+    "auth_group_permissions": [
+      {
+        "name": "id",
+        "type": "INTEGER",
+        "null": true,
+        "default": null,
+        "primary_key": true
+      },
+      {
+        "name": "group_id",
+        "type": "INTEGER",
+        "null": true,
+        "default": null,
+        "primary_key": false
+      },
+      {
+        "name": "permission_id",
+        "type": "INTEGER",
+        "null": true,
+        "default": null,
+        "primary_key": false
+      }
+    ],
+    "django_migrations": [
+      {
+        "name": "id",
+        "type": "INTEGER",
+        "null": true,
+        "default": null,
+        "primary_key": true
+      },
+      {
+        "name": "app",
+        "type": "varchar(255)",
+        "null": true,
+        "default": null,
+        "primary_key": false
+      },
+      {
+        "name": "name",
+        "type": "varchar(255)",
+        "null": true,
+        "default": null,
+        "primary_key": false
+      },
+      {
+        "name": "applied",
+        "type": "datetime",
+        "null": true,
+        "default": null,
+        "primary_key": false
+      }
+    ],
+    "sqlite_sequence": [
+      {
+        "name": "name",
+        "type": "",
+        "null": false,
+        "default": null,
+        "primary_key": false
+      },
+      {
+        "name": "seq",
+        "type": "",
+        "null": false,
+        "default": null,
+        "primary_key": false
+      }
+    ]
+  },
+  "relationships": {
+    "django_admin_log": {
+      "user": "accounts_user",
+      "content_type": "django_content_type"
+    },
+    "auth_permission": {
+      "content_type": "django_content_type"
+    },
+    "auth_group": {
+      "permissions": "auth_permission"
+    },
+    "django_content_type": {},
+    "django_session": {},
+    "django_celery_results_taskresult": {},
+    "django_celery_results_chordcounter": {},
+    "django_celery_results_groupresult": {},
+    "django_celery_beat_solarschedule": {},
+    "django_celery_beat_intervalschedule": {},
+    "django_celery_beat_clockedschedule": {},
+    "django_celery_beat_crontabschedule": {},
+    "django_celery_beat_periodictasks": {},
+    "django_celery_beat_periodictask": {
+      "interval": "django_celery_beat_intervalschedule",
+      "crontab": "django_celery_beat_crontabschedule",
+      "solar": "django_celery_beat_solarschedule",
+      "clocked": "django_celery_beat_clockedschedule"
+    },
+    "accounts_user": {
+      "hostel": "hostels_hostel",
+      "groups": "auth_group",
+      "user_permissions": "auth_permission"
+    },
+    "accounts_modulepermission": {
+      "user": "accounts_user"
+    },
+    "hostels_city": {},
+    "hostels_hostel": {
+      "city": "hostels_city"
+    },
+    "hostels_building": {
+      "hostel": "hostels_hostel"
+    },
+    "hostels_floor": {
+      "building": "hostels_building"
+    },
+    "hostels_room": {
+      "floor": "hostels_floor"
+    },
+    "hostels_bed": {
+      "room": "hostels_room"
+    },
+    "hostels_studentprofile": {
+      "user": "accounts_user",
+      "hostel": "hostels_hostel",
+      "bed": "hostels_bed"
+    },
+    "hostels_studentutilitycharge": {
+      "student": "hostels_studentprofile"
+    },
+    "inventory_category": {},
+    "inventory_unit": {},
+    "inventory_item": {
+      "category": "inventory_category",
+      "unit": "inventory_unit"
+    },
+    "inventory_vendor": {},
+    "inventory_purchase": {
+      "hostel": "hostels_hostel",
+      "vendor": "inventory_vendor",
+      "item": "inventory_item",
+      "approved_by": "accounts_user"
+    },
+    "inventory_consumption": {
+      "hostel": "hostels_hostel",
+      "item": "inventory_item"
+    },
+    "fees_feehead": {},
+    "fees_feerule": {
+      "fee_head": "fees_feehead"
+    },
+    "fees_monthlyfee": {
+      "student": "hostels_studentprofile",
+      "fee_head": "fees_feehead"
+    },
+    "fees_studentutilitybill": {
+      "student": "hostels_studentprofile"
+    },
+    "fees_receipt": {
+      "fee": "fees_monthlyfee"
+    },
+    "fees_paymentproof": {
+      "fee": "fees_monthlyfee",
+      "uploaded_by": "accounts_user"
+    },
+    "fees_securitydeposit": {
+      "student": "hostels_studentprofile"
+    },
+    "communication_slasetting": {},
+    "communication_ticket": {
+      "student": "hostels_studentprofile",
+      "hostel": "hostels_hostel",
+      "asset": "finance_asset",
+      "assigned_to": "accounts_user"
+    },
+    "payroll_employeeprofile": {
+      "user": "accounts_user"
+    },
+    "payroll_salaryadvance": {
+      "employee": "payroll_employeeprofile"
+    },
+    "payroll_payrollrecord": {
+      "authorized_by": "accounts_user"
+    },
+    "payroll_salaryslip": {
+      "payroll_master": "payroll_payrollrecord",
+      "employee": "payroll_employeeprofile"
+    },
+    "finance_assetcategory": {},
+    "finance_asset": {
+      "category": "finance_assetcategory",
+      "hostel": "hostels_hostel"
+    },
+    "finance_partnercapital": {
+      "partner": "accounts_user",
+      "hostel": "hostels_hostel"
+    },
+    "finance_liability": {
+      "hostel": "hostels_hostel"
+    },
+    "food_mealcategory": {},
+    "food_meal": {
+      "category": "food_mealcategory"
+    },
+    "food_mealrecipe": {
+      "meal": "food_meal",
+      "item": "inventory_item",
+      "substitute_item": "inventory_item"
+    },
+    "food_dailymenu": {
+      "hostel": "hostels_hostel",
+      "meal": "food_meal",
+      "created_by": "accounts_user"
+    },
+    "food_weeklymenutemplate": {
+      "hostel": "hostels_hostel",
+      "monday_breakfast": "food_meal",
+      "monday_lunch": "food_meal",
+      "monday_dinner": "food_meal",
+      "tuesday_breakfast": "food_meal",
+      "tuesday_lunch": "food_meal",
+      "tuesday_dinner": "food_meal",
+      "wednesday_breakfast": "food_meal",
+      "wednesday_lunch": "food_meal",
+      "wednesday_dinner": "food_meal",
+      "thursday_breakfast": "food_meal",
+      "thursday_lunch": "food_meal",
+      "thursday_dinner": "food_meal",
+      "friday_breakfast": "food_meal",
+      "friday_lunch": "food_meal",
+      "friday_dinner": "food_meal",
+      "saturday_breakfast": "food_meal",
+      "saturday_lunch": "food_meal",
+      "saturday_dinner": "food_meal",
+      "sunday_breakfast": "food_meal",
+      "sunday_lunch": "food_meal",
+      "sunday_dinner": "food_meal"
+    },
+    "food_mealfeedback": {
+      "student": "hostels_studentprofile",
+      "daily_menu": "food_dailymenu"
+    },
+    "food_groceryrequirement": {
+      "hostel": "hostels_hostel",
+      "item": "inventory_item"
+    },
+    "bi_reporttemplate": {
+      "created_by": "accounts_user"
+    },
+    "bi_savedreport": {
+      "template": "bi_reporttemplate",
+      "created_by": "accounts_user"
+    },
+    "bi_customreport": {
+      "created_by": "accounts_user"
+    },
+    "bi_customreportresult": {
+      "report": "bi_customreport",
+      "generated_by": "accounts_user"
+    }
+  },
+  "verbose_names": {
+    "django_admin_log": {
+      "name": "Log Entry",
+      "plural": "Log Entries"
+    },
+    "auth_permission": {
+      "name": "Permission",
+      "plural": "Permissions"
+    },
+    "auth_group": {
+      "name": "Group",
+      "plural": "Groups"
+    },
+    "django_content_type": {
+      "name": "Content Type",
+      "plural": "Content Types"
+    },
+    "django_session": {
+      "name": "Session",
+      "plural": "Sessions"
+    },
+    "django_celery_results_taskresult": {
+      "name": "Task Result",
+      "plural": "Task Results"
+    },
+    "django_celery_results_chordcounter": {
+      "name": "Chord Counter",
+      "plural": "Chord Counters"
+    },
+    "django_celery_results_groupresult": {
+      "name": "Group Result",
+      "plural": "Group Results"
+    },
+    "django_celery_beat_solarschedule": {
+      "name": "Solar Event",
+      "plural": "Solar Events"
+    },
+    "django_celery_beat_intervalschedule": {
+      "name": "Interval",
+      "plural": "Intervals"
+    },
+    "django_celery_beat_clockedschedule": {
+      "name": "Clocked",
+      "plural": "Clocked"
+    },
+    "django_celery_beat_crontabschedule": {
+      "name": "Crontab",
+      "plural": "Crontabs"
+    },
+    "django_celery_beat_periodictasks": {
+      "name": "Periodic Task Track",
+      "plural": "Periodic Task Tracks"
+    },
+    "django_celery_beat_periodictask": {
+      "name": "Periodic Task",
+      "plural": "Periodic Tasks"
+    },
+    "accounts_user": {
+      "name": "User",
+      "plural": "Users"
+    },
+    "accounts_modulepermission": {
+      "name": "Module Permission",
+      "plural": "Module Permissions"
+    },
+    "hostels_city": {
+      "name": "City",
+      "plural": "Citys"
+    },
+    "hostels_hostel": {
+      "name": "Hostel",
+      "plural": "Hostels"
+    },
+    "hostels_building": {
+      "name": "Building",
+      "plural": "Buildings"
+    },
+    "hostels_floor": {
+      "name": "Floor",
+      "plural": "Floors"
+    },
+    "hostels_room": {
+      "name": "Room",
+      "plural": "Rooms"
+    },
+    "hostels_bed": {
+      "name": "Bed",
+      "plural": "Beds"
+    },
+    "hostels_studentprofile": {
+      "name": "Student Profile",
+      "plural": "Student Profiles"
+    },
+    "hostels_studentutilitycharge": {
+      "name": "Student Utility Charge",
+      "plural": "Student Utility Charges"
+    },
+    "inventory_category": {
+      "name": "Category",
+      "plural": "Categorys"
+    },
+    "inventory_unit": {
+      "name": "Unit",
+      "plural": "Units"
+    },
+    "inventory_item": {
+      "name": "Item",
+      "plural": "Items"
+    },
+    "inventory_vendor": {
+      "name": "Vendor",
+      "plural": "Vendors"
+    },
+    "inventory_purchase": {
+      "name": "Purchase",
+      "plural": "Purchases"
+    },
+    "inventory_consumption": {
+      "name": "Consumption",
+      "plural": "Consumptions"
+    },
+    "fees_feehead": {
+      "name": "Fee Head",
+      "plural": "Fee Heads"
+    },
+    "fees_feerule": {
+      "name": "Fee Rule",
+      "plural": "Fee Rules"
+    },
+    "fees_monthlyfee": {
+      "name": "Monthly Fee",
+      "plural": "Monthly Fees"
+    },
+    "fees_studentutilitybill": {
+      "name": "Student Utility Bill",
+      "plural": "Student Utility Bills"
+    },
+    "fees_receipt": {
+      "name": "Receipt",
+      "plural": "Receipts"
+    },
+    "fees_paymentproof": {
+      "name": "Payment Proof",
+      "plural": "Payment Proofs"
+    },
+    "fees_securitydeposit": {
+      "name": "Security Deposit",
+      "plural": "Security Deposits"
+    },
+    "communication_slasetting": {
+      "name": "Sla Setting",
+      "plural": "Sla Settings"
+    },
+    "communication_ticket": {
+      "name": "Ticket",
+      "plural": "Tickets"
+    },
+    "payroll_employeeprofile": {
+      "name": "Employee Profile",
+      "plural": "Employee Profiles"
+    },
+    "payroll_salaryadvance": {
+      "name": "Salary Advance",
+      "plural": "Salary Advances"
+    },
+    "payroll_payrollrecord": {
+      "name": "Payroll Record",
+      "plural": "Payroll Records"
+    },
+    "payroll_salaryslip": {
+      "name": "Salary Slip",
+      "plural": "Salary Slips"
+    },
+    "finance_assetcategory": {
+      "name": "Asset Category",
+      "plural": "Asset Categorys"
+    },
+    "finance_asset": {
+      "name": "Asset",
+      "plural": "Assets"
+    },
+    "finance_partnercapital": {
+      "name": "Partner Capital",
+      "plural": "Partner Capitals"
+    },
+    "finance_liability": {
+      "name": "Liability",
+      "plural": "Liabilitys"
+    },
+    "food_mealcategory": {
+      "name": "Meal Category",
+      "plural": "Meal Categorys"
+    },
+    "food_meal": {
+      "name": "Meal",
+      "plural": "Meals"
+    },
+    "food_mealrecipe": {
+      "name": "Meal Recipe",
+      "plural": "Meal Recipes"
+    },
+    "food_dailymenu": {
+      "name": "Daily Menu",
+      "plural": "Daily Menus"
+    },
+    "food_weeklymenutemplate": {
+      "name": "Weekly Menu Template",
+      "plural": "Weekly Menu Templates"
+    },
+    "food_mealfeedback": {
+      "name": "Meal Feedback",
+      "plural": "Meal Feedbacks"
+    },
+    "food_groceryrequirement": {
+      "name": "Grocery Requirement",
+      "plural": "Grocery Requirements"
+    },
+    "bi_reporttemplate": {
+      "name": "Report Template",
+      "plural": "Report Templates"
+    },
+    "bi_savedreport": {
+      "name": "Saved Report",
+      "plural": "Saved Reports"
+    },
+    "bi_customreport": {
+      "name": "Custom Report",
+      "plural": "Custom Reports"
+    },
+    "bi_customreportresult": {
+      "name": "Custom Report Result",
+      "plural": "Custom Report Results"
+    },
+    "accounts_user_groups": {
+      "name": "Accounts User Groups",
+      "plural": "Accounts User Groupss"
+    },
+    "accounts_user_user_permissions": {
+      "name": "Accounts User User Permissions",
+      "plural": "Accounts User User Permissionss"
+    },
+    "auth_group_permissions": {
+      "name": "Auth Group Permissions",
+      "plural": "Auth Group Permissionss"
+    },
+    "django_migrations": {
+      "name": "Django Migrations",
+      "plural": "Django Migrationss"
+    },
+    "sqlite_sequence": {
+      "name": "Sqlite Sequence",
+      "plural": "Sqlite Sequences"
+    }
+  },
+  "generated_at": "2026-09-03T09:15:53.697008",
+  "total_tables": 63
+}

@@ -26,8 +26,37 @@ class Hostel(models.Model):
     def __str__(self):
         return f"{self.name} ({self.city.name})"
 
+class Property(models.Model):
+    class PropertyType(models.TextChoices):
+        HOUSE = "HOUSE", "House"
+        APARTMENT = "APARTMENT", "Apartment"
+        BUILDING = "BUILDING", "Standalone Building"
+
+    hostel = models.ForeignKey(Hostel, on_delete=models.CASCADE, related_name="properties")
+    name = models.CharField(max_length=150)
+    code = models.CharField(max_length=30)
+    property_type = models.CharField(max_length=20, choices=PropertyType.choices, default=PropertyType.BUILDING)
+    address = models.TextField(blank=True)
+    acquisition_date = models.DateField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=("hostel", "code"), name="unique_property_code_per_hostel"),
+        ]
+
+    def __str__(self):
+        return f"{self.hostel.code} - {self.name}"
+
 class Building(models.Model):
     hostel = models.ForeignKey(Hostel, on_delete=models.CASCADE, related_name="buildings")
+    property = models.ForeignKey(
+        Property,
+        on_delete=models.PROTECT,
+        related_name="buildings",
+        null=True,
+        blank=True,
+    )
     name = models.CharField(max_length=100)  # e.g. Block A, Main, etc.
 
     class Meta:
@@ -75,6 +104,7 @@ class Bed(models.Model):
 
     def __str__(self):
         return f"{self.room} - Bed {self.label}"
+
 class StudentProfile(models.Model):
     """
     Separate profile linked to User with role=STUDENT.
@@ -206,4 +236,54 @@ class StudentUtilityCharge(models.Model):
 
     def __str__(self):
         return f"{self.student.user.username} - {self.name} ({self.amount})"
+
+
+class BedAllocation(models.Model):
+    student = models.ForeignKey(StudentProfile, on_delete=models.PROTECT, related_name="bed_allocations")
+    bed = models.ForeignKey(Bed, on_delete=models.PROTECT, related_name="allocations")
+    move_in_date = models.DateField()
+    move_out_date = models.DateField(null=True, blank=True)
+    previous_bed = models.ForeignKey(
+        Bed,
+        on_delete=models.PROTECT,
+        related_name="transfers_from",
+        null=True,
+        blank=True,
+    )
+    reason = models.CharField(max_length=255, blank=True)
+    notes = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_bed_allocations",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-move_in_date", "-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=("student",),
+                condition=models.Q(is_active=True),
+                name="one_active_bed_allocation_per_student",
+            ),
+            models.UniqueConstraint(
+                fields=("bed",),
+                condition=models.Q(is_active=True),
+                name="one_active_bed_allocation_per_bed",
+            ),
+        ]
+
+    def clean(self):
+        super().clean()
+        if self.move_out_date and self.move_out_date < self.move_in_date:
+            raise ValidationError({"move_out_date": "Move-out date must be on or after move-in date."})
+        if self.student_id and self.bed_id:
+            student_hostel_id = StudentProfile.objects.filter(pk=self.student_id).values_list("hostel_id", flat=True).first()
+            bed_hostel_id = Bed.objects.filter(pk=self.bed_id).values_list("room__floor__building__hostel_id", flat=True).first()
+            if student_hostel_id != bed_hostel_id:
+                raise ValidationError("Student and bed must belong to the same hostel.")
 

@@ -18,6 +18,7 @@ import InventoryItemsPage from "./pages/InventoryItemsPage";
 import InventoryKpiPage from "./pages/InventoryKpiPage";
 import ProcurementPage from "./pages/ProcurementPage";
 import PurchaseApprovalPage from "./pages/PurchaseApprovalPage";
+import ScanReceiptPage from "./pages/ScanReceiptPage";
 import VisualAuditPage from "./pages/VisualAuditPage";
 import InvestorPortalPage from "./pages/InvestorPortalPage";
 import EmployeeProfilePage from "./pages/EmployeeProfilePage";
@@ -43,6 +44,10 @@ import PaymentVerificationPage from "./pages/PaymentVerificationPage";
 import SecurityDepositPage from "./pages/SecurityDepositPage";
 import StaffTasksPage from "./pages/StaffTasksPage";
 
+import BIPage from "./pages/BIPage";
+import CustomReportBuilderPage from "./pages/CustomReportBuilderPage";
+import PropertyManagementPage from "./pages/PropertyManagementPage";
+
 function AppRoutes() {
   // Access Tiers
   const EXEC_LEVEL = ["SUPER_ADMIN", "CITY_MANAGER", "PARTNER"]; // For Financials/HR
@@ -61,6 +66,7 @@ function AppRoutes() {
         <Route path="/student" element={<ProtectedRoute allowedRoles={["STUDENT"]}><StudentDashboard /></ProtectedRoute>} />
         <Route path="/change-password" element={<ProtectedRoute allowedRoles={ALL_USERS}><ChangePasswordPage /></ProtectedRoute>} />
         <Route path="/management" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><ManagementDashboard /></ProtectedRoute>} />
+        <Route path="/property-operations" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><PropertyManagementPage /></ProtectedRoute>} />
         <Route path="/staff-tasks" element={<ProtectedRoute allowedRoles={STAFF_LEVEL}><StaffTasksPage /></ProtectedRoute>} />
 
         {/* Meal Menu Routes */}
@@ -98,6 +104,7 @@ function AppRoutes() {
         <Route path="/visual-audit" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><VisualAuditPage /></ProtectedRoute>} />
         <Route path="/asset-inventory" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><AssetInventoryPage /></ProtectedRoute>} />
         <Route path="/purchase-approvals" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><PurchaseApprovalPage /></ProtectedRoute>} />
+        <Route path="/inventory/scan-receipt" element={<ScanReceiptPage />} />
 
         {/* HR & Payroll (Executive Only + Partner View) */}
         <Route path="/payroll-dashboard" element={<ProtectedRoute allowedRoles={EXEC_LEVEL}><PayrollDashboardPage /></ProtectedRoute>} />
@@ -117,6 +124,23 @@ function AppRoutes() {
         {/* System Administration (Absolute Restricted) */}
         <Route path="/users" element={<ProtectedRoute allowedRoles={["SUPER_ADMIN", "CITY_MANAGER"]}><UserManagementPage /></ProtectedRoute>} />
         <Route path="/permissions" element={<ProtectedRoute allowedRoles={["SUPER_ADMIN"]}><PermissionsManagementPage /></ProtectedRoute>} />
+
+        <Route 
+          path="/bi" 
+          element={
+            <ProtectedRoute allowedRoles={["SUPER_ADMIN", "CITY_MANAGER", "PARTNER", "HOSTEL_MANAGER", "STAFF"]}>
+            <BIPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/custom-reports" 
+          element={
+            <ProtectedRoute allowedRoles={["SUPER_ADMIN", "CITY_MANAGER", "HOSTEL_MANAGER"]}>
+            <CustomReportBuilderPage />
+            </ProtectedRoute>
+          } 
+        />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

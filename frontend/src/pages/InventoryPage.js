@@ -5,6 +5,7 @@ import { useLocation } from "react-router-dom";
 import api from "../api";
 import { usePermissions } from "../hooks/usePermissions";
 import { exportInventoryToPdf } from "../utils/exportHelpers";
+import ScanReceiptPage from "./ScanReceiptPage";
 
 function formatCurrency(v) {
   if (v === null || v === undefined || isNaN(v)) return "Rs 0";
@@ -162,6 +163,7 @@ export default function InventoryPage() {
   const { check } = usePermissions();
   const isReadOnly = !check("INVENTORY", "add") && !check("INVENTORY", "edit");
 
+  const [showScanReceipt, setShowScanReceipt] = useState(false);
   const [rows, setRows] = useState([]);
   const [hostels, setHostels] = useState([]);
   const [items, setItems] = useState([]);
@@ -209,17 +211,6 @@ export default function InventoryPage() {
     return { totalSpend: spend, lineCount: filteredRows.length };
   }, [filteredRows]);
 
-  const handleOCRScan = async (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    const formData = new FormData(); formData.append("image", file);
-    try {
-      setLoading(true);
-      const res = await api.post("inventory/ocr/", formData);
-      alert(`AI Detected Total: Rs ${res.data.detected_total}`);
-    } catch (err) { alert("AI Scan failed."); }
-    finally { setLoading(false); }
-  };
-
   const downloadPurchaseOrder = async (purchaseId) => {
     try {
       setLoading(true);
@@ -240,40 +231,129 @@ export default function InventoryPage() {
     }
   };
 
+  const goToHistory = () => {
+    setShowScanReceipt(false);
+    setShowPurchaseForm(false);
+    setShowConsumptionForm(false);
+  };
+
   return (
     <div className="page management-page">
-        {!isReadOnly && (
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
-             <button onClick={() => setShowPurchaseForm(true)} className="btn btn-primary" style={{ background: '#10b981' }}>➕ Log Purchase</button>
-             <button onClick={() => setShowConsumptionForm(true)} className="btn btn-primary" style={{ background: '#c3922b' }}>📤 Log Usage</button>
-          </div>
-        )}
-        {showPurchaseForm && <div className="card" style={{ border: '2px solid #10b981', marginBottom: '24px' }}><PurchaseEntryForm hostels={hostels} items={items} vendors={vendors} onCancel={() => setShowPurchaseForm(false)} onRefresh={loadData} /></div>}
-        {showConsumptionForm && <div className="card" style={{ border: '2px solid #c3922b', marginBottom: '24px' }}><ConsumptionEntryForm hostels={hostels} items={items} onCancel={() => setShowConsumptionForm(false)} onRefresh={loadData} /></div>}
-        <div className="cards-row">
-          <div className="card kpi-card"><div className="card-title">Total Spend (PKR)</div><div className="card-value">{formatCurrency(totalSpend)}</div><div className="card-subtext">Across {lineCount} records</div></div>
-          <div className="card kpi-card"><div className="card-title">Active Items</div><div className="card-value">{items.length}</div><div className="card-subtext">Monitored in inventory</div></div>
+      {/* Always-visible action buttons (unless read-only) */}
+      {!isReadOnly && (
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => { goToHistory(); setShowPurchaseForm(true); }}
+            className="btn btn-primary"
+            style={{ background: '#10b981' }}
+          >
+            ➕ Log Purchase
+          </button>
+          <button
+            onClick={() => { goToHistory(); setShowConsumptionForm(true); }}
+            className="btn btn-primary"
+            style={{ background: '#c3922b' }}
+          >
+            📤 Log Usage
+          </button>
+          <button
+            onClick={() => { setShowPurchaseForm(false); setShowConsumptionForm(false); setShowScanReceipt(true); }}
+            className="btn btn-primary"
+            style={{ background: '#6366f1' }}
+          >
+            🤖 AI Scan Receipt
+          </button>
+          <button
+            onClick={goToHistory}
+            className="btn btn-soft"
+            style={{ background: '#e2e8f0', color: '#1e293b' }}
+          >
+            📋 History
+          </button>
         </div>
-        <div className="card filters-card">
-          <div className="filters-row">
-            <div className="filter-group"><label className="filter-label">Search History</label><input type="text" placeholder="Item, Vendor..." className="filter-input" value={search} onChange={(e) => setSearch(e.target.value)} /></div>
-            <div className="filter-group"><label className="filter-label">Filter Branch</label><select className="filter-select" value={hostelFilter} onChange={(e) => setHostelFilter(e.target.value)}><option value="ALL">All Branchs</option>{hostels.map(h => <option key={h.id} value={h.name}>{h.name}</option>)}</select></div>
-            <div className="filters-actions">{!isReadOnly && <label className="btn btn-soft" style={{ cursor: 'pointer' }}>📷 AI Scan Receipt<input type="file" hidden accept="image/*" onChange={handleOCRScan} /></label>}<button className="btn btn-soft" onClick={() => exportInventoryToPdf(filteredRows)}>PDF Report</button></div>
+      )}
+
+      {/* Main content area – switches between ScanReceiptPage and the rest */}
+      {showScanReceipt ? (
+        <ScanReceiptPage onClose={() => setShowScanReceipt(false)} />
+      ) : (
+        <>
+          {showPurchaseForm && (
+            <div className="card" style={{ border: '2px solid #10b981', marginBottom: '24px' }}>
+              <PurchaseEntryForm hostels={hostels} items={items} vendors={vendors} onCancel={() => setShowPurchaseForm(false)} onRefresh={loadData} />
+            </div>
+          )}
+          {showConsumptionForm && (
+            <div className="card" style={{ border: '2px solid #c3922b', marginBottom: '24px' }}>
+              <ConsumptionEntryForm hostels={hostels} items={items} onCancel={() => setShowConsumptionForm(false)} onRefresh={loadData} />
+            </div>
+          )}
+          <div className="cards-row">
+            <div className="card kpi-card">
+              <div className="card-title">Total Spend (PKR)</div>
+              <div className="card-value">{formatCurrency(totalSpend)}</div>
+              <div className="card-subtext">Across {lineCount} records</div>
+            </div>
+            <div className="card kpi-card">
+              <div className="card-title">Active Items</div>
+              <div className="card-value">{items.length}</div>
+              <div className="card-subtext">Monitored in inventory</div>
+            </div>
           </div>
-        </div>
-        <div className="card table-card">
-          <div className="card-title">Approved Purchase History</div>
-          <div className="table-wrapper">
-            <table className="inventory-table">
-              <thead><tr><th>Date</th><th>Branch</th><th>Vendor</th><th>Item</th><th>Qty</th><th>Total</th><th>Status</th>{!isReadOnly && <th>PO</th>}</tr></thead>
-              <tbody>
-                {filteredRows.map(row => (
-                  <tr key={row.id}><td>{formatDate(row.date)}</td><td>{row.hostel}</td><td>{row.vendor}</td><td>{row.item}</td><td>{row.quantity} {row.unit}</td><td style={{ fontWeight: 700 }}>{formatCurrency(row.total_cost)}</td><td><span className={`badge ${row.status === 'APPROVED' ? 'badge-success' : row.status === 'REJECTED' ? 'badge-danger' : 'badge-warning'}`}>{row.status || 'PENDING'}</span></td>{!isReadOnly && <td><button onClick={() => downloadPurchaseOrder(row.id)} className="btn btn-soft" style={{ padding: '4px 8px', fontSize: '0.7rem' }}>📄 PO</button></td>}</tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="card filters-card">
+            <div className="filters-row">
+              <div className="filter-group">
+                <label className="filter-label">Search History</label>
+                <input type="text" placeholder="Item, Vendor..." className="filter-input" value={search} onChange={(e) => setSearch(e.target.value)} />
+              </div>
+              <div className="filter-group">
+                <label className="filter-label">Filter Branch</label>
+                <select className="filter-select" value={hostelFilter} onChange={(e) => setHostelFilter(e.target.value)}>
+                  <option value="ALL">All Branchs</option>
+                  {hostels.map(h => <option key={h.id} value={h.name}>{h.name}</option>)}
+                </select>
+              </div>
+              <div className="filters-actions">
+                <button className="btn btn-soft" onClick={() => exportInventoryToPdf(filteredRows)}>PDF Report</button>
+              </div>
+            </div>
           </div>
-        </div>
+          <div className="card table-card">
+            <div className="card-title">Approved Purchase History</div>
+            <div className="table-wrapper">
+              <table className="inventory-table">
+                <thead>
+                  <tr>
+                    <th>Date</th><th>Branch</th><th>Vendor</th><th>Item</th><th>Qty</th><th>Total</th><th>Status</th>{!isReadOnly && <th>PO</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredRows.map(row => (
+                    <tr key={row.id}>
+                      <td>{formatDate(row.date)}</td>
+                      <td>{row.hostel}</td>
+                      <td>{row.vendor}</td>
+                      <td>{row.item}</td>
+                      <td>{row.quantity} {row.unit}</td>
+                      <td style={{ fontWeight: 700 }}>{formatCurrency(row.total_cost)}</td>
+                      <td>
+                        <span className={`badge ${row.status === 'APPROVED' ? 'badge-success' : row.status === 'REJECTED' ? 'badge-danger' : 'badge-warning'}`}>
+                          {row.status || 'PENDING'}
+                        </span>
+                      </td>
+                      {!isReadOnly && (
+                        <td>
+                          <button onClick={() => downloadPurchaseOrder(row.id)} className="btn btn-soft" style={{ padding: '4px 8px', fontSize: '0.7rem' }}>📄 PO</button>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

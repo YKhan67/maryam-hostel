@@ -1,0 +1,1853 @@
+============================================================
+          SQLITE DATABASE RELATIONSHIP REPORT          
+============================================================
+Database Analyzed: db.sqlite3
+Total Tables Found: 62
+
+1. TABLE DETAILS & PRIMARY KEYS
+-------------------------------
+
+Table: django_migrations
+  Columns: id, app, name, applied
+  Primary Key(s): id
+
+Table: django_content_type
+  Columns: id, app_label, model
+  Primary Key(s): id
+
+Table: auth_group_permissions
+  Columns: id, group_id, permission_id
+  Primary Key(s): id
+
+Table: auth_permission
+  Columns: id, content_type_id, codename, name
+  Primary Key(s): id
+
+Table: auth_group
+  Columns: id, name
+  Primary Key(s): id
+
+Table: accounts_user
+  Columns: id, password, last_login, is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined, role, hostel_id
+  Primary Key(s): id
+
+Table: accounts_user_groups
+  Columns: id, user_id, group_id
+  Primary Key(s): id
+
+Table: accounts_user_user_permissions
+  Columns: id, user_id, permission_id
+  Primary Key(s): id
+
+Table: django_admin_log
+  Columns: id, object_id, object_repr, action_flag, change_message, content_type_id, user_id, action_time
+  Primary Key(s): id
+
+Table: hostels_city
+  Columns: id, name, state, country
+  Primary Key(s): id
+
+Table: hostels_floor
+  Columns: id, number, building_id
+  Primary Key(s): id
+
+Table: hostels_hostel
+  Columns: id, name, code, address, phone, is_active, city_id
+  Primary Key(s): id
+
+Table: hostels_building
+  Columns: id, name, hostel_id
+  Primary Key(s): id
+
+Table: hostels_room
+  Columns: id, number, room_type, is_ac, base_rent, floor_id
+  Primary Key(s): id
+
+Table: hostels_bed
+  Columns: id, label, is_occupied, room_id
+  Primary Key(s): id
+
+Table: inventory_category
+  Columns: id, name
+  Primary Key(s): id
+
+Table: inventory_unit
+  Columns: id, name
+  Primary Key(s): id
+
+Table: inventory_vendor
+  Columns: id, name, contact_person, phone, whatsapp, address
+  Primary Key(s): id
+
+Table: django_session
+  Columns: session_key, session_data, expire_date
+  Primary Key(s): session_key
+
+Table: fees_paymentproof
+  Columns: id, uploaded_on, file, status, remarks, fee_id, uploaded_by_id
+  Primary Key(s): id
+
+Table: fees_feehead
+  Columns: id, name, description, is_recurring, frequency, default_amount
+  Primary Key(s): id
+
+Table: fees_feerule
+  Columns: id, late_fee_type, fixed_amount, per_day_amount, fee_head_id, due_day
+  Primary Key(s): id
+
+Table: django_celery_beat_intervalschedule
+  Columns: id, every, period
+  Primary Key(s): id
+
+Table: django_celery_beat_periodictasks
+  Columns: ident, last_update
+  Primary Key(s): ident
+
+Table: django_celery_beat_solarschedule
+  Columns: id, event, latitude, longitude
+  Primary Key(s): id
+
+Table: django_celery_beat_periodictask
+  Columns: id, name, task, args, kwargs, queue, exchange, routing_key, expires, enabled, last_run_at, total_run_count, date_changed, description, crontab_id, interval_id, solar_id, one_off, start_time, priority, headers, clocked_id, expire_seconds
+  Primary Key(s): id
+
+Table: django_celery_beat_clockedschedule
+  Columns: id, clocked_time
+  Primary Key(s): id
+
+Table: django_celery_beat_crontabschedule
+  Columns: id, minute, hour, day_of_week, day_of_month, month_of_year, timezone
+  Primary Key(s): id
+
+Table: django_celery_results_groupresult
+  Columns: id, group_id, date_created, date_done, content_type, content_encoding, result
+  Primary Key(s): id
+
+Table: django_celery_results_chordcounter
+  Columns: id, sub_tasks, count, group_id
+  Primary Key(s): id
+
+Table: django_celery_results_taskresult
+  Columns: id, task_id, status, content_type, content_encoding, result, date_done, traceback, meta, task_args, task_kwargs, task_name, date_created, worker, periodic_task_name, date_started
+  Primary Key(s): id
+
+Table: inventory_consumption
+  Columns: id, date, quantity, remarks, created_at, hostel_id, item_id, photo
+  Primary Key(s): id
+
+Table: communication_slasetting
+  Columns: id, category, response_time_hours
+  Primary Key(s): id
+
+Table: communication_ticket
+  Columns: id, category, subject, description, status, created_at, updated_at, resolved_at, is_escalated, last_reminded_at, assigned_to_id, hostel_id, student_id, asset_id
+  Primary Key(s): id
+
+Table: inventory_item
+  Columns: id, code, name, is_active, category_id, unit_id, reorder_level
+  Primary Key(s): id
+
+Table: inventory_purchase
+  Columns: id, date, invoice_no, quantity, price_per_unit, created_at, hostel_id, item_id, vendor_id, invoice_photo, items_photo, approved_by_id, rejection_remarks, status
+  Primary Key(s): id
+
+Table: fees_receipt
+  Columns: id, receipt_no, amount, date_issued, payment_method, fee_id
+  Primary Key(s): id
+
+Table: fees_securitydeposit
+  Columns: id, amount, date_paid, status, refund_date, remarks, student_id
+  Primary Key(s): id
+
+Table: payroll_payrollrecord
+  Columns: id, month, status, total_net_payout, created_at, authorized_by_id
+  Primary Key(s): id
+
+Table: payroll_salaryadvance
+  Columns: id, amount, date_given, is_deducted, remarks, employee_id
+  Primary Key(s): id
+
+Table: payroll_salaryslip
+  Columns: id, base_pay, allowances, task_count, task_pay, bonus, deductions, advance_deduction, net_salary, receipt_no, is_disbursed, disbursed_at, employee_id, payroll_master_id
+  Primary Key(s): id
+
+Table: finance_assetcategory
+  Columns: id, name, depreciation_rate_annual
+  Primary Key(s): id
+
+Table: finance_liability
+  Columns: id, name, type, total_amount, remaining_amount, due_date, is_settled, hostel_id
+  Primary Key(s): id
+
+Table: finance_partnercapital
+  Columns: id, amount, date_invested, remarks, hostel_id, partner_id
+  Primary Key(s): id
+
+Table: accounts_modulepermission
+  Columns: id, module_name, can_view, can_add, can_edit, can_delete, user_id, role
+  Primary Key(s): id
+
+Table: finance_asset
+  Columns: id, name, serial_number, quantity, purchase_date, purchase_price, current_value, warranty_expiry, status, remarks, category_id, hostel_id, created_at, sale_price, sold_date, updated_at
+  Primary Key(s): id
+
+Table: hostels_studentutilitycharge
+  Columns: id, name, amount, is_active, created_at, updated_at, student_id
+  Primary Key(s): id
+
+Table: hostels_studentprofile
+  Columns: id, mobile, whatsapp, guardian_name, guardian_phone, college_name, course, year, is_active, joined_on, left_on, bed_id, hostel_id, user_id, nic_back_picture, nic_front_picture, nic_number, profile_picture, parent_phone, parent_whatsapp, parent_link_token, guardian_nic_number, parent_name, parent_nic_number, monthly_rent
+  Primary Key(s): id
+
+Table: payroll_employeeprofile
+  Columns: id, designation, pay_type, nic_front_picture, nic_back_picture, profile_picture, base_salary, housing_allowance, fuel_allowance, other_allowance, rate_per_task, bank_name, iban, joined_on, is_active, user_id, mobile, whatsapp, nic_number
+  Primary Key(s): id
+
+Table: food_mealcategory
+  Columns: id, name, emoji, description, is_active
+  Primary Key(s): id
+
+Table: food_dailymenu
+  Columns: id, date, meal_type, special_note, is_featured, created_at, updated_at, created_by_id, hostel_id, meal_id
+  Primary Key(s): id
+
+Table: food_meal
+  Columns: id, name, description, dietary_tags, preparation_time, calories, protein, is_active, created_at, updated_at, category_id
+  Primary Key(s): id
+
+Table: food_weeklymenutemplate
+  Columns: id, name, description, is_active, created_at, hostel_id, monday_breakfast_id, monday_dinner_id, monday_lunch_id, friday_breakfast_id, friday_dinner_id, friday_lunch_id, saturday_breakfast_id, saturday_dinner_id, saturday_lunch_id, sunday_breakfast_id, sunday_dinner_id, sunday_lunch_id, thursday_breakfast_id, thursday_dinner_id, thursday_lunch_id, tuesday_breakfast_id, tuesday_dinner_id, tuesday_lunch_id, wednesday_breakfast_id, wednesday_dinner_id, wednesday_lunch_id
+  Primary Key(s): id
+
+Table: food_mealfeedback
+  Columns: id, rating, comment, created_at, daily_menu_id, student_id
+  Primary Key(s): id
+
+Table: food_groceryrequirement
+  Columns: id, start_date, end_date, quantity_needed, unit, estimated_cost, actual_cost, status, created_at, updated_at, hostel_id, item_id, notes
+  Primary Key(s): id
+
+Table: bi_customreport
+  Columns: id, name, description, tables, fields, filters, group_by, sort_by, date_range, distinct, is_scheduled, schedule_frequency, schedule_time, schedule_recipients, is_shared, shared_with_roles, created_at, updated_at, last_run, created_by_id
+  Primary Key(s): id
+
+Table: bi_customreportresult
+  Columns: id, data, generated_at, generated_by_id, report_id
+  Primary Key(s): id
+
+Table: bi_reporttemplate
+  Columns: id, name, report_type, description, config, is_active, created_at, updated_at, created_by_id
+  Primary Key(s): id
+
+Table: bi_savedreport
+  Columns: id, name, filters, data, created_at, last_run, created_by_id, template_id
+  Primary Key(s): id
+
+Table: food_mealrecipe
+  Columns: id, quantity_required, unit, estimated_cost, item_id, meal_id, substitute_item_id, waste_factor
+  Primary Key(s): id
+
+Table: fees_studentutilitybill
+  Columns: id, student_id, month, amount, amount_paid, is_paid, created_at
+  Primary Key(s): id
+
+Table: fees_monthlyfee
+  Columns: id, month, amount, amount_paid, is_paid, is_partially_paid, late_fee_applied, created_at, fee_head_id, student_id, fine_waived_amount, fine_was_waived
+  Primary Key(s): id
+
+============================================================
+2. EXPLICIT RELATIONSHIPS (FOREIGN KEYS)
+----------------------------------------
+• Table [auth_group_permissions] links to Table [auth_permission]
+  Key Match Rule: auth_group_permissions.permission_id = auth_permission.id
+  SQL Join Example: FROM auth_group_permissions JOIN auth_permission ON auth_group_permissions.permission_id = auth_permission.id
+
+• Table [auth_group_permissions] links to Table [auth_group]
+  Key Match Rule: auth_group_permissions.group_id = auth_group.id
+  SQL Join Example: FROM auth_group_permissions JOIN auth_group ON auth_group_permissions.group_id = auth_group.id
+
+• Table [auth_permission] links to Table [django_content_type]
+  Key Match Rule: auth_permission.content_type_id = django_content_type.id
+  SQL Join Example: FROM auth_permission JOIN django_content_type ON auth_permission.content_type_id = django_content_type.id
+
+• Table [accounts_user] links to Table [hostels_hostel]
+  Key Match Rule: accounts_user.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM accounts_user JOIN hostels_hostel ON accounts_user.hostel_id = hostels_hostel.id
+
+• Table [accounts_user_groups] links to Table [auth_group]
+  Key Match Rule: accounts_user_groups.group_id = auth_group.id
+  SQL Join Example: FROM accounts_user_groups JOIN auth_group ON accounts_user_groups.group_id = auth_group.id
+
+• Table [accounts_user_groups] links to Table [accounts_user]
+  Key Match Rule: accounts_user_groups.user_id = accounts_user.id
+  SQL Join Example: FROM accounts_user_groups JOIN accounts_user ON accounts_user_groups.user_id = accounts_user.id
+
+• Table [accounts_user_user_permissions] links to Table [auth_permission]
+  Key Match Rule: accounts_user_user_permissions.permission_id = auth_permission.id
+  SQL Join Example: FROM accounts_user_user_permissions JOIN auth_permission ON accounts_user_user_permissions.permission_id = auth_permission.id
+
+• Table [accounts_user_user_permissions] links to Table [accounts_user]
+  Key Match Rule: accounts_user_user_permissions.user_id = accounts_user.id
+  SQL Join Example: FROM accounts_user_user_permissions JOIN accounts_user ON accounts_user_user_permissions.user_id = accounts_user.id
+
+• Table [django_admin_log] links to Table [accounts_user]
+  Key Match Rule: django_admin_log.user_id = accounts_user.id
+  SQL Join Example: FROM django_admin_log JOIN accounts_user ON django_admin_log.user_id = accounts_user.id
+
+• Table [django_admin_log] links to Table [django_content_type]
+  Key Match Rule: django_admin_log.content_type_id = django_content_type.id
+  SQL Join Example: FROM django_admin_log JOIN django_content_type ON django_admin_log.content_type_id = django_content_type.id
+
+• Table [hostels_floor] links to Table [hostels_building]
+  Key Match Rule: hostels_floor.building_id = hostels_building.id
+  SQL Join Example: FROM hostels_floor JOIN hostels_building ON hostels_floor.building_id = hostels_building.id
+
+• Table [hostels_hostel] links to Table [hostels_city]
+  Key Match Rule: hostels_hostel.city_id = hostels_city.id
+  SQL Join Example: FROM hostels_hostel JOIN hostels_city ON hostels_hostel.city_id = hostels_city.id
+
+• Table [hostels_building] links to Table [hostels_hostel]
+  Key Match Rule: hostels_building.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM hostels_building JOIN hostels_hostel ON hostels_building.hostel_id = hostels_hostel.id
+
+• Table [hostels_room] links to Table [hostels_floor]
+  Key Match Rule: hostels_room.floor_id = hostels_floor.id
+  SQL Join Example: FROM hostels_room JOIN hostels_floor ON hostels_room.floor_id = hostels_floor.id
+
+• Table [hostels_bed] links to Table [hostels_room]
+  Key Match Rule: hostels_bed.room_id = hostels_room.id
+  SQL Join Example: FROM hostels_bed JOIN hostels_room ON hostels_bed.room_id = hostels_room.id
+
+• Table [fees_paymentproof] links to Table [accounts_user]
+  Key Match Rule: fees_paymentproof.uploaded_by_id = accounts_user.id
+  SQL Join Example: FROM fees_paymentproof JOIN accounts_user ON fees_paymentproof.uploaded_by_id = accounts_user.id
+
+• Table [fees_paymentproof] links to Table [fees_monthlyfee]
+  Key Match Rule: fees_paymentproof.fee_id = fees_monthlyfee.id
+  SQL Join Example: FROM fees_paymentproof JOIN fees_monthlyfee ON fees_paymentproof.fee_id = fees_monthlyfee.id
+
+• Table [fees_feerule] links to Table [fees_feehead]
+  Key Match Rule: fees_feerule.fee_head_id = fees_feehead.id
+  SQL Join Example: FROM fees_feerule JOIN fees_feehead ON fees_feerule.fee_head_id = fees_feehead.id
+
+• Table [django_celery_beat_periodictask] links to Table [django_celery_beat_clockedschedule]
+  Key Match Rule: django_celery_beat_periodictask.clocked_id = django_celery_beat_clockedschedule.id
+  SQL Join Example: FROM django_celery_beat_periodictask JOIN django_celery_beat_clockedschedule ON django_celery_beat_periodictask.clocked_id = django_celery_beat_clockedschedule.id
+
+• Table [django_celery_beat_periodictask] links to Table [django_celery_beat_solarschedule]
+  Key Match Rule: django_celery_beat_periodictask.solar_id = django_celery_beat_solarschedule.id
+  SQL Join Example: FROM django_celery_beat_periodictask JOIN django_celery_beat_solarschedule ON django_celery_beat_periodictask.solar_id = django_celery_beat_solarschedule.id
+
+• Table [django_celery_beat_periodictask] links to Table [django_celery_beat_intervalschedule]
+  Key Match Rule: django_celery_beat_periodictask.interval_id = django_celery_beat_intervalschedule.id
+  SQL Join Example: FROM django_celery_beat_periodictask JOIN django_celery_beat_intervalschedule ON django_celery_beat_periodictask.interval_id = django_celery_beat_intervalschedule.id
+
+• Table [django_celery_beat_periodictask] links to Table [django_celery_beat_crontabschedule]
+  Key Match Rule: django_celery_beat_periodictask.crontab_id = django_celery_beat_crontabschedule.id
+  SQL Join Example: FROM django_celery_beat_periodictask JOIN django_celery_beat_crontabschedule ON django_celery_beat_periodictask.crontab_id = django_celery_beat_crontabschedule.id
+
+• Table [inventory_consumption] links to Table [inventory_item]
+  Key Match Rule: inventory_consumption.item_id = inventory_item.id
+  SQL Join Example: FROM inventory_consumption JOIN inventory_item ON inventory_consumption.item_id = inventory_item.id
+
+• Table [inventory_consumption] links to Table [hostels_hostel]
+  Key Match Rule: inventory_consumption.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM inventory_consumption JOIN hostels_hostel ON inventory_consumption.hostel_id = hostels_hostel.id
+
+• Table [communication_ticket] links to Table [finance_asset]
+  Key Match Rule: communication_ticket.asset_id = finance_asset.id
+  SQL Join Example: FROM communication_ticket JOIN finance_asset ON communication_ticket.asset_id = finance_asset.id
+
+• Table [communication_ticket] links to Table [hostels_studentprofile]
+  Key Match Rule: communication_ticket.student_id = hostels_studentprofile.id
+  SQL Join Example: FROM communication_ticket JOIN hostels_studentprofile ON communication_ticket.student_id = hostels_studentprofile.id
+
+• Table [communication_ticket] links to Table [hostels_hostel]
+  Key Match Rule: communication_ticket.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM communication_ticket JOIN hostels_hostel ON communication_ticket.hostel_id = hostels_hostel.id
+
+• Table [communication_ticket] links to Table [accounts_user]
+  Key Match Rule: communication_ticket.assigned_to_id = accounts_user.id
+  SQL Join Example: FROM communication_ticket JOIN accounts_user ON communication_ticket.assigned_to_id = accounts_user.id
+
+• Table [inventory_item] links to Table [inventory_unit]
+  Key Match Rule: inventory_item.unit_id = inventory_unit.id
+  SQL Join Example: FROM inventory_item JOIN inventory_unit ON inventory_item.unit_id = inventory_unit.id
+
+• Table [inventory_item] links to Table [inventory_category]
+  Key Match Rule: inventory_item.category_id = inventory_category.id
+  SQL Join Example: FROM inventory_item JOIN inventory_category ON inventory_item.category_id = inventory_category.id
+
+• Table [inventory_purchase] links to Table [accounts_user]
+  Key Match Rule: inventory_purchase.approved_by_id = accounts_user.id
+  SQL Join Example: FROM inventory_purchase JOIN accounts_user ON inventory_purchase.approved_by_id = accounts_user.id
+
+• Table [inventory_purchase] links to Table [inventory_vendor]
+  Key Match Rule: inventory_purchase.vendor_id = inventory_vendor.id
+  SQL Join Example: FROM inventory_purchase JOIN inventory_vendor ON inventory_purchase.vendor_id = inventory_vendor.id
+
+• Table [inventory_purchase] links to Table [inventory_item]
+  Key Match Rule: inventory_purchase.item_id = inventory_item.id
+  SQL Join Example: FROM inventory_purchase JOIN inventory_item ON inventory_purchase.item_id = inventory_item.id
+
+• Table [inventory_purchase] links to Table [hostels_hostel]
+  Key Match Rule: inventory_purchase.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM inventory_purchase JOIN hostels_hostel ON inventory_purchase.hostel_id = hostels_hostel.id
+
+• Table [fees_receipt] links to Table [fees_monthlyfee]
+  Key Match Rule: fees_receipt.fee_id = fees_monthlyfee.id
+  SQL Join Example: FROM fees_receipt JOIN fees_monthlyfee ON fees_receipt.fee_id = fees_monthlyfee.id
+
+• Table [fees_securitydeposit] links to Table [hostels_studentprofile]
+  Key Match Rule: fees_securitydeposit.student_id = hostels_studentprofile.id
+  SQL Join Example: FROM fees_securitydeposit JOIN hostels_studentprofile ON fees_securitydeposit.student_id = hostels_studentprofile.id
+
+• Table [payroll_payrollrecord] links to Table [accounts_user]
+  Key Match Rule: payroll_payrollrecord.authorized_by_id = accounts_user.id
+  SQL Join Example: FROM payroll_payrollrecord JOIN accounts_user ON payroll_payrollrecord.authorized_by_id = accounts_user.id
+
+• Table [payroll_salaryadvance] links to Table [payroll_employeeprofile]
+  Key Match Rule: payroll_salaryadvance.employee_id = payroll_employeeprofile.id
+  SQL Join Example: FROM payroll_salaryadvance JOIN payroll_employeeprofile ON payroll_salaryadvance.employee_id = payroll_employeeprofile.id
+
+• Table [payroll_salaryslip] links to Table [payroll_payrollrecord]
+  Key Match Rule: payroll_salaryslip.payroll_master_id = payroll_payrollrecord.id
+  SQL Join Example: FROM payroll_salaryslip JOIN payroll_payrollrecord ON payroll_salaryslip.payroll_master_id = payroll_payrollrecord.id
+
+• Table [payroll_salaryslip] links to Table [payroll_employeeprofile]
+  Key Match Rule: payroll_salaryslip.employee_id = payroll_employeeprofile.id
+  SQL Join Example: FROM payroll_salaryslip JOIN payroll_employeeprofile ON payroll_salaryslip.employee_id = payroll_employeeprofile.id
+
+• Table [finance_liability] links to Table [hostels_hostel]
+  Key Match Rule: finance_liability.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM finance_liability JOIN hostels_hostel ON finance_liability.hostel_id = hostels_hostel.id
+
+• Table [finance_partnercapital] links to Table [accounts_user]
+  Key Match Rule: finance_partnercapital.partner_id = accounts_user.id
+  SQL Join Example: FROM finance_partnercapital JOIN accounts_user ON finance_partnercapital.partner_id = accounts_user.id
+
+• Table [finance_partnercapital] links to Table [hostels_hostel]
+  Key Match Rule: finance_partnercapital.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM finance_partnercapital JOIN hostels_hostel ON finance_partnercapital.hostel_id = hostels_hostel.id
+
+• Table [accounts_modulepermission] links to Table [accounts_user]
+  Key Match Rule: accounts_modulepermission.user_id = accounts_user.id
+  SQL Join Example: FROM accounts_modulepermission JOIN accounts_user ON accounts_modulepermission.user_id = accounts_user.id
+
+• Table [finance_asset] links to Table [hostels_hostel]
+  Key Match Rule: finance_asset.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM finance_asset JOIN hostels_hostel ON finance_asset.hostel_id = hostels_hostel.id
+
+• Table [finance_asset] links to Table [finance_assetcategory]
+  Key Match Rule: finance_asset.category_id = finance_assetcategory.id
+  SQL Join Example: FROM finance_asset JOIN finance_assetcategory ON finance_asset.category_id = finance_assetcategory.id
+
+• Table [hostels_studentutilitycharge] links to Table [hostels_studentprofile]
+  Key Match Rule: hostels_studentutilitycharge.student_id = hostels_studentprofile.id
+  SQL Join Example: FROM hostels_studentutilitycharge JOIN hostels_studentprofile ON hostels_studentutilitycharge.student_id = hostels_studentprofile.id
+
+• Table [hostels_studentprofile] links to Table [accounts_user]
+  Key Match Rule: hostels_studentprofile.user_id = accounts_user.id
+  SQL Join Example: FROM hostels_studentprofile JOIN accounts_user ON hostels_studentprofile.user_id = accounts_user.id
+
+• Table [hostels_studentprofile] links to Table [hostels_hostel]
+  Key Match Rule: hostels_studentprofile.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM hostels_studentprofile JOIN hostels_hostel ON hostels_studentprofile.hostel_id = hostels_hostel.id
+
+• Table [hostels_studentprofile] links to Table [hostels_bed]
+  Key Match Rule: hostels_studentprofile.bed_id = hostels_bed.id
+  SQL Join Example: FROM hostels_studentprofile JOIN hostels_bed ON hostels_studentprofile.bed_id = hostels_bed.id
+
+• Table [payroll_employeeprofile] links to Table [accounts_user]
+  Key Match Rule: payroll_employeeprofile.user_id = accounts_user.id
+  SQL Join Example: FROM payroll_employeeprofile JOIN accounts_user ON payroll_employeeprofile.user_id = accounts_user.id
+
+• Table [food_dailymenu] links to Table [food_meal]
+  Key Match Rule: food_dailymenu.meal_id = food_meal.id
+  SQL Join Example: FROM food_dailymenu JOIN food_meal ON food_dailymenu.meal_id = food_meal.id
+
+• Table [food_dailymenu] links to Table [hostels_hostel]
+  Key Match Rule: food_dailymenu.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM food_dailymenu JOIN hostels_hostel ON food_dailymenu.hostel_id = hostels_hostel.id
+
+• Table [food_dailymenu] links to Table [accounts_user]
+  Key Match Rule: food_dailymenu.created_by_id = accounts_user.id
+  SQL Join Example: FROM food_dailymenu JOIN accounts_user ON food_dailymenu.created_by_id = accounts_user.id
+
+• Table [food_meal] links to Table [food_mealcategory]
+  Key Match Rule: food_meal.category_id = food_mealcategory.id
+  SQL Join Example: FROM food_meal JOIN food_mealcategory ON food_meal.category_id = food_mealcategory.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.wednesday_lunch_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.wednesday_lunch_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.wednesday_dinner_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.wednesday_dinner_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.wednesday_breakfast_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.wednesday_breakfast_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.tuesday_lunch_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.tuesday_lunch_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.tuesday_dinner_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.tuesday_dinner_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.tuesday_breakfast_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.tuesday_breakfast_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.thursday_lunch_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.thursday_lunch_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.thursday_dinner_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.thursday_dinner_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.thursday_breakfast_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.thursday_breakfast_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.sunday_lunch_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.sunday_lunch_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.sunday_dinner_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.sunday_dinner_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.sunday_breakfast_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.sunday_breakfast_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.saturday_lunch_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.saturday_lunch_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.saturday_dinner_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.saturday_dinner_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.saturday_breakfast_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.saturday_breakfast_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.friday_lunch_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.friday_lunch_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.friday_dinner_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.friday_dinner_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.friday_breakfast_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.friday_breakfast_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.monday_lunch_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.monday_lunch_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.monday_dinner_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.monday_dinner_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [food_meal]
+  Key Match Rule: food_weeklymenutemplate.monday_breakfast_id = food_meal.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_meal ON food_weeklymenutemplate.monday_breakfast_id = food_meal.id
+
+• Table [food_weeklymenutemplate] links to Table [hostels_hostel]
+  Key Match Rule: food_weeklymenutemplate.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN hostels_hostel ON food_weeklymenutemplate.hostel_id = hostels_hostel.id
+
+• Table [food_mealfeedback] links to Table [hostels_studentprofile]
+  Key Match Rule: food_mealfeedback.student_id = hostels_studentprofile.id
+  SQL Join Example: FROM food_mealfeedback JOIN hostels_studentprofile ON food_mealfeedback.student_id = hostels_studentprofile.id
+
+• Table [food_mealfeedback] links to Table [food_dailymenu]
+  Key Match Rule: food_mealfeedback.daily_menu_id = food_dailymenu.id
+  SQL Join Example: FROM food_mealfeedback JOIN food_dailymenu ON food_mealfeedback.daily_menu_id = food_dailymenu.id
+
+• Table [food_groceryrequirement] links to Table [inventory_item]
+  Key Match Rule: food_groceryrequirement.item_id = inventory_item.id
+  SQL Join Example: FROM food_groceryrequirement JOIN inventory_item ON food_groceryrequirement.item_id = inventory_item.id
+
+• Table [food_groceryrequirement] links to Table [hostels_hostel]
+  Key Match Rule: food_groceryrequirement.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM food_groceryrequirement JOIN hostels_hostel ON food_groceryrequirement.hostel_id = hostels_hostel.id
+
+• Table [bi_customreport] links to Table [accounts_user]
+  Key Match Rule: bi_customreport.created_by_id = accounts_user.id
+  SQL Join Example: FROM bi_customreport JOIN accounts_user ON bi_customreport.created_by_id = accounts_user.id
+
+• Table [bi_customreportresult] links to Table [bi_customreport]
+  Key Match Rule: bi_customreportresult.report_id = bi_customreport.id
+  SQL Join Example: FROM bi_customreportresult JOIN bi_customreport ON bi_customreportresult.report_id = bi_customreport.id
+
+• Table [bi_customreportresult] links to Table [accounts_user]
+  Key Match Rule: bi_customreportresult.generated_by_id = accounts_user.id
+  SQL Join Example: FROM bi_customreportresult JOIN accounts_user ON bi_customreportresult.generated_by_id = accounts_user.id
+
+• Table [bi_reporttemplate] links to Table [accounts_user]
+  Key Match Rule: bi_reporttemplate.created_by_id = accounts_user.id
+  SQL Join Example: FROM bi_reporttemplate JOIN accounts_user ON bi_reporttemplate.created_by_id = accounts_user.id
+
+• Table [bi_savedreport] links to Table [bi_reporttemplate]
+  Key Match Rule: bi_savedreport.template_id = bi_reporttemplate.id
+  SQL Join Example: FROM bi_savedreport JOIN bi_reporttemplate ON bi_savedreport.template_id = bi_reporttemplate.id
+
+• Table [bi_savedreport] links to Table [accounts_user]
+  Key Match Rule: bi_savedreport.created_by_id = accounts_user.id
+  SQL Join Example: FROM bi_savedreport JOIN accounts_user ON bi_savedreport.created_by_id = accounts_user.id
+
+• Table [food_mealrecipe] links to Table [inventory_item]
+  Key Match Rule: food_mealrecipe.substitute_item_id = inventory_item.id
+  SQL Join Example: FROM food_mealrecipe JOIN inventory_item ON food_mealrecipe.substitute_item_id = inventory_item.id
+
+• Table [food_mealrecipe] links to Table [food_meal]
+  Key Match Rule: food_mealrecipe.meal_id = food_meal.id
+  SQL Join Example: FROM food_mealrecipe JOIN food_meal ON food_mealrecipe.meal_id = food_meal.id
+
+• Table [food_mealrecipe] links to Table [inventory_item]
+  Key Match Rule: food_mealrecipe.item_id = inventory_item.id
+  SQL Join Example: FROM food_mealrecipe JOIN inventory_item ON food_mealrecipe.item_id = inventory_item.id
+
+• Table [fees_studentutilitybill] links to Table [hostels_studentprofile]
+  Key Match Rule: fees_studentutilitybill.student_id = hostels_studentprofile.id
+  SQL Join Example: FROM fees_studentutilitybill JOIN hostels_studentprofile ON fees_studentutilitybill.student_id = hostels_studentprofile.id
+
+• Table [fees_monthlyfee] links to Table [hostels_studentprofile]
+  Key Match Rule: fees_monthlyfee.student_id = hostels_studentprofile.id
+  SQL Join Example: FROM fees_monthlyfee JOIN hostels_studentprofile ON fees_monthlyfee.student_id = hostels_studentprofile.id
+
+• Table [fees_monthlyfee] links to Table [fees_feehead]
+  Key Match Rule: fees_monthlyfee.fee_head_id = fees_feehead.id
+  SQL Join Example: FROM fees_monthlyfee JOIN fees_feehead ON fees_monthlyfee.fee_head_id = fees_feehead.id
+
+
+============================================================
+3. IMPLICIT SMART GUESSES (NAMING CONVENTIONS)
+----------------------------------------------
+The fields below look like links because their names match columns in other tables:
+
+• Potential Link: Table [auth_group_permissions] to Table [auth_group]
+  Suggested Match: auth_group_permissions.group_id = auth_group.id
+  SQL Join Example: FROM auth_group_permissions JOIN auth_group ON auth_group_permissions.group_id = auth_group.id
+
+• Potential Link: Table [auth_group_permissions] to Table [accounts_user_groups]
+  Suggested Match: auth_group_permissions.group_id = accounts_user_groups.group_id
+  SQL Join Example: FROM auth_group_permissions JOIN accounts_user_groups ON auth_group_permissions.group_id = accounts_user_groups.group_id
+
+• Potential Link: Table [auth_group_permissions] to Table [django_celery_results_groupresult]
+  Suggested Match: auth_group_permissions.group_id = django_celery_results_groupresult.group_id
+  SQL Join Example: FROM auth_group_permissions JOIN django_celery_results_groupresult ON auth_group_permissions.group_id = django_celery_results_groupresult.group_id
+
+• Potential Link: Table [auth_group_permissions] to Table [django_celery_results_chordcounter]
+  Suggested Match: auth_group_permissions.group_id = django_celery_results_chordcounter.group_id
+  SQL Join Example: FROM auth_group_permissions JOIN django_celery_results_chordcounter ON auth_group_permissions.group_id = django_celery_results_chordcounter.group_id
+
+• Potential Link: Table [auth_group_permissions] to Table [auth_permission]
+  Suggested Match: auth_group_permissions.permission_id = auth_permission.id
+  SQL Join Example: FROM auth_group_permissions JOIN auth_permission ON auth_group_permissions.permission_id = auth_permission.id
+
+• Potential Link: Table [auth_group_permissions] to Table [accounts_user_user_permissions]
+  Suggested Match: auth_group_permissions.permission_id = accounts_user_user_permissions.permission_id
+  SQL Join Example: FROM auth_group_permissions JOIN accounts_user_user_permissions ON auth_group_permissions.permission_id = accounts_user_user_permissions.permission_id
+
+• Potential Link: Table [auth_group_permissions] to Table [accounts_modulepermission]
+  Suggested Match: auth_group_permissions.permission_id = accounts_modulepermission.id
+  SQL Join Example: FROM auth_group_permissions JOIN accounts_modulepermission ON auth_group_permissions.permission_id = accounts_modulepermission.id
+
+• Potential Link: Table [auth_permission] to Table [django_content_type]
+  Suggested Match: auth_permission.content_type_id = django_content_type.id
+  SQL Join Example: FROM auth_permission JOIN django_content_type ON auth_permission.content_type_id = django_content_type.id
+
+• Potential Link: Table [auth_permission] to Table [django_admin_log]
+  Suggested Match: auth_permission.content_type_id = django_admin_log.content_type_id
+  SQL Join Example: FROM auth_permission JOIN django_admin_log ON auth_permission.content_type_id = django_admin_log.content_type_id
+
+• Potential Link: Table [accounts_user] to Table [hostels_hostel]
+  Suggested Match: accounts_user.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM accounts_user JOIN hostels_hostel ON accounts_user.hostel_id = hostels_hostel.id
+
+• Potential Link: Table [accounts_user] to Table [hostels_building]
+  Suggested Match: accounts_user.hostel_id = hostels_building.hostel_id
+  SQL Join Example: FROM accounts_user JOIN hostels_building ON accounts_user.hostel_id = hostels_building.hostel_id
+
+• Potential Link: Table [accounts_user] to Table [inventory_consumption]
+  Suggested Match: accounts_user.hostel_id = inventory_consumption.hostel_id
+  SQL Join Example: FROM accounts_user JOIN inventory_consumption ON accounts_user.hostel_id = inventory_consumption.hostel_id
+
+• Potential Link: Table [accounts_user] to Table [communication_ticket]
+  Suggested Match: accounts_user.hostel_id = communication_ticket.hostel_id
+  SQL Join Example: FROM accounts_user JOIN communication_ticket ON accounts_user.hostel_id = communication_ticket.hostel_id
+
+• Potential Link: Table [accounts_user] to Table [inventory_purchase]
+  Suggested Match: accounts_user.hostel_id = inventory_purchase.hostel_id
+  SQL Join Example: FROM accounts_user JOIN inventory_purchase ON accounts_user.hostel_id = inventory_purchase.hostel_id
+
+• Potential Link: Table [accounts_user] to Table [finance_liability]
+  Suggested Match: accounts_user.hostel_id = finance_liability.hostel_id
+  SQL Join Example: FROM accounts_user JOIN finance_liability ON accounts_user.hostel_id = finance_liability.hostel_id
+
+• Potential Link: Table [accounts_user] to Table [finance_partnercapital]
+  Suggested Match: accounts_user.hostel_id = finance_partnercapital.hostel_id
+  SQL Join Example: FROM accounts_user JOIN finance_partnercapital ON accounts_user.hostel_id = finance_partnercapital.hostel_id
+
+• Potential Link: Table [accounts_user] to Table [finance_asset]
+  Suggested Match: accounts_user.hostel_id = finance_asset.hostel_id
+  SQL Join Example: FROM accounts_user JOIN finance_asset ON accounts_user.hostel_id = finance_asset.hostel_id
+
+• Potential Link: Table [accounts_user] to Table [hostels_studentprofile]
+  Suggested Match: accounts_user.hostel_id = hostels_studentprofile.hostel_id
+  SQL Join Example: FROM accounts_user JOIN hostels_studentprofile ON accounts_user.hostel_id = hostels_studentprofile.hostel_id
+
+• Potential Link: Table [accounts_user] to Table [food_dailymenu]
+  Suggested Match: accounts_user.hostel_id = food_dailymenu.hostel_id
+  SQL Join Example: FROM accounts_user JOIN food_dailymenu ON accounts_user.hostel_id = food_dailymenu.hostel_id
+
+• Potential Link: Table [accounts_user] to Table [food_weeklymenutemplate]
+  Suggested Match: accounts_user.hostel_id = food_weeklymenutemplate.hostel_id
+  SQL Join Example: FROM accounts_user JOIN food_weeklymenutemplate ON accounts_user.hostel_id = food_weeklymenutemplate.hostel_id
+
+• Potential Link: Table [accounts_user] to Table [food_groceryrequirement]
+  Suggested Match: accounts_user.hostel_id = food_groceryrequirement.hostel_id
+  SQL Join Example: FROM accounts_user JOIN food_groceryrequirement ON accounts_user.hostel_id = food_groceryrequirement.hostel_id
+
+• Potential Link: Table [accounts_user_groups] to Table [accounts_user]
+  Suggested Match: accounts_user_groups.user_id = accounts_user.id
+  SQL Join Example: FROM accounts_user_groups JOIN accounts_user ON accounts_user_groups.user_id = accounts_user.id
+
+• Potential Link: Table [accounts_user_groups] to Table [accounts_user_user_permissions]
+  Suggested Match: accounts_user_groups.user_id = accounts_user_user_permissions.user_id
+  SQL Join Example: FROM accounts_user_groups JOIN accounts_user_user_permissions ON accounts_user_groups.user_id = accounts_user_user_permissions.user_id
+
+• Potential Link: Table [accounts_user_groups] to Table [django_admin_log]
+  Suggested Match: accounts_user_groups.user_id = django_admin_log.user_id
+  SQL Join Example: FROM accounts_user_groups JOIN django_admin_log ON accounts_user_groups.user_id = django_admin_log.user_id
+
+• Potential Link: Table [accounts_user_groups] to Table [accounts_modulepermission]
+  Suggested Match: accounts_user_groups.user_id = accounts_modulepermission.user_id
+  SQL Join Example: FROM accounts_user_groups JOIN accounts_modulepermission ON accounts_user_groups.user_id = accounts_modulepermission.user_id
+
+• Potential Link: Table [accounts_user_groups] to Table [hostels_studentprofile]
+  Suggested Match: accounts_user_groups.user_id = hostels_studentprofile.user_id
+  SQL Join Example: FROM accounts_user_groups JOIN hostels_studentprofile ON accounts_user_groups.user_id = hostels_studentprofile.user_id
+
+• Potential Link: Table [accounts_user_groups] to Table [payroll_employeeprofile]
+  Suggested Match: accounts_user_groups.user_id = payroll_employeeprofile.user_id
+  SQL Join Example: FROM accounts_user_groups JOIN payroll_employeeprofile ON accounts_user_groups.user_id = payroll_employeeprofile.user_id
+
+• Potential Link: Table [accounts_user_groups] to Table [auth_group_permissions]
+  Suggested Match: accounts_user_groups.group_id = auth_group_permissions.group_id
+  SQL Join Example: FROM accounts_user_groups JOIN auth_group_permissions ON accounts_user_groups.group_id = auth_group_permissions.group_id
+
+• Potential Link: Table [accounts_user_groups] to Table [auth_group]
+  Suggested Match: accounts_user_groups.group_id = auth_group.id
+  SQL Join Example: FROM accounts_user_groups JOIN auth_group ON accounts_user_groups.group_id = auth_group.id
+
+• Potential Link: Table [accounts_user_groups] to Table [django_celery_results_groupresult]
+  Suggested Match: accounts_user_groups.group_id = django_celery_results_groupresult.group_id
+  SQL Join Example: FROM accounts_user_groups JOIN django_celery_results_groupresult ON accounts_user_groups.group_id = django_celery_results_groupresult.group_id
+
+• Potential Link: Table [accounts_user_groups] to Table [django_celery_results_chordcounter]
+  Suggested Match: accounts_user_groups.group_id = django_celery_results_chordcounter.group_id
+  SQL Join Example: FROM accounts_user_groups JOIN django_celery_results_chordcounter ON accounts_user_groups.group_id = django_celery_results_chordcounter.group_id
+
+• Potential Link: Table [accounts_user_user_permissions] to Table [accounts_user]
+  Suggested Match: accounts_user_user_permissions.user_id = accounts_user.id
+  SQL Join Example: FROM accounts_user_user_permissions JOIN accounts_user ON accounts_user_user_permissions.user_id = accounts_user.id
+
+• Potential Link: Table [accounts_user_user_permissions] to Table [accounts_user_groups]
+  Suggested Match: accounts_user_user_permissions.user_id = accounts_user_groups.user_id
+  SQL Join Example: FROM accounts_user_user_permissions JOIN accounts_user_groups ON accounts_user_user_permissions.user_id = accounts_user_groups.user_id
+
+• Potential Link: Table [accounts_user_user_permissions] to Table [django_admin_log]
+  Suggested Match: accounts_user_user_permissions.user_id = django_admin_log.user_id
+  SQL Join Example: FROM accounts_user_user_permissions JOIN django_admin_log ON accounts_user_user_permissions.user_id = django_admin_log.user_id
+
+• Potential Link: Table [accounts_user_user_permissions] to Table [accounts_modulepermission]
+  Suggested Match: accounts_user_user_permissions.user_id = accounts_modulepermission.user_id
+  SQL Join Example: FROM accounts_user_user_permissions JOIN accounts_modulepermission ON accounts_user_user_permissions.user_id = accounts_modulepermission.user_id
+
+• Potential Link: Table [accounts_user_user_permissions] to Table [hostels_studentprofile]
+  Suggested Match: accounts_user_user_permissions.user_id = hostels_studentprofile.user_id
+  SQL Join Example: FROM accounts_user_user_permissions JOIN hostels_studentprofile ON accounts_user_user_permissions.user_id = hostels_studentprofile.user_id
+
+• Potential Link: Table [accounts_user_user_permissions] to Table [payroll_employeeprofile]
+  Suggested Match: accounts_user_user_permissions.user_id = payroll_employeeprofile.user_id
+  SQL Join Example: FROM accounts_user_user_permissions JOIN payroll_employeeprofile ON accounts_user_user_permissions.user_id = payroll_employeeprofile.user_id
+
+• Potential Link: Table [accounts_user_user_permissions] to Table [auth_group_permissions]
+  Suggested Match: accounts_user_user_permissions.permission_id = auth_group_permissions.permission_id
+  SQL Join Example: FROM accounts_user_user_permissions JOIN auth_group_permissions ON accounts_user_user_permissions.permission_id = auth_group_permissions.permission_id
+
+• Potential Link: Table [accounts_user_user_permissions] to Table [auth_permission]
+  Suggested Match: accounts_user_user_permissions.permission_id = auth_permission.id
+  SQL Join Example: FROM accounts_user_user_permissions JOIN auth_permission ON accounts_user_user_permissions.permission_id = auth_permission.id
+
+• Potential Link: Table [accounts_user_user_permissions] to Table [accounts_modulepermission]
+  Suggested Match: accounts_user_user_permissions.permission_id = accounts_modulepermission.id
+  SQL Join Example: FROM accounts_user_user_permissions JOIN accounts_modulepermission ON accounts_user_user_permissions.permission_id = accounts_modulepermission.id
+
+• Potential Link: Table [django_admin_log] to Table [django_content_type]
+  Suggested Match: django_admin_log.content_type_id = django_content_type.id
+  SQL Join Example: FROM django_admin_log JOIN django_content_type ON django_admin_log.content_type_id = django_content_type.id
+
+• Potential Link: Table [django_admin_log] to Table [auth_permission]
+  Suggested Match: django_admin_log.content_type_id = auth_permission.content_type_id
+  SQL Join Example: FROM django_admin_log JOIN auth_permission ON django_admin_log.content_type_id = auth_permission.content_type_id
+
+• Potential Link: Table [django_admin_log] to Table [accounts_user]
+  Suggested Match: django_admin_log.user_id = accounts_user.id
+  SQL Join Example: FROM django_admin_log JOIN accounts_user ON django_admin_log.user_id = accounts_user.id
+
+• Potential Link: Table [django_admin_log] to Table [accounts_user_groups]
+  Suggested Match: django_admin_log.user_id = accounts_user_groups.user_id
+  SQL Join Example: FROM django_admin_log JOIN accounts_user_groups ON django_admin_log.user_id = accounts_user_groups.user_id
+
+• Potential Link: Table [django_admin_log] to Table [accounts_user_user_permissions]
+  Suggested Match: django_admin_log.user_id = accounts_user_user_permissions.user_id
+  SQL Join Example: FROM django_admin_log JOIN accounts_user_user_permissions ON django_admin_log.user_id = accounts_user_user_permissions.user_id
+
+• Potential Link: Table [django_admin_log] to Table [accounts_modulepermission]
+  Suggested Match: django_admin_log.user_id = accounts_modulepermission.user_id
+  SQL Join Example: FROM django_admin_log JOIN accounts_modulepermission ON django_admin_log.user_id = accounts_modulepermission.user_id
+
+• Potential Link: Table [django_admin_log] to Table [hostels_studentprofile]
+  Suggested Match: django_admin_log.user_id = hostels_studentprofile.user_id
+  SQL Join Example: FROM django_admin_log JOIN hostels_studentprofile ON django_admin_log.user_id = hostels_studentprofile.user_id
+
+• Potential Link: Table [django_admin_log] to Table [payroll_employeeprofile]
+  Suggested Match: django_admin_log.user_id = payroll_employeeprofile.user_id
+  SQL Join Example: FROM django_admin_log JOIN payroll_employeeprofile ON django_admin_log.user_id = payroll_employeeprofile.user_id
+
+• Potential Link: Table [hostels_floor] to Table [hostels_building]
+  Suggested Match: hostels_floor.building_id = hostels_building.id
+  SQL Join Example: FROM hostels_floor JOIN hostels_building ON hostels_floor.building_id = hostels_building.id
+
+• Potential Link: Table [hostels_hostel] to Table [hostels_city]
+  Suggested Match: hostels_hostel.city_id = hostels_city.id
+  SQL Join Example: FROM hostels_hostel JOIN hostels_city ON hostels_hostel.city_id = hostels_city.id
+
+• Potential Link: Table [hostels_building] to Table [accounts_user]
+  Suggested Match: hostels_building.hostel_id = accounts_user.hostel_id
+  SQL Join Example: FROM hostels_building JOIN accounts_user ON hostels_building.hostel_id = accounts_user.hostel_id
+
+• Potential Link: Table [hostels_building] to Table [hostels_hostel]
+  Suggested Match: hostels_building.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM hostels_building JOIN hostels_hostel ON hostels_building.hostel_id = hostels_hostel.id
+
+• Potential Link: Table [hostels_building] to Table [inventory_consumption]
+  Suggested Match: hostels_building.hostel_id = inventory_consumption.hostel_id
+  SQL Join Example: FROM hostels_building JOIN inventory_consumption ON hostels_building.hostel_id = inventory_consumption.hostel_id
+
+• Potential Link: Table [hostels_building] to Table [communication_ticket]
+  Suggested Match: hostels_building.hostel_id = communication_ticket.hostel_id
+  SQL Join Example: FROM hostels_building JOIN communication_ticket ON hostels_building.hostel_id = communication_ticket.hostel_id
+
+• Potential Link: Table [hostels_building] to Table [inventory_purchase]
+  Suggested Match: hostels_building.hostel_id = inventory_purchase.hostel_id
+  SQL Join Example: FROM hostels_building JOIN inventory_purchase ON hostels_building.hostel_id = inventory_purchase.hostel_id
+
+• Potential Link: Table [hostels_building] to Table [finance_liability]
+  Suggested Match: hostels_building.hostel_id = finance_liability.hostel_id
+  SQL Join Example: FROM hostels_building JOIN finance_liability ON hostels_building.hostel_id = finance_liability.hostel_id
+
+• Potential Link: Table [hostels_building] to Table [finance_partnercapital]
+  Suggested Match: hostels_building.hostel_id = finance_partnercapital.hostel_id
+  SQL Join Example: FROM hostels_building JOIN finance_partnercapital ON hostels_building.hostel_id = finance_partnercapital.hostel_id
+
+• Potential Link: Table [hostels_building] to Table [finance_asset]
+  Suggested Match: hostels_building.hostel_id = finance_asset.hostel_id
+  SQL Join Example: FROM hostels_building JOIN finance_asset ON hostels_building.hostel_id = finance_asset.hostel_id
+
+• Potential Link: Table [hostels_building] to Table [hostels_studentprofile]
+  Suggested Match: hostels_building.hostel_id = hostels_studentprofile.hostel_id
+  SQL Join Example: FROM hostels_building JOIN hostels_studentprofile ON hostels_building.hostel_id = hostels_studentprofile.hostel_id
+
+• Potential Link: Table [hostels_building] to Table [food_dailymenu]
+  Suggested Match: hostels_building.hostel_id = food_dailymenu.hostel_id
+  SQL Join Example: FROM hostels_building JOIN food_dailymenu ON hostels_building.hostel_id = food_dailymenu.hostel_id
+
+• Potential Link: Table [hostels_building] to Table [food_weeklymenutemplate]
+  Suggested Match: hostels_building.hostel_id = food_weeklymenutemplate.hostel_id
+  SQL Join Example: FROM hostels_building JOIN food_weeklymenutemplate ON hostels_building.hostel_id = food_weeklymenutemplate.hostel_id
+
+• Potential Link: Table [hostels_building] to Table [food_groceryrequirement]
+  Suggested Match: hostels_building.hostel_id = food_groceryrequirement.hostel_id
+  SQL Join Example: FROM hostels_building JOIN food_groceryrequirement ON hostels_building.hostel_id = food_groceryrequirement.hostel_id
+
+• Potential Link: Table [hostels_room] to Table [hostels_floor]
+  Suggested Match: hostels_room.floor_id = hostels_floor.id
+  SQL Join Example: FROM hostels_room JOIN hostels_floor ON hostels_room.floor_id = hostels_floor.id
+
+• Potential Link: Table [hostels_bed] to Table [hostels_room]
+  Suggested Match: hostels_bed.room_id = hostels_room.id
+  SQL Join Example: FROM hostels_bed JOIN hostels_room ON hostels_bed.room_id = hostels_room.id
+
+• Potential Link: Table [fees_paymentproof] to Table [fees_receipt]
+  Suggested Match: fees_paymentproof.fee_id = fees_receipt.fee_id
+  SQL Join Example: FROM fees_paymentproof JOIN fees_receipt ON fees_paymentproof.fee_id = fees_receipt.fee_id
+
+• Potential Link: Table [fees_paymentproof] to Table [fees_monthlyfee]
+  Suggested Match: fees_paymentproof.fee_id = fees_monthlyfee.id
+  SQL Join Example: FROM fees_paymentproof JOIN fees_monthlyfee ON fees_paymentproof.fee_id = fees_monthlyfee.id
+
+• Potential Link: Table [fees_feerule] to Table [fees_monthlyfee]
+  Suggested Match: fees_feerule.fee_head_id = fees_monthlyfee.fee_head_id
+  SQL Join Example: FROM fees_feerule JOIN fees_monthlyfee ON fees_feerule.fee_head_id = fees_monthlyfee.fee_head_id
+
+• Potential Link: Table [django_celery_results_groupresult] to Table [auth_group_permissions]
+  Suggested Match: django_celery_results_groupresult.group_id = auth_group_permissions.group_id
+  SQL Join Example: FROM django_celery_results_groupresult JOIN auth_group_permissions ON django_celery_results_groupresult.group_id = auth_group_permissions.group_id
+
+• Potential Link: Table [django_celery_results_groupresult] to Table [auth_group]
+  Suggested Match: django_celery_results_groupresult.group_id = auth_group.id
+  SQL Join Example: FROM django_celery_results_groupresult JOIN auth_group ON django_celery_results_groupresult.group_id = auth_group.id
+
+• Potential Link: Table [django_celery_results_groupresult] to Table [accounts_user_groups]
+  Suggested Match: django_celery_results_groupresult.group_id = accounts_user_groups.group_id
+  SQL Join Example: FROM django_celery_results_groupresult JOIN accounts_user_groups ON django_celery_results_groupresult.group_id = accounts_user_groups.group_id
+
+• Potential Link: Table [django_celery_results_groupresult] to Table [django_celery_results_chordcounter]
+  Suggested Match: django_celery_results_groupresult.group_id = django_celery_results_chordcounter.group_id
+  SQL Join Example: FROM django_celery_results_groupresult JOIN django_celery_results_chordcounter ON django_celery_results_groupresult.group_id = django_celery_results_chordcounter.group_id
+
+• Potential Link: Table [django_celery_results_chordcounter] to Table [auth_group_permissions]
+  Suggested Match: django_celery_results_chordcounter.group_id = auth_group_permissions.group_id
+  SQL Join Example: FROM django_celery_results_chordcounter JOIN auth_group_permissions ON django_celery_results_chordcounter.group_id = auth_group_permissions.group_id
+
+• Potential Link: Table [django_celery_results_chordcounter] to Table [auth_group]
+  Suggested Match: django_celery_results_chordcounter.group_id = auth_group.id
+  SQL Join Example: FROM django_celery_results_chordcounter JOIN auth_group ON django_celery_results_chordcounter.group_id = auth_group.id
+
+• Potential Link: Table [django_celery_results_chordcounter] to Table [accounts_user_groups]
+  Suggested Match: django_celery_results_chordcounter.group_id = accounts_user_groups.group_id
+  SQL Join Example: FROM django_celery_results_chordcounter JOIN accounts_user_groups ON django_celery_results_chordcounter.group_id = accounts_user_groups.group_id
+
+• Potential Link: Table [django_celery_results_chordcounter] to Table [django_celery_results_groupresult]
+  Suggested Match: django_celery_results_chordcounter.group_id = django_celery_results_groupresult.group_id
+  SQL Join Example: FROM django_celery_results_chordcounter JOIN django_celery_results_groupresult ON django_celery_results_chordcounter.group_id = django_celery_results_groupresult.group_id
+
+• Potential Link: Table [django_celery_results_taskresult] to Table [django_celery_beat_periodictask]
+  Suggested Match: django_celery_results_taskresult.task_id = django_celery_beat_periodictask.id
+  SQL Join Example: FROM django_celery_results_taskresult JOIN django_celery_beat_periodictask ON django_celery_results_taskresult.task_id = django_celery_beat_periodictask.id
+
+• Potential Link: Table [inventory_consumption] to Table [accounts_user]
+  Suggested Match: inventory_consumption.hostel_id = accounts_user.hostel_id
+  SQL Join Example: FROM inventory_consumption JOIN accounts_user ON inventory_consumption.hostel_id = accounts_user.hostel_id
+
+• Potential Link: Table [inventory_consumption] to Table [hostels_hostel]
+  Suggested Match: inventory_consumption.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM inventory_consumption JOIN hostels_hostel ON inventory_consumption.hostel_id = hostels_hostel.id
+
+• Potential Link: Table [inventory_consumption] to Table [hostels_building]
+  Suggested Match: inventory_consumption.hostel_id = hostels_building.hostel_id
+  SQL Join Example: FROM inventory_consumption JOIN hostels_building ON inventory_consumption.hostel_id = hostels_building.hostel_id
+
+• Potential Link: Table [inventory_consumption] to Table [communication_ticket]
+  Suggested Match: inventory_consumption.hostel_id = communication_ticket.hostel_id
+  SQL Join Example: FROM inventory_consumption JOIN communication_ticket ON inventory_consumption.hostel_id = communication_ticket.hostel_id
+
+• Potential Link: Table [inventory_consumption] to Table [inventory_purchase]
+  Suggested Match: inventory_consumption.hostel_id = inventory_purchase.hostel_id
+  SQL Join Example: FROM inventory_consumption JOIN inventory_purchase ON inventory_consumption.hostel_id = inventory_purchase.hostel_id
+
+• Potential Link: Table [inventory_consumption] to Table [finance_liability]
+  Suggested Match: inventory_consumption.hostel_id = finance_liability.hostel_id
+  SQL Join Example: FROM inventory_consumption JOIN finance_liability ON inventory_consumption.hostel_id = finance_liability.hostel_id
+
+• Potential Link: Table [inventory_consumption] to Table [finance_partnercapital]
+  Suggested Match: inventory_consumption.hostel_id = finance_partnercapital.hostel_id
+  SQL Join Example: FROM inventory_consumption JOIN finance_partnercapital ON inventory_consumption.hostel_id = finance_partnercapital.hostel_id
+
+• Potential Link: Table [inventory_consumption] to Table [finance_asset]
+  Suggested Match: inventory_consumption.hostel_id = finance_asset.hostel_id
+  SQL Join Example: FROM inventory_consumption JOIN finance_asset ON inventory_consumption.hostel_id = finance_asset.hostel_id
+
+• Potential Link: Table [inventory_consumption] to Table [hostels_studentprofile]
+  Suggested Match: inventory_consumption.hostel_id = hostels_studentprofile.hostel_id
+  SQL Join Example: FROM inventory_consumption JOIN hostels_studentprofile ON inventory_consumption.hostel_id = hostels_studentprofile.hostel_id
+
+• Potential Link: Table [inventory_consumption] to Table [food_dailymenu]
+  Suggested Match: inventory_consumption.hostel_id = food_dailymenu.hostel_id
+  SQL Join Example: FROM inventory_consumption JOIN food_dailymenu ON inventory_consumption.hostel_id = food_dailymenu.hostel_id
+
+• Potential Link: Table [inventory_consumption] to Table [food_weeklymenutemplate]
+  Suggested Match: inventory_consumption.hostel_id = food_weeklymenutemplate.hostel_id
+  SQL Join Example: FROM inventory_consumption JOIN food_weeklymenutemplate ON inventory_consumption.hostel_id = food_weeklymenutemplate.hostel_id
+
+• Potential Link: Table [inventory_consumption] to Table [food_groceryrequirement]
+  Suggested Match: inventory_consumption.hostel_id = food_groceryrequirement.hostel_id
+  SQL Join Example: FROM inventory_consumption JOIN food_groceryrequirement ON inventory_consumption.hostel_id = food_groceryrequirement.hostel_id
+
+• Potential Link: Table [inventory_consumption] to Table [inventory_item]
+  Suggested Match: inventory_consumption.item_id = inventory_item.id
+  SQL Join Example: FROM inventory_consumption JOIN inventory_item ON inventory_consumption.item_id = inventory_item.id
+
+• Potential Link: Table [inventory_consumption] to Table [inventory_purchase]
+  Suggested Match: inventory_consumption.item_id = inventory_purchase.item_id
+  SQL Join Example: FROM inventory_consumption JOIN inventory_purchase ON inventory_consumption.item_id = inventory_purchase.item_id
+
+• Potential Link: Table [inventory_consumption] to Table [food_groceryrequirement]
+  Suggested Match: inventory_consumption.item_id = food_groceryrequirement.item_id
+  SQL Join Example: FROM inventory_consumption JOIN food_groceryrequirement ON inventory_consumption.item_id = food_groceryrequirement.item_id
+
+• Potential Link: Table [inventory_consumption] to Table [food_mealrecipe]
+  Suggested Match: inventory_consumption.item_id = food_mealrecipe.item_id
+  SQL Join Example: FROM inventory_consumption JOIN food_mealrecipe ON inventory_consumption.item_id = food_mealrecipe.item_id
+
+• Potential Link: Table [communication_ticket] to Table [accounts_user]
+  Suggested Match: communication_ticket.hostel_id = accounts_user.hostel_id
+  SQL Join Example: FROM communication_ticket JOIN accounts_user ON communication_ticket.hostel_id = accounts_user.hostel_id
+
+• Potential Link: Table [communication_ticket] to Table [hostels_hostel]
+  Suggested Match: communication_ticket.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM communication_ticket JOIN hostels_hostel ON communication_ticket.hostel_id = hostels_hostel.id
+
+• Potential Link: Table [communication_ticket] to Table [hostels_building]
+  Suggested Match: communication_ticket.hostel_id = hostels_building.hostel_id
+  SQL Join Example: FROM communication_ticket JOIN hostels_building ON communication_ticket.hostel_id = hostels_building.hostel_id
+
+• Potential Link: Table [communication_ticket] to Table [inventory_consumption]
+  Suggested Match: communication_ticket.hostel_id = inventory_consumption.hostel_id
+  SQL Join Example: FROM communication_ticket JOIN inventory_consumption ON communication_ticket.hostel_id = inventory_consumption.hostel_id
+
+• Potential Link: Table [communication_ticket] to Table [inventory_purchase]
+  Suggested Match: communication_ticket.hostel_id = inventory_purchase.hostel_id
+  SQL Join Example: FROM communication_ticket JOIN inventory_purchase ON communication_ticket.hostel_id = inventory_purchase.hostel_id
+
+• Potential Link: Table [communication_ticket] to Table [finance_liability]
+  Suggested Match: communication_ticket.hostel_id = finance_liability.hostel_id
+  SQL Join Example: FROM communication_ticket JOIN finance_liability ON communication_ticket.hostel_id = finance_liability.hostel_id
+
+• Potential Link: Table [communication_ticket] to Table [finance_partnercapital]
+  Suggested Match: communication_ticket.hostel_id = finance_partnercapital.hostel_id
+  SQL Join Example: FROM communication_ticket JOIN finance_partnercapital ON communication_ticket.hostel_id = finance_partnercapital.hostel_id
+
+• Potential Link: Table [communication_ticket] to Table [finance_asset]
+  Suggested Match: communication_ticket.hostel_id = finance_asset.hostel_id
+  SQL Join Example: FROM communication_ticket JOIN finance_asset ON communication_ticket.hostel_id = finance_asset.hostel_id
+
+• Potential Link: Table [communication_ticket] to Table [hostels_studentprofile]
+  Suggested Match: communication_ticket.hostel_id = hostels_studentprofile.hostel_id
+  SQL Join Example: FROM communication_ticket JOIN hostels_studentprofile ON communication_ticket.hostel_id = hostels_studentprofile.hostel_id
+
+• Potential Link: Table [communication_ticket] to Table [food_dailymenu]
+  Suggested Match: communication_ticket.hostel_id = food_dailymenu.hostel_id
+  SQL Join Example: FROM communication_ticket JOIN food_dailymenu ON communication_ticket.hostel_id = food_dailymenu.hostel_id
+
+• Potential Link: Table [communication_ticket] to Table [food_weeklymenutemplate]
+  Suggested Match: communication_ticket.hostel_id = food_weeklymenutemplate.hostel_id
+  SQL Join Example: FROM communication_ticket JOIN food_weeklymenutemplate ON communication_ticket.hostel_id = food_weeklymenutemplate.hostel_id
+
+• Potential Link: Table [communication_ticket] to Table [food_groceryrequirement]
+  Suggested Match: communication_ticket.hostel_id = food_groceryrequirement.hostel_id
+  SQL Join Example: FROM communication_ticket JOIN food_groceryrequirement ON communication_ticket.hostel_id = food_groceryrequirement.hostel_id
+
+• Potential Link: Table [communication_ticket] to Table [fees_securitydeposit]
+  Suggested Match: communication_ticket.student_id = fees_securitydeposit.student_id
+  SQL Join Example: FROM communication_ticket JOIN fees_securitydeposit ON communication_ticket.student_id = fees_securitydeposit.student_id
+
+• Potential Link: Table [communication_ticket] to Table [hostels_studentutilitycharge]
+  Suggested Match: communication_ticket.student_id = hostels_studentutilitycharge.student_id
+  SQL Join Example: FROM communication_ticket JOIN hostels_studentutilitycharge ON communication_ticket.student_id = hostels_studentutilitycharge.student_id
+
+• Potential Link: Table [communication_ticket] to Table [food_mealfeedback]
+  Suggested Match: communication_ticket.student_id = food_mealfeedback.student_id
+  SQL Join Example: FROM communication_ticket JOIN food_mealfeedback ON communication_ticket.student_id = food_mealfeedback.student_id
+
+• Potential Link: Table [communication_ticket] to Table [fees_studentutilitybill]
+  Suggested Match: communication_ticket.student_id = fees_studentutilitybill.student_id
+  SQL Join Example: FROM communication_ticket JOIN fees_studentutilitybill ON communication_ticket.student_id = fees_studentutilitybill.student_id
+
+• Potential Link: Table [communication_ticket] to Table [fees_monthlyfee]
+  Suggested Match: communication_ticket.student_id = fees_monthlyfee.student_id
+  SQL Join Example: FROM communication_ticket JOIN fees_monthlyfee ON communication_ticket.student_id = fees_monthlyfee.student_id
+
+• Potential Link: Table [communication_ticket] to Table [finance_asset]
+  Suggested Match: communication_ticket.asset_id = finance_asset.id
+  SQL Join Example: FROM communication_ticket JOIN finance_asset ON communication_ticket.asset_id = finance_asset.id
+
+• Potential Link: Table [inventory_item] to Table [inventory_category]
+  Suggested Match: inventory_item.category_id = inventory_category.id
+  SQL Join Example: FROM inventory_item JOIN inventory_category ON inventory_item.category_id = inventory_category.id
+
+• Potential Link: Table [inventory_item] to Table [finance_assetcategory]
+  Suggested Match: inventory_item.category_id = finance_assetcategory.id
+  SQL Join Example: FROM inventory_item JOIN finance_assetcategory ON inventory_item.category_id = finance_assetcategory.id
+
+• Potential Link: Table [inventory_item] to Table [finance_asset]
+  Suggested Match: inventory_item.category_id = finance_asset.category_id
+  SQL Join Example: FROM inventory_item JOIN finance_asset ON inventory_item.category_id = finance_asset.category_id
+
+• Potential Link: Table [inventory_item] to Table [food_mealcategory]
+  Suggested Match: inventory_item.category_id = food_mealcategory.id
+  SQL Join Example: FROM inventory_item JOIN food_mealcategory ON inventory_item.category_id = food_mealcategory.id
+
+• Potential Link: Table [inventory_item] to Table [food_meal]
+  Suggested Match: inventory_item.category_id = food_meal.category_id
+  SQL Join Example: FROM inventory_item JOIN food_meal ON inventory_item.category_id = food_meal.category_id
+
+• Potential Link: Table [inventory_item] to Table [inventory_unit]
+  Suggested Match: inventory_item.unit_id = inventory_unit.id
+  SQL Join Example: FROM inventory_item JOIN inventory_unit ON inventory_item.unit_id = inventory_unit.id
+
+• Potential Link: Table [inventory_purchase] to Table [accounts_user]
+  Suggested Match: inventory_purchase.hostel_id = accounts_user.hostel_id
+  SQL Join Example: FROM inventory_purchase JOIN accounts_user ON inventory_purchase.hostel_id = accounts_user.hostel_id
+
+• Potential Link: Table [inventory_purchase] to Table [hostels_hostel]
+  Suggested Match: inventory_purchase.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM inventory_purchase JOIN hostels_hostel ON inventory_purchase.hostel_id = hostels_hostel.id
+
+• Potential Link: Table [inventory_purchase] to Table [hostels_building]
+  Suggested Match: inventory_purchase.hostel_id = hostels_building.hostel_id
+  SQL Join Example: FROM inventory_purchase JOIN hostels_building ON inventory_purchase.hostel_id = hostels_building.hostel_id
+
+• Potential Link: Table [inventory_purchase] to Table [inventory_consumption]
+  Suggested Match: inventory_purchase.hostel_id = inventory_consumption.hostel_id
+  SQL Join Example: FROM inventory_purchase JOIN inventory_consumption ON inventory_purchase.hostel_id = inventory_consumption.hostel_id
+
+• Potential Link: Table [inventory_purchase] to Table [communication_ticket]
+  Suggested Match: inventory_purchase.hostel_id = communication_ticket.hostel_id
+  SQL Join Example: FROM inventory_purchase JOIN communication_ticket ON inventory_purchase.hostel_id = communication_ticket.hostel_id
+
+• Potential Link: Table [inventory_purchase] to Table [finance_liability]
+  Suggested Match: inventory_purchase.hostel_id = finance_liability.hostel_id
+  SQL Join Example: FROM inventory_purchase JOIN finance_liability ON inventory_purchase.hostel_id = finance_liability.hostel_id
+
+• Potential Link: Table [inventory_purchase] to Table [finance_partnercapital]
+  Suggested Match: inventory_purchase.hostel_id = finance_partnercapital.hostel_id
+  SQL Join Example: FROM inventory_purchase JOIN finance_partnercapital ON inventory_purchase.hostel_id = finance_partnercapital.hostel_id
+
+• Potential Link: Table [inventory_purchase] to Table [finance_asset]
+  Suggested Match: inventory_purchase.hostel_id = finance_asset.hostel_id
+  SQL Join Example: FROM inventory_purchase JOIN finance_asset ON inventory_purchase.hostel_id = finance_asset.hostel_id
+
+• Potential Link: Table [inventory_purchase] to Table [hostels_studentprofile]
+  Suggested Match: inventory_purchase.hostel_id = hostels_studentprofile.hostel_id
+  SQL Join Example: FROM inventory_purchase JOIN hostels_studentprofile ON inventory_purchase.hostel_id = hostels_studentprofile.hostel_id
+
+• Potential Link: Table [inventory_purchase] to Table [food_dailymenu]
+  Suggested Match: inventory_purchase.hostel_id = food_dailymenu.hostel_id
+  SQL Join Example: FROM inventory_purchase JOIN food_dailymenu ON inventory_purchase.hostel_id = food_dailymenu.hostel_id
+
+• Potential Link: Table [inventory_purchase] to Table [food_weeklymenutemplate]
+  Suggested Match: inventory_purchase.hostel_id = food_weeklymenutemplate.hostel_id
+  SQL Join Example: FROM inventory_purchase JOIN food_weeklymenutemplate ON inventory_purchase.hostel_id = food_weeklymenutemplate.hostel_id
+
+• Potential Link: Table [inventory_purchase] to Table [food_groceryrequirement]
+  Suggested Match: inventory_purchase.hostel_id = food_groceryrequirement.hostel_id
+  SQL Join Example: FROM inventory_purchase JOIN food_groceryrequirement ON inventory_purchase.hostel_id = food_groceryrequirement.hostel_id
+
+• Potential Link: Table [inventory_purchase] to Table [inventory_consumption]
+  Suggested Match: inventory_purchase.item_id = inventory_consumption.item_id
+  SQL Join Example: FROM inventory_purchase JOIN inventory_consumption ON inventory_purchase.item_id = inventory_consumption.item_id
+
+• Potential Link: Table [inventory_purchase] to Table [inventory_item]
+  Suggested Match: inventory_purchase.item_id = inventory_item.id
+  SQL Join Example: FROM inventory_purchase JOIN inventory_item ON inventory_purchase.item_id = inventory_item.id
+
+• Potential Link: Table [inventory_purchase] to Table [food_groceryrequirement]
+  Suggested Match: inventory_purchase.item_id = food_groceryrequirement.item_id
+  SQL Join Example: FROM inventory_purchase JOIN food_groceryrequirement ON inventory_purchase.item_id = food_groceryrequirement.item_id
+
+• Potential Link: Table [inventory_purchase] to Table [food_mealrecipe]
+  Suggested Match: inventory_purchase.item_id = food_mealrecipe.item_id
+  SQL Join Example: FROM inventory_purchase JOIN food_mealrecipe ON inventory_purchase.item_id = food_mealrecipe.item_id
+
+• Potential Link: Table [inventory_purchase] to Table [inventory_vendor]
+  Suggested Match: inventory_purchase.vendor_id = inventory_vendor.id
+  SQL Join Example: FROM inventory_purchase JOIN inventory_vendor ON inventory_purchase.vendor_id = inventory_vendor.id
+
+• Potential Link: Table [fees_receipt] to Table [fees_paymentproof]
+  Suggested Match: fees_receipt.fee_id = fees_paymentproof.fee_id
+  SQL Join Example: FROM fees_receipt JOIN fees_paymentproof ON fees_receipt.fee_id = fees_paymentproof.fee_id
+
+• Potential Link: Table [fees_receipt] to Table [fees_monthlyfee]
+  Suggested Match: fees_receipt.fee_id = fees_monthlyfee.id
+  SQL Join Example: FROM fees_receipt JOIN fees_monthlyfee ON fees_receipt.fee_id = fees_monthlyfee.id
+
+• Potential Link: Table [fees_securitydeposit] to Table [communication_ticket]
+  Suggested Match: fees_securitydeposit.student_id = communication_ticket.student_id
+  SQL Join Example: FROM fees_securitydeposit JOIN communication_ticket ON fees_securitydeposit.student_id = communication_ticket.student_id
+
+• Potential Link: Table [fees_securitydeposit] to Table [hostels_studentutilitycharge]
+  Suggested Match: fees_securitydeposit.student_id = hostels_studentutilitycharge.student_id
+  SQL Join Example: FROM fees_securitydeposit JOIN hostels_studentutilitycharge ON fees_securitydeposit.student_id = hostels_studentutilitycharge.student_id
+
+• Potential Link: Table [fees_securitydeposit] to Table [food_mealfeedback]
+  Suggested Match: fees_securitydeposit.student_id = food_mealfeedback.student_id
+  SQL Join Example: FROM fees_securitydeposit JOIN food_mealfeedback ON fees_securitydeposit.student_id = food_mealfeedback.student_id
+
+• Potential Link: Table [fees_securitydeposit] to Table [fees_studentutilitybill]
+  Suggested Match: fees_securitydeposit.student_id = fees_studentutilitybill.student_id
+  SQL Join Example: FROM fees_securitydeposit JOIN fees_studentutilitybill ON fees_securitydeposit.student_id = fees_studentutilitybill.student_id
+
+• Potential Link: Table [fees_securitydeposit] to Table [fees_monthlyfee]
+  Suggested Match: fees_securitydeposit.student_id = fees_monthlyfee.student_id
+  SQL Join Example: FROM fees_securitydeposit JOIN fees_monthlyfee ON fees_securitydeposit.student_id = fees_monthlyfee.student_id
+
+• Potential Link: Table [payroll_salaryadvance] to Table [payroll_salaryslip]
+  Suggested Match: payroll_salaryadvance.employee_id = payroll_salaryslip.employee_id
+  SQL Join Example: FROM payroll_salaryadvance JOIN payroll_salaryslip ON payroll_salaryadvance.employee_id = payroll_salaryslip.employee_id
+
+• Potential Link: Table [payroll_salaryslip] to Table [payroll_salaryadvance]
+  Suggested Match: payroll_salaryslip.employee_id = payroll_salaryadvance.employee_id
+  SQL Join Example: FROM payroll_salaryslip JOIN payroll_salaryadvance ON payroll_salaryslip.employee_id = payroll_salaryadvance.employee_id
+
+• Potential Link: Table [finance_liability] to Table [accounts_user]
+  Suggested Match: finance_liability.hostel_id = accounts_user.hostel_id
+  SQL Join Example: FROM finance_liability JOIN accounts_user ON finance_liability.hostel_id = accounts_user.hostel_id
+
+• Potential Link: Table [finance_liability] to Table [hostels_hostel]
+  Suggested Match: finance_liability.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM finance_liability JOIN hostels_hostel ON finance_liability.hostel_id = hostels_hostel.id
+
+• Potential Link: Table [finance_liability] to Table [hostels_building]
+  Suggested Match: finance_liability.hostel_id = hostels_building.hostel_id
+  SQL Join Example: FROM finance_liability JOIN hostels_building ON finance_liability.hostel_id = hostels_building.hostel_id
+
+• Potential Link: Table [finance_liability] to Table [inventory_consumption]
+  Suggested Match: finance_liability.hostel_id = inventory_consumption.hostel_id
+  SQL Join Example: FROM finance_liability JOIN inventory_consumption ON finance_liability.hostel_id = inventory_consumption.hostel_id
+
+• Potential Link: Table [finance_liability] to Table [communication_ticket]
+  Suggested Match: finance_liability.hostel_id = communication_ticket.hostel_id
+  SQL Join Example: FROM finance_liability JOIN communication_ticket ON finance_liability.hostel_id = communication_ticket.hostel_id
+
+• Potential Link: Table [finance_liability] to Table [inventory_purchase]
+  Suggested Match: finance_liability.hostel_id = inventory_purchase.hostel_id
+  SQL Join Example: FROM finance_liability JOIN inventory_purchase ON finance_liability.hostel_id = inventory_purchase.hostel_id
+
+• Potential Link: Table [finance_liability] to Table [finance_partnercapital]
+  Suggested Match: finance_liability.hostel_id = finance_partnercapital.hostel_id
+  SQL Join Example: FROM finance_liability JOIN finance_partnercapital ON finance_liability.hostel_id = finance_partnercapital.hostel_id
+
+• Potential Link: Table [finance_liability] to Table [finance_asset]
+  Suggested Match: finance_liability.hostel_id = finance_asset.hostel_id
+  SQL Join Example: FROM finance_liability JOIN finance_asset ON finance_liability.hostel_id = finance_asset.hostel_id
+
+• Potential Link: Table [finance_liability] to Table [hostels_studentprofile]
+  Suggested Match: finance_liability.hostel_id = hostels_studentprofile.hostel_id
+  SQL Join Example: FROM finance_liability JOIN hostels_studentprofile ON finance_liability.hostel_id = hostels_studentprofile.hostel_id
+
+• Potential Link: Table [finance_liability] to Table [food_dailymenu]
+  Suggested Match: finance_liability.hostel_id = food_dailymenu.hostel_id
+  SQL Join Example: FROM finance_liability JOIN food_dailymenu ON finance_liability.hostel_id = food_dailymenu.hostel_id
+
+• Potential Link: Table [finance_liability] to Table [food_weeklymenutemplate]
+  Suggested Match: finance_liability.hostel_id = food_weeklymenutemplate.hostel_id
+  SQL Join Example: FROM finance_liability JOIN food_weeklymenutemplate ON finance_liability.hostel_id = food_weeklymenutemplate.hostel_id
+
+• Potential Link: Table [finance_liability] to Table [food_groceryrequirement]
+  Suggested Match: finance_liability.hostel_id = food_groceryrequirement.hostel_id
+  SQL Join Example: FROM finance_liability JOIN food_groceryrequirement ON finance_liability.hostel_id = food_groceryrequirement.hostel_id
+
+• Potential Link: Table [finance_partnercapital] to Table [accounts_user]
+  Suggested Match: finance_partnercapital.hostel_id = accounts_user.hostel_id
+  SQL Join Example: FROM finance_partnercapital JOIN accounts_user ON finance_partnercapital.hostel_id = accounts_user.hostel_id
+
+• Potential Link: Table [finance_partnercapital] to Table [hostels_hostel]
+  Suggested Match: finance_partnercapital.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM finance_partnercapital JOIN hostels_hostel ON finance_partnercapital.hostel_id = hostels_hostel.id
+
+• Potential Link: Table [finance_partnercapital] to Table [hostels_building]
+  Suggested Match: finance_partnercapital.hostel_id = hostels_building.hostel_id
+  SQL Join Example: FROM finance_partnercapital JOIN hostels_building ON finance_partnercapital.hostel_id = hostels_building.hostel_id
+
+• Potential Link: Table [finance_partnercapital] to Table [inventory_consumption]
+  Suggested Match: finance_partnercapital.hostel_id = inventory_consumption.hostel_id
+  SQL Join Example: FROM finance_partnercapital JOIN inventory_consumption ON finance_partnercapital.hostel_id = inventory_consumption.hostel_id
+
+• Potential Link: Table [finance_partnercapital] to Table [communication_ticket]
+  Suggested Match: finance_partnercapital.hostel_id = communication_ticket.hostel_id
+  SQL Join Example: FROM finance_partnercapital JOIN communication_ticket ON finance_partnercapital.hostel_id = communication_ticket.hostel_id
+
+• Potential Link: Table [finance_partnercapital] to Table [inventory_purchase]
+  Suggested Match: finance_partnercapital.hostel_id = inventory_purchase.hostel_id
+  SQL Join Example: FROM finance_partnercapital JOIN inventory_purchase ON finance_partnercapital.hostel_id = inventory_purchase.hostel_id
+
+• Potential Link: Table [finance_partnercapital] to Table [finance_liability]
+  Suggested Match: finance_partnercapital.hostel_id = finance_liability.hostel_id
+  SQL Join Example: FROM finance_partnercapital JOIN finance_liability ON finance_partnercapital.hostel_id = finance_liability.hostel_id
+
+• Potential Link: Table [finance_partnercapital] to Table [finance_asset]
+  Suggested Match: finance_partnercapital.hostel_id = finance_asset.hostel_id
+  SQL Join Example: FROM finance_partnercapital JOIN finance_asset ON finance_partnercapital.hostel_id = finance_asset.hostel_id
+
+• Potential Link: Table [finance_partnercapital] to Table [hostels_studentprofile]
+  Suggested Match: finance_partnercapital.hostel_id = hostels_studentprofile.hostel_id
+  SQL Join Example: FROM finance_partnercapital JOIN hostels_studentprofile ON finance_partnercapital.hostel_id = hostels_studentprofile.hostel_id
+
+• Potential Link: Table [finance_partnercapital] to Table [food_dailymenu]
+  Suggested Match: finance_partnercapital.hostel_id = food_dailymenu.hostel_id
+  SQL Join Example: FROM finance_partnercapital JOIN food_dailymenu ON finance_partnercapital.hostel_id = food_dailymenu.hostel_id
+
+• Potential Link: Table [finance_partnercapital] to Table [food_weeklymenutemplate]
+  Suggested Match: finance_partnercapital.hostel_id = food_weeklymenutemplate.hostel_id
+  SQL Join Example: FROM finance_partnercapital JOIN food_weeklymenutemplate ON finance_partnercapital.hostel_id = food_weeklymenutemplate.hostel_id
+
+• Potential Link: Table [finance_partnercapital] to Table [food_groceryrequirement]
+  Suggested Match: finance_partnercapital.hostel_id = food_groceryrequirement.hostel_id
+  SQL Join Example: FROM finance_partnercapital JOIN food_groceryrequirement ON finance_partnercapital.hostel_id = food_groceryrequirement.hostel_id
+
+• Potential Link: Table [accounts_modulepermission] to Table [accounts_user]
+  Suggested Match: accounts_modulepermission.user_id = accounts_user.id
+  SQL Join Example: FROM accounts_modulepermission JOIN accounts_user ON accounts_modulepermission.user_id = accounts_user.id
+
+• Potential Link: Table [accounts_modulepermission] to Table [accounts_user_groups]
+  Suggested Match: accounts_modulepermission.user_id = accounts_user_groups.user_id
+  SQL Join Example: FROM accounts_modulepermission JOIN accounts_user_groups ON accounts_modulepermission.user_id = accounts_user_groups.user_id
+
+• Potential Link: Table [accounts_modulepermission] to Table [accounts_user_user_permissions]
+  Suggested Match: accounts_modulepermission.user_id = accounts_user_user_permissions.user_id
+  SQL Join Example: FROM accounts_modulepermission JOIN accounts_user_user_permissions ON accounts_modulepermission.user_id = accounts_user_user_permissions.user_id
+
+• Potential Link: Table [accounts_modulepermission] to Table [django_admin_log]
+  Suggested Match: accounts_modulepermission.user_id = django_admin_log.user_id
+  SQL Join Example: FROM accounts_modulepermission JOIN django_admin_log ON accounts_modulepermission.user_id = django_admin_log.user_id
+
+• Potential Link: Table [accounts_modulepermission] to Table [hostels_studentprofile]
+  Suggested Match: accounts_modulepermission.user_id = hostels_studentprofile.user_id
+  SQL Join Example: FROM accounts_modulepermission JOIN hostels_studentprofile ON accounts_modulepermission.user_id = hostels_studentprofile.user_id
+
+• Potential Link: Table [accounts_modulepermission] to Table [payroll_employeeprofile]
+  Suggested Match: accounts_modulepermission.user_id = payroll_employeeprofile.user_id
+  SQL Join Example: FROM accounts_modulepermission JOIN payroll_employeeprofile ON accounts_modulepermission.user_id = payroll_employeeprofile.user_id
+
+• Potential Link: Table [finance_asset] to Table [inventory_category]
+  Suggested Match: finance_asset.category_id = inventory_category.id
+  SQL Join Example: FROM finance_asset JOIN inventory_category ON finance_asset.category_id = inventory_category.id
+
+• Potential Link: Table [finance_asset] to Table [inventory_item]
+  Suggested Match: finance_asset.category_id = inventory_item.category_id
+  SQL Join Example: FROM finance_asset JOIN inventory_item ON finance_asset.category_id = inventory_item.category_id
+
+• Potential Link: Table [finance_asset] to Table [finance_assetcategory]
+  Suggested Match: finance_asset.category_id = finance_assetcategory.id
+  SQL Join Example: FROM finance_asset JOIN finance_assetcategory ON finance_asset.category_id = finance_assetcategory.id
+
+• Potential Link: Table [finance_asset] to Table [food_mealcategory]
+  Suggested Match: finance_asset.category_id = food_mealcategory.id
+  SQL Join Example: FROM finance_asset JOIN food_mealcategory ON finance_asset.category_id = food_mealcategory.id
+
+• Potential Link: Table [finance_asset] to Table [food_meal]
+  Suggested Match: finance_asset.category_id = food_meal.category_id
+  SQL Join Example: FROM finance_asset JOIN food_meal ON finance_asset.category_id = food_meal.category_id
+
+• Potential Link: Table [finance_asset] to Table [accounts_user]
+  Suggested Match: finance_asset.hostel_id = accounts_user.hostel_id
+  SQL Join Example: FROM finance_asset JOIN accounts_user ON finance_asset.hostel_id = accounts_user.hostel_id
+
+• Potential Link: Table [finance_asset] to Table [hostels_hostel]
+  Suggested Match: finance_asset.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM finance_asset JOIN hostels_hostel ON finance_asset.hostel_id = hostels_hostel.id
+
+• Potential Link: Table [finance_asset] to Table [hostels_building]
+  Suggested Match: finance_asset.hostel_id = hostels_building.hostel_id
+  SQL Join Example: FROM finance_asset JOIN hostels_building ON finance_asset.hostel_id = hostels_building.hostel_id
+
+• Potential Link: Table [finance_asset] to Table [inventory_consumption]
+  Suggested Match: finance_asset.hostel_id = inventory_consumption.hostel_id
+  SQL Join Example: FROM finance_asset JOIN inventory_consumption ON finance_asset.hostel_id = inventory_consumption.hostel_id
+
+• Potential Link: Table [finance_asset] to Table [communication_ticket]
+  Suggested Match: finance_asset.hostel_id = communication_ticket.hostel_id
+  SQL Join Example: FROM finance_asset JOIN communication_ticket ON finance_asset.hostel_id = communication_ticket.hostel_id
+
+• Potential Link: Table [finance_asset] to Table [inventory_purchase]
+  Suggested Match: finance_asset.hostel_id = inventory_purchase.hostel_id
+  SQL Join Example: FROM finance_asset JOIN inventory_purchase ON finance_asset.hostel_id = inventory_purchase.hostel_id
+
+• Potential Link: Table [finance_asset] to Table [finance_liability]
+  Suggested Match: finance_asset.hostel_id = finance_liability.hostel_id
+  SQL Join Example: FROM finance_asset JOIN finance_liability ON finance_asset.hostel_id = finance_liability.hostel_id
+
+• Potential Link: Table [finance_asset] to Table [finance_partnercapital]
+  Suggested Match: finance_asset.hostel_id = finance_partnercapital.hostel_id
+  SQL Join Example: FROM finance_asset JOIN finance_partnercapital ON finance_asset.hostel_id = finance_partnercapital.hostel_id
+
+• Potential Link: Table [finance_asset] to Table [hostels_studentprofile]
+  Suggested Match: finance_asset.hostel_id = hostels_studentprofile.hostel_id
+  SQL Join Example: FROM finance_asset JOIN hostels_studentprofile ON finance_asset.hostel_id = hostels_studentprofile.hostel_id
+
+• Potential Link: Table [finance_asset] to Table [food_dailymenu]
+  Suggested Match: finance_asset.hostel_id = food_dailymenu.hostel_id
+  SQL Join Example: FROM finance_asset JOIN food_dailymenu ON finance_asset.hostel_id = food_dailymenu.hostel_id
+
+• Potential Link: Table [finance_asset] to Table [food_weeklymenutemplate]
+  Suggested Match: finance_asset.hostel_id = food_weeklymenutemplate.hostel_id
+  SQL Join Example: FROM finance_asset JOIN food_weeklymenutemplate ON finance_asset.hostel_id = food_weeklymenutemplate.hostel_id
+
+• Potential Link: Table [finance_asset] to Table [food_groceryrequirement]
+  Suggested Match: finance_asset.hostel_id = food_groceryrequirement.hostel_id
+  SQL Join Example: FROM finance_asset JOIN food_groceryrequirement ON finance_asset.hostel_id = food_groceryrequirement.hostel_id
+
+• Potential Link: Table [hostels_studentutilitycharge] to Table [communication_ticket]
+  Suggested Match: hostels_studentutilitycharge.student_id = communication_ticket.student_id
+  SQL Join Example: FROM hostels_studentutilitycharge JOIN communication_ticket ON hostels_studentutilitycharge.student_id = communication_ticket.student_id
+
+• Potential Link: Table [hostels_studentutilitycharge] to Table [fees_securitydeposit]
+  Suggested Match: hostels_studentutilitycharge.student_id = fees_securitydeposit.student_id
+  SQL Join Example: FROM hostels_studentutilitycharge JOIN fees_securitydeposit ON hostels_studentutilitycharge.student_id = fees_securitydeposit.student_id
+
+• Potential Link: Table [hostels_studentutilitycharge] to Table [food_mealfeedback]
+  Suggested Match: hostels_studentutilitycharge.student_id = food_mealfeedback.student_id
+  SQL Join Example: FROM hostels_studentutilitycharge JOIN food_mealfeedback ON hostels_studentutilitycharge.student_id = food_mealfeedback.student_id
+
+• Potential Link: Table [hostels_studentutilitycharge] to Table [fees_studentutilitybill]
+  Suggested Match: hostels_studentutilitycharge.student_id = fees_studentutilitybill.student_id
+  SQL Join Example: FROM hostels_studentutilitycharge JOIN fees_studentutilitybill ON hostels_studentutilitycharge.student_id = fees_studentutilitybill.student_id
+
+• Potential Link: Table [hostels_studentutilitycharge] to Table [fees_monthlyfee]
+  Suggested Match: hostels_studentutilitycharge.student_id = fees_monthlyfee.student_id
+  SQL Join Example: FROM hostels_studentutilitycharge JOIN fees_monthlyfee ON hostels_studentutilitycharge.student_id = fees_monthlyfee.student_id
+
+• Potential Link: Table [hostels_studentprofile] to Table [hostels_bed]
+  Suggested Match: hostels_studentprofile.bed_id = hostels_bed.id
+  SQL Join Example: FROM hostels_studentprofile JOIN hostels_bed ON hostels_studentprofile.bed_id = hostels_bed.id
+
+• Potential Link: Table [hostels_studentprofile] to Table [accounts_user]
+  Suggested Match: hostels_studentprofile.hostel_id = accounts_user.hostel_id
+  SQL Join Example: FROM hostels_studentprofile JOIN accounts_user ON hostels_studentprofile.hostel_id = accounts_user.hostel_id
+
+• Potential Link: Table [hostels_studentprofile] to Table [hostels_hostel]
+  Suggested Match: hostels_studentprofile.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM hostels_studentprofile JOIN hostels_hostel ON hostels_studentprofile.hostel_id = hostels_hostel.id
+
+• Potential Link: Table [hostels_studentprofile] to Table [hostels_building]
+  Suggested Match: hostels_studentprofile.hostel_id = hostels_building.hostel_id
+  SQL Join Example: FROM hostels_studentprofile JOIN hostels_building ON hostels_studentprofile.hostel_id = hostels_building.hostel_id
+
+• Potential Link: Table [hostels_studentprofile] to Table [inventory_consumption]
+  Suggested Match: hostels_studentprofile.hostel_id = inventory_consumption.hostel_id
+  SQL Join Example: FROM hostels_studentprofile JOIN inventory_consumption ON hostels_studentprofile.hostel_id = inventory_consumption.hostel_id
+
+• Potential Link: Table [hostels_studentprofile] to Table [communication_ticket]
+  Suggested Match: hostels_studentprofile.hostel_id = communication_ticket.hostel_id
+  SQL Join Example: FROM hostels_studentprofile JOIN communication_ticket ON hostels_studentprofile.hostel_id = communication_ticket.hostel_id
+
+• Potential Link: Table [hostels_studentprofile] to Table [inventory_purchase]
+  Suggested Match: hostels_studentprofile.hostel_id = inventory_purchase.hostel_id
+  SQL Join Example: FROM hostels_studentprofile JOIN inventory_purchase ON hostels_studentprofile.hostel_id = inventory_purchase.hostel_id
+
+• Potential Link: Table [hostels_studentprofile] to Table [finance_liability]
+  Suggested Match: hostels_studentprofile.hostel_id = finance_liability.hostel_id
+  SQL Join Example: FROM hostels_studentprofile JOIN finance_liability ON hostels_studentprofile.hostel_id = finance_liability.hostel_id
+
+• Potential Link: Table [hostels_studentprofile] to Table [finance_partnercapital]
+  Suggested Match: hostels_studentprofile.hostel_id = finance_partnercapital.hostel_id
+  SQL Join Example: FROM hostels_studentprofile JOIN finance_partnercapital ON hostels_studentprofile.hostel_id = finance_partnercapital.hostel_id
+
+• Potential Link: Table [hostels_studentprofile] to Table [finance_asset]
+  Suggested Match: hostels_studentprofile.hostel_id = finance_asset.hostel_id
+  SQL Join Example: FROM hostels_studentprofile JOIN finance_asset ON hostels_studentprofile.hostel_id = finance_asset.hostel_id
+
+• Potential Link: Table [hostels_studentprofile] to Table [food_dailymenu]
+  Suggested Match: hostels_studentprofile.hostel_id = food_dailymenu.hostel_id
+  SQL Join Example: FROM hostels_studentprofile JOIN food_dailymenu ON hostels_studentprofile.hostel_id = food_dailymenu.hostel_id
+
+• Potential Link: Table [hostels_studentprofile] to Table [food_weeklymenutemplate]
+  Suggested Match: hostels_studentprofile.hostel_id = food_weeklymenutemplate.hostel_id
+  SQL Join Example: FROM hostels_studentprofile JOIN food_weeklymenutemplate ON hostels_studentprofile.hostel_id = food_weeklymenutemplate.hostel_id
+
+• Potential Link: Table [hostels_studentprofile] to Table [food_groceryrequirement]
+  Suggested Match: hostels_studentprofile.hostel_id = food_groceryrequirement.hostel_id
+  SQL Join Example: FROM hostels_studentprofile JOIN food_groceryrequirement ON hostels_studentprofile.hostel_id = food_groceryrequirement.hostel_id
+
+• Potential Link: Table [hostels_studentprofile] to Table [accounts_user]
+  Suggested Match: hostels_studentprofile.user_id = accounts_user.id
+  SQL Join Example: FROM hostels_studentprofile JOIN accounts_user ON hostels_studentprofile.user_id = accounts_user.id
+
+• Potential Link: Table [hostels_studentprofile] to Table [accounts_user_groups]
+  Suggested Match: hostels_studentprofile.user_id = accounts_user_groups.user_id
+  SQL Join Example: FROM hostels_studentprofile JOIN accounts_user_groups ON hostels_studentprofile.user_id = accounts_user_groups.user_id
+
+• Potential Link: Table [hostels_studentprofile] to Table [accounts_user_user_permissions]
+  Suggested Match: hostels_studentprofile.user_id = accounts_user_user_permissions.user_id
+  SQL Join Example: FROM hostels_studentprofile JOIN accounts_user_user_permissions ON hostels_studentprofile.user_id = accounts_user_user_permissions.user_id
+
+• Potential Link: Table [hostels_studentprofile] to Table [django_admin_log]
+  Suggested Match: hostels_studentprofile.user_id = django_admin_log.user_id
+  SQL Join Example: FROM hostels_studentprofile JOIN django_admin_log ON hostels_studentprofile.user_id = django_admin_log.user_id
+
+• Potential Link: Table [hostels_studentprofile] to Table [accounts_modulepermission]
+  Suggested Match: hostels_studentprofile.user_id = accounts_modulepermission.user_id
+  SQL Join Example: FROM hostels_studentprofile JOIN accounts_modulepermission ON hostels_studentprofile.user_id = accounts_modulepermission.user_id
+
+• Potential Link: Table [hostels_studentprofile] to Table [payroll_employeeprofile]
+  Suggested Match: hostels_studentprofile.user_id = payroll_employeeprofile.user_id
+  SQL Join Example: FROM hostels_studentprofile JOIN payroll_employeeprofile ON hostels_studentprofile.user_id = payroll_employeeprofile.user_id
+
+• Potential Link: Table [payroll_employeeprofile] to Table [accounts_user]
+  Suggested Match: payroll_employeeprofile.user_id = accounts_user.id
+  SQL Join Example: FROM payroll_employeeprofile JOIN accounts_user ON payroll_employeeprofile.user_id = accounts_user.id
+
+• Potential Link: Table [payroll_employeeprofile] to Table [accounts_user_groups]
+  Suggested Match: payroll_employeeprofile.user_id = accounts_user_groups.user_id
+  SQL Join Example: FROM payroll_employeeprofile JOIN accounts_user_groups ON payroll_employeeprofile.user_id = accounts_user_groups.user_id
+
+• Potential Link: Table [payroll_employeeprofile] to Table [accounts_user_user_permissions]
+  Suggested Match: payroll_employeeprofile.user_id = accounts_user_user_permissions.user_id
+  SQL Join Example: FROM payroll_employeeprofile JOIN accounts_user_user_permissions ON payroll_employeeprofile.user_id = accounts_user_user_permissions.user_id
+
+• Potential Link: Table [payroll_employeeprofile] to Table [django_admin_log]
+  Suggested Match: payroll_employeeprofile.user_id = django_admin_log.user_id
+  SQL Join Example: FROM payroll_employeeprofile JOIN django_admin_log ON payroll_employeeprofile.user_id = django_admin_log.user_id
+
+• Potential Link: Table [payroll_employeeprofile] to Table [accounts_modulepermission]
+  Suggested Match: payroll_employeeprofile.user_id = accounts_modulepermission.user_id
+  SQL Join Example: FROM payroll_employeeprofile JOIN accounts_modulepermission ON payroll_employeeprofile.user_id = accounts_modulepermission.user_id
+
+• Potential Link: Table [payroll_employeeprofile] to Table [hostels_studentprofile]
+  Suggested Match: payroll_employeeprofile.user_id = hostels_studentprofile.user_id
+  SQL Join Example: FROM payroll_employeeprofile JOIN hostels_studentprofile ON payroll_employeeprofile.user_id = hostels_studentprofile.user_id
+
+• Potential Link: Table [food_dailymenu] to Table [bi_customreport]
+  Suggested Match: food_dailymenu.created_by_id = bi_customreport.created_by_id
+  SQL Join Example: FROM food_dailymenu JOIN bi_customreport ON food_dailymenu.created_by_id = bi_customreport.created_by_id
+
+• Potential Link: Table [food_dailymenu] to Table [bi_reporttemplate]
+  Suggested Match: food_dailymenu.created_by_id = bi_reporttemplate.created_by_id
+  SQL Join Example: FROM food_dailymenu JOIN bi_reporttemplate ON food_dailymenu.created_by_id = bi_reporttemplate.created_by_id
+
+• Potential Link: Table [food_dailymenu] to Table [bi_savedreport]
+  Suggested Match: food_dailymenu.created_by_id = bi_savedreport.created_by_id
+  SQL Join Example: FROM food_dailymenu JOIN bi_savedreport ON food_dailymenu.created_by_id = bi_savedreport.created_by_id
+
+• Potential Link: Table [food_dailymenu] to Table [accounts_user]
+  Suggested Match: food_dailymenu.hostel_id = accounts_user.hostel_id
+  SQL Join Example: FROM food_dailymenu JOIN accounts_user ON food_dailymenu.hostel_id = accounts_user.hostel_id
+
+• Potential Link: Table [food_dailymenu] to Table [hostels_hostel]
+  Suggested Match: food_dailymenu.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM food_dailymenu JOIN hostels_hostel ON food_dailymenu.hostel_id = hostels_hostel.id
+
+• Potential Link: Table [food_dailymenu] to Table [hostels_building]
+  Suggested Match: food_dailymenu.hostel_id = hostels_building.hostel_id
+  SQL Join Example: FROM food_dailymenu JOIN hostels_building ON food_dailymenu.hostel_id = hostels_building.hostel_id
+
+• Potential Link: Table [food_dailymenu] to Table [inventory_consumption]
+  Suggested Match: food_dailymenu.hostel_id = inventory_consumption.hostel_id
+  SQL Join Example: FROM food_dailymenu JOIN inventory_consumption ON food_dailymenu.hostel_id = inventory_consumption.hostel_id
+
+• Potential Link: Table [food_dailymenu] to Table [communication_ticket]
+  Suggested Match: food_dailymenu.hostel_id = communication_ticket.hostel_id
+  SQL Join Example: FROM food_dailymenu JOIN communication_ticket ON food_dailymenu.hostel_id = communication_ticket.hostel_id
+
+• Potential Link: Table [food_dailymenu] to Table [inventory_purchase]
+  Suggested Match: food_dailymenu.hostel_id = inventory_purchase.hostel_id
+  SQL Join Example: FROM food_dailymenu JOIN inventory_purchase ON food_dailymenu.hostel_id = inventory_purchase.hostel_id
+
+• Potential Link: Table [food_dailymenu] to Table [finance_liability]
+  Suggested Match: food_dailymenu.hostel_id = finance_liability.hostel_id
+  SQL Join Example: FROM food_dailymenu JOIN finance_liability ON food_dailymenu.hostel_id = finance_liability.hostel_id
+
+• Potential Link: Table [food_dailymenu] to Table [finance_partnercapital]
+  Suggested Match: food_dailymenu.hostel_id = finance_partnercapital.hostel_id
+  SQL Join Example: FROM food_dailymenu JOIN finance_partnercapital ON food_dailymenu.hostel_id = finance_partnercapital.hostel_id
+
+• Potential Link: Table [food_dailymenu] to Table [finance_asset]
+  Suggested Match: food_dailymenu.hostel_id = finance_asset.hostel_id
+  SQL Join Example: FROM food_dailymenu JOIN finance_asset ON food_dailymenu.hostel_id = finance_asset.hostel_id
+
+• Potential Link: Table [food_dailymenu] to Table [hostels_studentprofile]
+  Suggested Match: food_dailymenu.hostel_id = hostels_studentprofile.hostel_id
+  SQL Join Example: FROM food_dailymenu JOIN hostels_studentprofile ON food_dailymenu.hostel_id = hostels_studentprofile.hostel_id
+
+• Potential Link: Table [food_dailymenu] to Table [food_weeklymenutemplate]
+  Suggested Match: food_dailymenu.hostel_id = food_weeklymenutemplate.hostel_id
+  SQL Join Example: FROM food_dailymenu JOIN food_weeklymenutemplate ON food_dailymenu.hostel_id = food_weeklymenutemplate.hostel_id
+
+• Potential Link: Table [food_dailymenu] to Table [food_groceryrequirement]
+  Suggested Match: food_dailymenu.hostel_id = food_groceryrequirement.hostel_id
+  SQL Join Example: FROM food_dailymenu JOIN food_groceryrequirement ON food_dailymenu.hostel_id = food_groceryrequirement.hostel_id
+
+• Potential Link: Table [food_dailymenu] to Table [food_meal]
+  Suggested Match: food_dailymenu.meal_id = food_meal.id
+  SQL Join Example: FROM food_dailymenu JOIN food_meal ON food_dailymenu.meal_id = food_meal.id
+
+• Potential Link: Table [food_dailymenu] to Table [food_mealrecipe]
+  Suggested Match: food_dailymenu.meal_id = food_mealrecipe.meal_id
+  SQL Join Example: FROM food_dailymenu JOIN food_mealrecipe ON food_dailymenu.meal_id = food_mealrecipe.meal_id
+
+• Potential Link: Table [food_meal] to Table [inventory_category]
+  Suggested Match: food_meal.category_id = inventory_category.id
+  SQL Join Example: FROM food_meal JOIN inventory_category ON food_meal.category_id = inventory_category.id
+
+• Potential Link: Table [food_meal] to Table [inventory_item]
+  Suggested Match: food_meal.category_id = inventory_item.category_id
+  SQL Join Example: FROM food_meal JOIN inventory_item ON food_meal.category_id = inventory_item.category_id
+
+• Potential Link: Table [food_meal] to Table [finance_assetcategory]
+  Suggested Match: food_meal.category_id = finance_assetcategory.id
+  SQL Join Example: FROM food_meal JOIN finance_assetcategory ON food_meal.category_id = finance_assetcategory.id
+
+• Potential Link: Table [food_meal] to Table [finance_asset]
+  Suggested Match: food_meal.category_id = finance_asset.category_id
+  SQL Join Example: FROM food_meal JOIN finance_asset ON food_meal.category_id = finance_asset.category_id
+
+• Potential Link: Table [food_meal] to Table [food_mealcategory]
+  Suggested Match: food_meal.category_id = food_mealcategory.id
+  SQL Join Example: FROM food_meal JOIN food_mealcategory ON food_meal.category_id = food_mealcategory.id
+
+• Potential Link: Table [food_weeklymenutemplate] to Table [accounts_user]
+  Suggested Match: food_weeklymenutemplate.hostel_id = accounts_user.hostel_id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN accounts_user ON food_weeklymenutemplate.hostel_id = accounts_user.hostel_id
+
+• Potential Link: Table [food_weeklymenutemplate] to Table [hostels_hostel]
+  Suggested Match: food_weeklymenutemplate.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN hostels_hostel ON food_weeklymenutemplate.hostel_id = hostels_hostel.id
+
+• Potential Link: Table [food_weeklymenutemplate] to Table [hostels_building]
+  Suggested Match: food_weeklymenutemplate.hostel_id = hostels_building.hostel_id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN hostels_building ON food_weeklymenutemplate.hostel_id = hostels_building.hostel_id
+
+• Potential Link: Table [food_weeklymenutemplate] to Table [inventory_consumption]
+  Suggested Match: food_weeklymenutemplate.hostel_id = inventory_consumption.hostel_id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN inventory_consumption ON food_weeklymenutemplate.hostel_id = inventory_consumption.hostel_id
+
+• Potential Link: Table [food_weeklymenutemplate] to Table [communication_ticket]
+  Suggested Match: food_weeklymenutemplate.hostel_id = communication_ticket.hostel_id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN communication_ticket ON food_weeklymenutemplate.hostel_id = communication_ticket.hostel_id
+
+• Potential Link: Table [food_weeklymenutemplate] to Table [inventory_purchase]
+  Suggested Match: food_weeklymenutemplate.hostel_id = inventory_purchase.hostel_id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN inventory_purchase ON food_weeklymenutemplate.hostel_id = inventory_purchase.hostel_id
+
+• Potential Link: Table [food_weeklymenutemplate] to Table [finance_liability]
+  Suggested Match: food_weeklymenutemplate.hostel_id = finance_liability.hostel_id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN finance_liability ON food_weeklymenutemplate.hostel_id = finance_liability.hostel_id
+
+• Potential Link: Table [food_weeklymenutemplate] to Table [finance_partnercapital]
+  Suggested Match: food_weeklymenutemplate.hostel_id = finance_partnercapital.hostel_id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN finance_partnercapital ON food_weeklymenutemplate.hostel_id = finance_partnercapital.hostel_id
+
+• Potential Link: Table [food_weeklymenutemplate] to Table [finance_asset]
+  Suggested Match: food_weeklymenutemplate.hostel_id = finance_asset.hostel_id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN finance_asset ON food_weeklymenutemplate.hostel_id = finance_asset.hostel_id
+
+• Potential Link: Table [food_weeklymenutemplate] to Table [hostels_studentprofile]
+  Suggested Match: food_weeklymenutemplate.hostel_id = hostels_studentprofile.hostel_id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN hostels_studentprofile ON food_weeklymenutemplate.hostel_id = hostels_studentprofile.hostel_id
+
+• Potential Link: Table [food_weeklymenutemplate] to Table [food_dailymenu]
+  Suggested Match: food_weeklymenutemplate.hostel_id = food_dailymenu.hostel_id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_dailymenu ON food_weeklymenutemplate.hostel_id = food_dailymenu.hostel_id
+
+• Potential Link: Table [food_weeklymenutemplate] to Table [food_groceryrequirement]
+  Suggested Match: food_weeklymenutemplate.hostel_id = food_groceryrequirement.hostel_id
+  SQL Join Example: FROM food_weeklymenutemplate JOIN food_groceryrequirement ON food_weeklymenutemplate.hostel_id = food_groceryrequirement.hostel_id
+
+• Potential Link: Table [food_mealfeedback] to Table [communication_ticket]
+  Suggested Match: food_mealfeedback.student_id = communication_ticket.student_id
+  SQL Join Example: FROM food_mealfeedback JOIN communication_ticket ON food_mealfeedback.student_id = communication_ticket.student_id
+
+• Potential Link: Table [food_mealfeedback] to Table [fees_securitydeposit]
+  Suggested Match: food_mealfeedback.student_id = fees_securitydeposit.student_id
+  SQL Join Example: FROM food_mealfeedback JOIN fees_securitydeposit ON food_mealfeedback.student_id = fees_securitydeposit.student_id
+
+• Potential Link: Table [food_mealfeedback] to Table [hostels_studentutilitycharge]
+  Suggested Match: food_mealfeedback.student_id = hostels_studentutilitycharge.student_id
+  SQL Join Example: FROM food_mealfeedback JOIN hostels_studentutilitycharge ON food_mealfeedback.student_id = hostels_studentutilitycharge.student_id
+
+• Potential Link: Table [food_mealfeedback] to Table [fees_studentutilitybill]
+  Suggested Match: food_mealfeedback.student_id = fees_studentutilitybill.student_id
+  SQL Join Example: FROM food_mealfeedback JOIN fees_studentutilitybill ON food_mealfeedback.student_id = fees_studentutilitybill.student_id
+
+• Potential Link: Table [food_mealfeedback] to Table [fees_monthlyfee]
+  Suggested Match: food_mealfeedback.student_id = fees_monthlyfee.student_id
+  SQL Join Example: FROM food_mealfeedback JOIN fees_monthlyfee ON food_mealfeedback.student_id = fees_monthlyfee.student_id
+
+• Potential Link: Table [food_groceryrequirement] to Table [accounts_user]
+  Suggested Match: food_groceryrequirement.hostel_id = accounts_user.hostel_id
+  SQL Join Example: FROM food_groceryrequirement JOIN accounts_user ON food_groceryrequirement.hostel_id = accounts_user.hostel_id
+
+• Potential Link: Table [food_groceryrequirement] to Table [hostels_hostel]
+  Suggested Match: food_groceryrequirement.hostel_id = hostels_hostel.id
+  SQL Join Example: FROM food_groceryrequirement JOIN hostels_hostel ON food_groceryrequirement.hostel_id = hostels_hostel.id
+
+• Potential Link: Table [food_groceryrequirement] to Table [hostels_building]
+  Suggested Match: food_groceryrequirement.hostel_id = hostels_building.hostel_id
+  SQL Join Example: FROM food_groceryrequirement JOIN hostels_building ON food_groceryrequirement.hostel_id = hostels_building.hostel_id
+
+• Potential Link: Table [food_groceryrequirement] to Table [inventory_consumption]
+  Suggested Match: food_groceryrequirement.hostel_id = inventory_consumption.hostel_id
+  SQL Join Example: FROM food_groceryrequirement JOIN inventory_consumption ON food_groceryrequirement.hostel_id = inventory_consumption.hostel_id
+
+• Potential Link: Table [food_groceryrequirement] to Table [communication_ticket]
+  Suggested Match: food_groceryrequirement.hostel_id = communication_ticket.hostel_id
+  SQL Join Example: FROM food_groceryrequirement JOIN communication_ticket ON food_groceryrequirement.hostel_id = communication_ticket.hostel_id
+
+• Potential Link: Table [food_groceryrequirement] to Table [inventory_purchase]
+  Suggested Match: food_groceryrequirement.hostel_id = inventory_purchase.hostel_id
+  SQL Join Example: FROM food_groceryrequirement JOIN inventory_purchase ON food_groceryrequirement.hostel_id = inventory_purchase.hostel_id
+
+• Potential Link: Table [food_groceryrequirement] to Table [finance_liability]
+  Suggested Match: food_groceryrequirement.hostel_id = finance_liability.hostel_id
+  SQL Join Example: FROM food_groceryrequirement JOIN finance_liability ON food_groceryrequirement.hostel_id = finance_liability.hostel_id
+
+• Potential Link: Table [food_groceryrequirement] to Table [finance_partnercapital]
+  Suggested Match: food_groceryrequirement.hostel_id = finance_partnercapital.hostel_id
+  SQL Join Example: FROM food_groceryrequirement JOIN finance_partnercapital ON food_groceryrequirement.hostel_id = finance_partnercapital.hostel_id
+
+• Potential Link: Table [food_groceryrequirement] to Table [finance_asset]
+  Suggested Match: food_groceryrequirement.hostel_id = finance_asset.hostel_id
+  SQL Join Example: FROM food_groceryrequirement JOIN finance_asset ON food_groceryrequirement.hostel_id = finance_asset.hostel_id
+
+• Potential Link: Table [food_groceryrequirement] to Table [hostels_studentprofile]
+  Suggested Match: food_groceryrequirement.hostel_id = hostels_studentprofile.hostel_id
+  SQL Join Example: FROM food_groceryrequirement JOIN hostels_studentprofile ON food_groceryrequirement.hostel_id = hostels_studentprofile.hostel_id
+
+• Potential Link: Table [food_groceryrequirement] to Table [food_dailymenu]
+  Suggested Match: food_groceryrequirement.hostel_id = food_dailymenu.hostel_id
+  SQL Join Example: FROM food_groceryrequirement JOIN food_dailymenu ON food_groceryrequirement.hostel_id = food_dailymenu.hostel_id
+
+• Potential Link: Table [food_groceryrequirement] to Table [food_weeklymenutemplate]
+  Suggested Match: food_groceryrequirement.hostel_id = food_weeklymenutemplate.hostel_id
+  SQL Join Example: FROM food_groceryrequirement JOIN food_weeklymenutemplate ON food_groceryrequirement.hostel_id = food_weeklymenutemplate.hostel_id
+
+• Potential Link: Table [food_groceryrequirement] to Table [inventory_consumption]
+  Suggested Match: food_groceryrequirement.item_id = inventory_consumption.item_id
+  SQL Join Example: FROM food_groceryrequirement JOIN inventory_consumption ON food_groceryrequirement.item_id = inventory_consumption.item_id
+
+• Potential Link: Table [food_groceryrequirement] to Table [inventory_item]
+  Suggested Match: food_groceryrequirement.item_id = inventory_item.id
+  SQL Join Example: FROM food_groceryrequirement JOIN inventory_item ON food_groceryrequirement.item_id = inventory_item.id
+
+• Potential Link: Table [food_groceryrequirement] to Table [inventory_purchase]
+  Suggested Match: food_groceryrequirement.item_id = inventory_purchase.item_id
+  SQL Join Example: FROM food_groceryrequirement JOIN inventory_purchase ON food_groceryrequirement.item_id = inventory_purchase.item_id
+
+• Potential Link: Table [food_groceryrequirement] to Table [food_mealrecipe]
+  Suggested Match: food_groceryrequirement.item_id = food_mealrecipe.item_id
+  SQL Join Example: FROM food_groceryrequirement JOIN food_mealrecipe ON food_groceryrequirement.item_id = food_mealrecipe.item_id
+
+• Potential Link: Table [bi_customreport] to Table [food_dailymenu]
+  Suggested Match: bi_customreport.created_by_id = food_dailymenu.created_by_id
+  SQL Join Example: FROM bi_customreport JOIN food_dailymenu ON bi_customreport.created_by_id = food_dailymenu.created_by_id
+
+• Potential Link: Table [bi_customreport] to Table [bi_reporttemplate]
+  Suggested Match: bi_customreport.created_by_id = bi_reporttemplate.created_by_id
+  SQL Join Example: FROM bi_customreport JOIN bi_reporttemplate ON bi_customreport.created_by_id = bi_reporttemplate.created_by_id
+
+• Potential Link: Table [bi_customreport] to Table [bi_savedreport]
+  Suggested Match: bi_customreport.created_by_id = bi_savedreport.created_by_id
+  SQL Join Example: FROM bi_customreport JOIN bi_savedreport ON bi_customreport.created_by_id = bi_savedreport.created_by_id
+
+• Potential Link: Table [bi_customreportresult] to Table [bi_customreport]
+  Suggested Match: bi_customreportresult.report_id = bi_customreport.id
+  SQL Join Example: FROM bi_customreportresult JOIN bi_customreport ON bi_customreportresult.report_id = bi_customreport.id
+
+• Potential Link: Table [bi_customreportresult] to Table [bi_savedreport]
+  Suggested Match: bi_customreportresult.report_id = bi_savedreport.id
+  SQL Join Example: FROM bi_customreportresult JOIN bi_savedreport ON bi_customreportresult.report_id = bi_savedreport.id
+
+• Potential Link: Table [bi_reporttemplate] to Table [food_dailymenu]
+  Suggested Match: bi_reporttemplate.created_by_id = food_dailymenu.created_by_id
+  SQL Join Example: FROM bi_reporttemplate JOIN food_dailymenu ON bi_reporttemplate.created_by_id = food_dailymenu.created_by_id
+
+• Potential Link: Table [bi_reporttemplate] to Table [bi_customreport]
+  Suggested Match: bi_reporttemplate.created_by_id = bi_customreport.created_by_id
+  SQL Join Example: FROM bi_reporttemplate JOIN bi_customreport ON bi_reporttemplate.created_by_id = bi_customreport.created_by_id
+
+• Potential Link: Table [bi_reporttemplate] to Table [bi_savedreport]
+  Suggested Match: bi_reporttemplate.created_by_id = bi_savedreport.created_by_id
+  SQL Join Example: FROM bi_reporttemplate JOIN bi_savedreport ON bi_reporttemplate.created_by_id = bi_savedreport.created_by_id
+
+• Potential Link: Table [bi_savedreport] to Table [food_dailymenu]
+  Suggested Match: bi_savedreport.created_by_id = food_dailymenu.created_by_id
+  SQL Join Example: FROM bi_savedreport JOIN food_dailymenu ON bi_savedreport.created_by_id = food_dailymenu.created_by_id
+
+• Potential Link: Table [bi_savedreport] to Table [bi_customreport]
+  Suggested Match: bi_savedreport.created_by_id = bi_customreport.created_by_id
+  SQL Join Example: FROM bi_savedreport JOIN bi_customreport ON bi_savedreport.created_by_id = bi_customreport.created_by_id
+
+• Potential Link: Table [bi_savedreport] to Table [bi_reporttemplate]
+  Suggested Match: bi_savedreport.created_by_id = bi_reporttemplate.created_by_id
+  SQL Join Example: FROM bi_savedreport JOIN bi_reporttemplate ON bi_savedreport.created_by_id = bi_reporttemplate.created_by_id
+
+• Potential Link: Table [bi_savedreport] to Table [food_weeklymenutemplate]
+  Suggested Match: bi_savedreport.template_id = food_weeklymenutemplate.id
+  SQL Join Example: FROM bi_savedreport JOIN food_weeklymenutemplate ON bi_savedreport.template_id = food_weeklymenutemplate.id
+
+• Potential Link: Table [bi_savedreport] to Table [bi_reporttemplate]
+  Suggested Match: bi_savedreport.template_id = bi_reporttemplate.id
+  SQL Join Example: FROM bi_savedreport JOIN bi_reporttemplate ON bi_savedreport.template_id = bi_reporttemplate.id
+
+• Potential Link: Table [food_mealrecipe] to Table [inventory_consumption]
+  Suggested Match: food_mealrecipe.item_id = inventory_consumption.item_id
+  SQL Join Example: FROM food_mealrecipe JOIN inventory_consumption ON food_mealrecipe.item_id = inventory_consumption.item_id
+
+• Potential Link: Table [food_mealrecipe] to Table [inventory_item]
+  Suggested Match: food_mealrecipe.item_id = inventory_item.id
+  SQL Join Example: FROM food_mealrecipe JOIN inventory_item ON food_mealrecipe.item_id = inventory_item.id
+
+• Potential Link: Table [food_mealrecipe] to Table [inventory_purchase]
+  Suggested Match: food_mealrecipe.item_id = inventory_purchase.item_id
+  SQL Join Example: FROM food_mealrecipe JOIN inventory_purchase ON food_mealrecipe.item_id = inventory_purchase.item_id
+
+• Potential Link: Table [food_mealrecipe] to Table [food_groceryrequirement]
+  Suggested Match: food_mealrecipe.item_id = food_groceryrequirement.item_id
+  SQL Join Example: FROM food_mealrecipe JOIN food_groceryrequirement ON food_mealrecipe.item_id = food_groceryrequirement.item_id
+
+• Potential Link: Table [food_mealrecipe] to Table [food_dailymenu]
+  Suggested Match: food_mealrecipe.meal_id = food_dailymenu.meal_id
+  SQL Join Example: FROM food_mealrecipe JOIN food_dailymenu ON food_mealrecipe.meal_id = food_dailymenu.meal_id
+
+• Potential Link: Table [food_mealrecipe] to Table [food_meal]
+  Suggested Match: food_mealrecipe.meal_id = food_meal.id
+  SQL Join Example: FROM food_mealrecipe JOIN food_meal ON food_mealrecipe.meal_id = food_meal.id
+
+• Potential Link: Table [fees_studentutilitybill] to Table [communication_ticket]
+  Suggested Match: fees_studentutilitybill.student_id = communication_ticket.student_id
+  SQL Join Example: FROM fees_studentutilitybill JOIN communication_ticket ON fees_studentutilitybill.student_id = communication_ticket.student_id
+
+• Potential Link: Table [fees_studentutilitybill] to Table [fees_securitydeposit]
+  Suggested Match: fees_studentutilitybill.student_id = fees_securitydeposit.student_id
+  SQL Join Example: FROM fees_studentutilitybill JOIN fees_securitydeposit ON fees_studentutilitybill.student_id = fees_securitydeposit.student_id
+
+• Potential Link: Table [fees_studentutilitybill] to Table [hostels_studentutilitycharge]
+  Suggested Match: fees_studentutilitybill.student_id = hostels_studentutilitycharge.student_id
+  SQL Join Example: FROM fees_studentutilitybill JOIN hostels_studentutilitycharge ON fees_studentutilitybill.student_id = hostels_studentutilitycharge.student_id
+
+• Potential Link: Table [fees_studentutilitybill] to Table [food_mealfeedback]
+  Suggested Match: fees_studentutilitybill.student_id = food_mealfeedback.student_id
+  SQL Join Example: FROM fees_studentutilitybill JOIN food_mealfeedback ON fees_studentutilitybill.student_id = food_mealfeedback.student_id
+
+• Potential Link: Table [fees_studentutilitybill] to Table [fees_monthlyfee]
+  Suggested Match: fees_studentutilitybill.student_id = fees_monthlyfee.student_id
+  SQL Join Example: FROM fees_studentutilitybill JOIN fees_monthlyfee ON fees_studentutilitybill.student_id = fees_monthlyfee.student_id
+
+• Potential Link: Table [fees_monthlyfee] to Table [fees_feerule]
+  Suggested Match: fees_monthlyfee.fee_head_id = fees_feerule.fee_head_id
+  SQL Join Example: FROM fees_monthlyfee JOIN fees_feerule ON fees_monthlyfee.fee_head_id = fees_feerule.fee_head_id
+
+• Potential Link: Table [fees_monthlyfee] to Table [communication_ticket]
+  Suggested Match: fees_monthlyfee.student_id = communication_ticket.student_id
+  SQL Join Example: FROM fees_monthlyfee JOIN communication_ticket ON fees_monthlyfee.student_id = communication_ticket.student_id
+
+• Potential Link: Table [fees_monthlyfee] to Table [fees_securitydeposit]
+  Suggested Match: fees_monthlyfee.student_id = fees_securitydeposit.student_id
+  SQL Join Example: FROM fees_monthlyfee JOIN fees_securitydeposit ON fees_monthlyfee.student_id = fees_securitydeposit.student_id
+
+• Potential Link: Table [fees_monthlyfee] to Table [hostels_studentutilitycharge]
+  Suggested Match: fees_monthlyfee.student_id = hostels_studentutilitycharge.student_id
+  SQL Join Example: FROM fees_monthlyfee JOIN hostels_studentutilitycharge ON fees_monthlyfee.student_id = hostels_studentutilitycharge.student_id
+
+• Potential Link: Table [fees_monthlyfee] to Table [food_mealfeedback]
+  Suggested Match: fees_monthlyfee.student_id = food_mealfeedback.student_id
+  SQL Join Example: FROM fees_monthlyfee JOIN food_mealfeedback ON fees_monthlyfee.student_id = food_mealfeedback.student_id
+
+• Potential Link: Table [fees_monthlyfee] to Table [fees_studentutilitybill]
+  Suggested Match: fees_monthlyfee.student_id = fees_studentutilitybill.student_id
+  SQL Join Example: FROM fees_monthlyfee JOIN fees_studentutilitybill ON fees_monthlyfee.student_id = fees_studentutilitybill.student_id

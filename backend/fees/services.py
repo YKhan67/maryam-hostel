@@ -1,9 +1,10 @@
 # backend/fees/services.py
 
 from datetime import date
+from decimal import Decimal
 from django.db import transaction
 from hostels.models import StudentProfile
-from .models import FeeHead, MonthlyFee, FeeRule
+from .models import FeeHead, MonthlyFee, FeeRule, StudentUtilityBill
 
 
 def get_month_start(target_date: date) -> date:
@@ -14,12 +15,15 @@ def get_month_start(target_date: date) -> date:
 @transaction.atomic
 def generate_monthly_fees(for_date: date | None = None, dry_run: bool = False) -> int:
     """
-    Generate MonthlyFee entries for all active students for a given month.
+    Generate MonthlyFee entries for all active students for a given month,
+    plus a matching StudentUtilityBill snapshot for that month's utility charge.
 
     - Uses FeeHead.default_amount by default.
-    - For 'Rent': If student has a room with base_rent, that will override.
+    - For 'Rent': student.monthly_rent is the source of truth when set (kept
+      consistent with GenerateMonthlyFeesView in api_views.py - room.base_rent
+      is no longer used here).
     - Avoids duplicates (using get_or_create).
-    - Returns count of created entries.
+    - Returns count of created MonthlyFee entries.
     """
     if for_date is None:
         for_date = date.today()
@@ -27,7 +31,7 @@ def generate_monthly_fees(for_date: date | None = None, dry_run: bool = False) -
     month_start = get_month_start(for_date)
 
     fee_heads = FeeHead.objects.filter(is_recurring=True, frequency="MONTHLY")
-    students = StudentProfile.objects.filter(is_active=True).select_related("bed__room")
+    students = StudentProfile.objects.filter(is_active=True)
 
     created_count = 0
 
@@ -35,11 +39,9 @@ def generate_monthly_fees(for_date: date | None = None, dry_run: bool = False) -
         for fee_head in fee_heads:
             amount = fee_head.default_amount
 
-            # If fee head is Rent → get base_rent from room
-            if fee_head.name.lower() == "rent" and student.bed:
-                room = student.bed.room
-                if room and room.base_rent:
-                    amount = room.base_rent
+            # Rent uses the student's own monthly_rent as the default/source of truth.
+            if fee_head.name.lower() == "rent" and student.monthly_rent:
+                amount = student.monthly_rent
 
             obj, created = MonthlyFee.objects.get_or_create(
                 student=student,
@@ -56,6 +58,15 @@ def generate_monthly_fees(for_date: date | None = None, dry_run: bool = False) -
             if created:
                 created_count += 1
 
+        # Snapshot this month's utility bill so it has real per-month history
+        # instead of only ever reflecting whatever's "currently active".
+        utility_amount = Decimal(str(student.calculate_active_utility_bill()))
+        StudentUtilityBill.objects.get_or_create(
+            student=student,
+            month=month_start,
+            defaults={"amount": utility_amount},
+        )
+
     return created_count
 
 
@@ -63,7 +74,16 @@ def apply_late_fees(for_date: date | None = None) -> int:
     """
     Apply late fees to unpaid MonthlyFee records based on FeeRule.
     Returns number of updated entries.
+
+    Automation/scheduling for this function is intentionally left as-is (not
+    wired into Celery beat) - this only deduplicates the calculation itself
+    to share it with fees/utils.py::compute_late_fee_for_record, since the two
+    had already drifted slightly (this used date(...) directly, which raises
+    on an invalid day-of-month instead of clamping to month-end). The
+    "skip entirely if no rule exists" behavior below is preserved exactly.
     """
+    from .utils import compute_late_fee_for_record
+
     if for_date is None:
         for_date = date.today()
 
@@ -75,25 +95,7 @@ def apply_late_fees(for_date: date | None = None) -> int:
         if not rule:
             continue
 
-        # Construct due date
-        try:
-            due_date = date(mf.month.year, mf.month.month, rule.due_day)
-        except ValueError:
-            continue  # Invalid due date (e.g., Feb 30)
-
-        if for_date <= due_date:
-            continue  # Not yet late
-
-        days_late = (for_date - due_date).days
-        if days_late <= 0:
-            continue
-
-        # Calculate late fee
-        if rule.late_fee_type == "FIXED":
-            new_late_fee = rule.fixed_amount
-        else:  # PER_DAY
-            new_late_fee = rule.per_day_amount * days_late
-
+        new_late_fee = compute_late_fee_for_record(mf, on_date=for_date)
         if mf.late_fee_applied != new_late_fee:
             mf.late_fee_applied = new_late_fee
             mf.save()

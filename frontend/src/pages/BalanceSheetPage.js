@@ -75,6 +75,7 @@ export default function BalanceSheetPage() {
            <div className="card" style={{ borderTop: '4px solid var(--danger)' }}>
               <StatRow label="Refundable Security Deposits" value={data.liabilities.security_deposits} />
               <StatRow label="Accrued Expenses (Liabilities)" value={data.liabilities.accrued_expenses} />
+              <StatRow label="Property Rent Payable" value={data.liabilities.rent_payable} />
               <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '2px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '1.1rem' }}>
                  <span>TOTAL LIABILITIES</span>
                  <span style={{ color: 'var(--danger)' }}>{formatPKR(data.liabilities.total)}</span>

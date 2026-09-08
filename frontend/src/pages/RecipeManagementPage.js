@@ -226,10 +226,16 @@ export default function RecipeManagementPage() {
             <button onClick={downloadTemplate} className="btn btn-soft">
               📥 Download Template
             </button>
-            <button 
-              onClick={() => setShowImportModal(true)} 
+            <button
+              onClick={() => {
+              if (!selectedMeal) {
+                alert("Select a recipe first.");
+                return;
+              }
+              setShowImportModal(true);
+              }}
               className="btn btn-primary"
-              disabled={!selectedMeal || !isManager}
+              disabled={!isManager}
             >
               📤 Import Excel
             </button>

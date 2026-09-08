@@ -1,6 +1,8 @@
+import builtins
+
 from django.db import models
 from django.conf import settings
-from hostels.models import Hostel
+from hostels.models import Hostel, Property
 
 class AssetCategory(models.Model):
     """
@@ -28,6 +30,7 @@ class Asset(models.Model):
     name = models.CharField(max_length=200)
     category = models.ForeignKey(AssetCategory, on_delete=models.PROTECT, related_name="assets")
     hostel = models.ForeignKey(Hostel, on_delete=models.PROTECT, related_name="assets")
+    property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="assets", null=True, blank=True)
     
     serial_number = models.CharField(max_length=100, blank=True)
     
@@ -55,6 +58,7 @@ class Asset(models.Model):
 class PartnerCapital(models.Model):
     partner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, limit_choices_to={'role': 'PARTNER'})
     hostel = models.ForeignKey(Hostel, on_delete=models.PROTECT, related_name="capital_investments")
+    property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="capital_investments", null=True, blank=True)
     amount = models.DecimalField(max_digits=15, decimal_places=2)
     date_invested = models.DateField()
     remarks = models.TextField(blank=True)
@@ -71,6 +75,7 @@ class Liability(models.Model):
     name = models.CharField(max_length=200)
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='CREDIT')
     hostel = models.ForeignKey(Hostel, on_delete=models.PROTECT, related_name="liabilities")
+    property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="liabilities", null=True, blank=True)
     total_amount = models.DecimalField(max_digits=15, decimal_places=2)
     remaining_amount = models.DecimalField(max_digits=15, decimal_places=2)
     due_date = models.DateField(null=True, blank=True)
@@ -78,3 +83,87 @@ class Liability(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.remaining_amount} due"
+
+
+class PropertyRentalContract(models.Model):
+    property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="rental_contracts")
+    landlord_name = models.CharField(max_length=200)
+    landlord_contact = models.CharField(max_length=100, blank=True)
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+    monthly_rent = models.DecimalField(max_digits=15, decimal_places=2)
+    landlord_deposit = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    is_active = models.BooleanField(default=True)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-start_date"]
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        super().clean()
+        if self.end_date and self.end_date < self.start_date:
+            raise ValidationError({"end_date": "Contract end date must be on or after the start date."})
+
+    def __str__(self):
+        return f"{self.property} - {self.monthly_rent}"
+
+
+class PropertyRentAccrual(models.Model):
+    property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="rent_accruals")
+    contract = models.ForeignKey(PropertyRentalContract, on_delete=models.PROTECT, related_name="accruals")
+    month = models.DateField(help_text="First day of the accrued month")
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    paid_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    paid_on = models.DateField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=("property", "contract", "month"), name="unique_property_rent_accrual_month"),
+        ]
+        ordering = ["-month"]
+
+    @builtins.property
+    def outstanding_amount(self):
+        return self.amount - self.paid_amount
+
+
+class InvestorPropertyAccess(models.Model):
+    investor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="property_access")
+    property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="investor_access")
+    can_view_financials = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=("investor", "property"), name="unique_investor_property_access"),
+        ]
+
+
+class InvestorPropertyOwnership(models.Model):
+    investor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="property_ownerships")
+    property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="investor_ownerships")
+    ownership_percentage = models.DecimalField(max_digits=5, decimal_places=2)
+    effective_from = models.DateField()
+    effective_to = models.DateField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["property", "-effective_from"]
+        constraints = [
+            models.UniqueConstraint(fields=("investor", "property", "effective_from"), name="unique_investor_property_ownership_period"),
+        ]
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        from django.db.models import Sum
+        super().clean()
+        if not 0 <= self.ownership_percentage <= 100:
+            raise ValidationError({"ownership_percentage": "Ownership must be between 0 and 100."})
+        if self.effective_to and self.effective_to < self.effective_from:
+            raise ValidationError({"effective_to": "Effective end date must be on or after the start date."})
+        total = InvestorPropertyOwnership.objects.filter(
+            property=self.property,
+            effective_from=self.effective_from,
+        ).exclude(pk=self.pk).aggregate(total=Sum("ownership_percentage"))["total"] or 0
+        if total + self.ownership_percentage > 100:
+            raise ValidationError("Ownership percentages for a property cannot exceed 100%.")

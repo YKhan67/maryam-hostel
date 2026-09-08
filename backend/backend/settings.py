@@ -1,5 +1,5 @@
 # backend/backend/settings.py
-
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -12,6 +12,10 @@ ADMIN_INDEX_TITLE = "Site Administration"
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-default-key-change-me'
+
+#Gemini API key
+# GEMINI_API_KEY = os.environ.get("api-key", "")
+GEMINI_API_KEY = "AIzaSyAOAaDr8_9Xu2-gPIMOEMlniv1yUxL5oS4"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -52,7 +56,12 @@ INSTALLED_APPS = [
     "communication",
     "payroll",
     "finance",
-    "food",  # Meal Menu System
+
+    # Meal Menu System
+    "food",
+
+    # Business Reports
+    'bi',
 ]
 
 MIDDLEWARE = [
@@ -114,7 +123,7 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-LOGOUT_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/admin/'
 # Temporarily allow GET for logout to fix the 405 error
 LOGOUT_ON_GET = True
 
@@ -210,5 +219,19 @@ CELERY_BEAT_SCHEDULE = {
     'run-depreciation-monthly': {
         'task': 'finance.tasks.run_monthly_depreciation',
         'schedule': crontab(0, 0, day_of_month='1'),
+    },
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',   # or DEBUG for more detail
     },
 }

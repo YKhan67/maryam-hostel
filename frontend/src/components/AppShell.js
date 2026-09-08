@@ -75,9 +75,17 @@ export default function AppShell({ children, subtitle }) {
 
                 <div className="sidebar-section-title">Strategic Management</div>
                 {check("DASHBOARD") && (
-                  <NavLink to="/management" className={navClass}>
-                    📊 Management Dashboard
-                  </NavLink>
+                  <>
+                    <NavLink to="/management" className={navClass}>
+                      📊 Management Dashboard
+                    </NavLink>
+                    <NavLink to="/bi" className={navClass}>
+                      📈 Business Intelligence
+                    </NavLink>
+                    <NavLink to="/custom-reports" className={navClass}>
+                      🔧 Custom Reports
+                    </NavLink>
+                  </>
                 )}
 
                 {check("BALANCE_SHEET") && (
@@ -126,6 +134,11 @@ export default function AppShell({ children, subtitle }) {
                 <div className="sidebar-section-title" style={{ marginTop: 12 }}>
                   Hostel Operations
                 </div>
+                {(check("DASHBOARD") || user.role === "SUPER_ADMIN" || user.role === "HOSTEL_MANAGER") && (
+                  <NavLink to="/property-operations" className={navClass}>
+                    🏠 Property Operations
+                  </NavLink>
+                )}
                 {check("TASKS") && (
                   <NavLink to="/staff-tasks" className={navClass}>
                     🛠️ Staff Tasks

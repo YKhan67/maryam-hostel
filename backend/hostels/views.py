@@ -8,12 +8,15 @@ from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 
 # backend/hostels/views.py
-from rest_framework import viewsets, permissions
-from .models import City, Hostel, Building, Floor, Room, Bed, StudentProfile
+from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action
+from .models import City, Hostel, Property, Building, Floor, Room, Bed, BedAllocation, StudentProfile
 from .serializers import (
-    CitySerializer, HostelSerializer, BuildingSerializer, FloorSerializer,
-    RoomSerializer, BedSerializer, StudentProfileSerializer
+    CitySerializer, HostelSerializer, PropertySerializer, BuildingSerializer,
+    FloorSerializer, RoomSerializer, BedSerializer, BedAllocationSerializer,
+    BedAllocationActionSerializer, BedReleaseActionSerializer, StudentProfileSerializer,
 )
+from .services import allocate_bed, release_bed, transfer_bed
 
 class IsSuperAdminOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -29,6 +32,11 @@ class CityViewSet(viewsets.ModelViewSet):
 class HostelViewSet(viewsets.ModelViewSet):
     queryset = Hostel.objects.all().order_by("code")
     serializer_class = HostelSerializer
+    permission_classes = [IsSuperAdminOrReadOnly]
+
+class PropertyViewSet(viewsets.ModelViewSet):
+    queryset = Property.objects.select_related("hostel").all().order_by("hostel__code", "name")
+    serializer_class = PropertySerializer
     permission_classes = [IsSuperAdminOrReadOnly]
 
 class BuildingViewSet(viewsets.ModelViewSet):
@@ -51,6 +59,22 @@ class BedViewSet(viewsets.ModelViewSet):
     serializer_class = BedSerializer
     permission_classes = [IsSuperAdminOrReadOnly]
 
+class BedAllocationViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = BedAllocation.objects.select_related(
+        "student__user", "bed__room__floor__building__property", "previous_bed", "created_by"
+    ).all()
+    serializer_class = BedAllocationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+        if user.role == "STUDENT":
+            return qs.filter(student__user=user)
+        if user.role in ["HOSTEL_MANAGER", "PARTNER", "STAFF"] and user.hostel:
+            return qs.filter(student__hostel=user.hostel)
+        return qs
+
 class StudentProfileViewSet(viewsets.ModelViewSet):
     queryset = StudentProfile.objects.select_related("user", "hostel", "bed").all()
     serializer_class = StudentProfileSerializer
@@ -64,6 +88,63 @@ class StudentProfileViewSet(viewsets.ModelViewSet):
         if user.role in ["HOSTEL_MANAGER", "PARTNER", "STAFF"] and user.hostel:
             return qs.filter(hostel=user.hostel)
         return qs
+
+    def _allocation_payload(self, request):
+        serializer = BedAllocationActionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return serializer.validated_data
+
+    @action(detail=True, methods=["post"], url_path="allocate-bed")
+    def allocate_bed(self, request, pk=None):
+        student = self.get_object()
+        payload = self._allocation_payload(request)
+        try:
+            allocation = allocate_bed(
+                student,
+                payload["bed"],
+                move_in_date=payload.get("move_in_date"),
+                created_by=request.user,
+                reason=payload.get("reason", ""),
+                notes=payload.get("notes", ""),
+            )
+        except Exception as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(BedAllocationSerializer(allocation).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["post"], url_path="release-bed")
+    def release_bed(self, request, pk=None):
+        student = self.get_object()
+        serializer = BedReleaseActionSerializer(data=request.data or {})
+        serializer.is_valid(raise_exception=True)
+        payload = serializer.validated_data
+        try:
+            allocation = release_bed(
+                student,
+                move_out_date=payload.get("move_out_date"),
+                created_by=request.user,
+                reason=payload.get("reason", ""),
+                notes=payload.get("notes", ""),
+            )
+        except Exception as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(BedAllocationSerializer(allocation).data if allocation else {"detail": "Student has no assigned bed."})
+
+    @action(detail=True, methods=["post"], url_path="transfer-bed")
+    def transfer_bed(self, request, pk=None):
+        student = self.get_object()
+        payload = self._allocation_payload(request)
+        try:
+            allocation = transfer_bed(
+                student,
+                payload["bed"],
+                move_in_date=payload.get("move_in_date"),
+                created_by=request.user,
+                reason=payload.get("reason", ""),
+                notes=payload.get("notes", ""),
+            )
+        except Exception as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(BedAllocationSerializer(allocation).data, status=status.HTTP_200_OK)
 
 from .models import Bed, StudentProfile, Hostel, City
 from fees.models import MonthlyFee
@@ -112,7 +193,10 @@ class ManagementKPIView(APIView):
             beds_qs = Bed.objects.all()
 
         total_beds = beds_qs.count()
-        occupied_beds = beds_qs.filter(is_occupied=True).count()
+        occupied_beds = StudentProfile.objects.filter(
+            is_active=True,
+            bed__in=beds_qs,
+        ).count()
 
         # --- active students in selected hostels ---
         students_qs = StudentProfile.objects.filter(is_active=True)

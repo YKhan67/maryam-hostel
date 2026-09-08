@@ -1,0 +1,13 @@
+[Unit]
+Description=Maryam Backend
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/var/www/maryamhostel/backend
+ExecStart=/var/www/maryamhostel/backend/venv/bin/gunicorn --workers 4 --bind 127.0.0.1:8001 backend.wsgi:application
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

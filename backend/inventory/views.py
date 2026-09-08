@@ -1,13 +1,15 @@
 import io
 import re
 import csv
+import json
 import qrcode
 import logging
 from datetime import date
 
-from django.db.models import Sum, Avg, F
+from django.db.models import Sum, Avg, F, Q
 from django.http import HttpResponse
 from django.utils import timezone
+from django.conf import settings
 
 from rest_framework import viewsets, permissions, parsers
 from rest_framework.views import APIView
@@ -20,10 +22,6 @@ try:
     from PIL import Image
 except ImportError:
     Image = None
-try:
-    import pytesseract
-except ImportError:
-    pytesseract = None
 
 # PDF Dependencies
 from reportlab.lib.pagesizes import A4
@@ -33,10 +31,10 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 
 from .models import Category, Unit, Item, Vendor, Purchase, Consumption
-from hostels.models import Hostel, StudentProfile
+from hostels.models import Hostel, Property, StudentProfile
 from fees.models import Receipt
 from payroll.models import SalarySlip
-from finance.models import Asset
+from finance.models import Asset, PropertyRentAccrual, InvestorPropertyAccess, InvestorPropertyOwnership
 
 from .serializers import (
     CategorySerializer, UnitSerializer, ItemSerializer,
@@ -51,18 +49,11 @@ class IsHostelManagerOrAbove(permissions.BasePermission):
                request.user.role in ["SUPER_ADMIN", "CITY_MANAGER", "HOSTEL_MANAGER", "PARTNER", "STAFF"]
 
 class InventorySummaryView(APIView):
-    """
-    Dashboard Compatibility View.
-    """
     permission_classes = [IsAuthenticated]
     def get(self, request):
         return Response({"status": "Redirecting", "engine": "6.0"}, status=200)
 
 class BranchProfitLossView(APIView):
-    """
-    ENGINE 6.0: Integer-Lock Logic.
-    Extracts data strictly by Year and Month integers.
-    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -81,6 +72,65 @@ class BranchProfitLossView(APIView):
         else:
             h_id = request.query_params.get("hostel_id")
             hostels = Hostel.objects.filter(id=h_id) if h_id else Hostel.objects.all()
+
+        partner_properties = []
+        if user.role == "PARTNER":
+            partner_properties = list(Property.objects.filter(
+                investor_access__investor=user,
+                investor_access__can_view_financials=True,
+                is_active=True,
+            ).distinct())
+
+        if partner_properties:
+            matrix = []
+            total_revenue = total_logistics = total_payroll = total_rent = 0.0
+            for property_obj in partner_properties:
+                r_qs = apply_filters(Receipt.objects.filter(
+                    fee__student__bed__room__floor__building__property=property_obj
+                ), "date_issued__date")
+                revenue = float(r_qs.aggregate(s=Sum("amount"))["s"] or 0)
+                rent = float(apply_filters(
+                    PropertyRentAccrual.objects.filter(property=property_obj), "month"
+                ).aggregate(s=Sum("amount"))["s"] or 0)
+                asset_cost = float(apply_filters(
+                    Asset.objects.filter(property=property_obj), "purchase_date"
+                ).aggregate(s=Sum("purchase_price"))["s"] or 0)
+                net_profit = revenue - rent - asset_cost
+                ownership = InvestorPropertyOwnership.objects.filter(
+                    investor=user, property=property_obj, effective_from__lte=today,
+                ).filter(
+                    Q(effective_to__isnull=True) | Q(effective_to__gte=today)
+                ).order_by("-effective_from").first()
+                percentage = float(ownership.ownership_percentage) if ownership else 0.0
+                matrix.append({
+                    "property_id": property_obj.id,
+                    "property_name": property_obj.name,
+                    "hostel_name": property_obj.hostel.name,
+                    "income": revenue,
+                    "groceries": asset_cost,
+                    "payroll_burn": 0.0,
+                    "accommodation_rent": rent,
+                    "net_profit": net_profit,
+                    "ownership_percentage": percentage,
+                    "investor_profit": net_profit * percentage / 100,
+                    "profit_margin": round(net_profit / revenue * 100, 1) if revenue else 0,
+                })
+                total_revenue += revenue
+                total_logistics += asset_cost
+                total_rent += rent
+            return Response({
+                "version": "property-1.0",
+                "matrix": matrix,
+                "summary": {
+                    "total_revenue": total_revenue,
+                    "total_logistics": total_logistics,
+                    "total_payroll": total_payroll,
+                    "total_accommodation_rent": total_rent,
+                    "net_margin": total_revenue - total_logistics - total_rent,
+                    "investor_profit": sum(row["investor_profit"] for row in matrix),
+                    "student_count": 0,
+                },
+            })
         
         def apply_filters(qs, date_field):
             if period == "YTD": return qs.filter(**{f"{date_field}__year": year, f"{date_field}__month__lte": today.month})
@@ -88,32 +138,32 @@ class BranchProfitLossView(APIView):
             else: return qs.filter(**{f"{date_field}__year": today.year, f"{date_field}__month": today.month})
 
         matrix = []
-        t_rev, t_log, t_pay, t_stu = 0.0, 0.0, 0.0, 0
+        t_rev, t_log, t_pay, t_rent, t_stu = 0.0, 0.0, 0.0, 0.0, 0
 
         for h in hostels:
-            # Income
             r_qs = apply_filters(Receipt.objects.filter(fee__student__hostel=h), "date_issued__date")
             rev_val = float(r_qs.aggregate(s=Sum('amount'))['s'] or 0)
             
-            # Logistics
             p_qs = apply_filters(Purchase.objects.filter(hostel=h, status='APPROVED'), "date")
             logi_val = float(p_qs.annotate(c=F('quantity')*F('price_per_unit')).aggregate(s=Sum('c'))['s'] or 0)
 
-            # CapEx (Assets)
             a_qs = apply_filters(Asset.objects.filter(hostel=h), "purchase_date")
             asset_val = float(a_qs.aggregate(s=Sum('purchase_price'))['s'] or 0)
             
-            # Payroll
             py_qs = apply_filters(SalarySlip.objects.filter(employee__user__hostel=h, is_disbursed=True), "disbursed_at__date")
             payr_val = float(py_qs.aggregate(s=Sum('net_salary'))['s'] or 0)
+
+            rent_qs = apply_filters(PropertyRentAccrual.objects.filter(property__hostel=h), "month")
+            rent_val = float(rent_qs.aggregate(s=Sum('amount'))['s'] or 0)
             
             s_count = StudentProfile.objects.filter(hostel=h, is_active=True).count()
-            t_rev += rev_val; t_log += (logi_val + asset_val); t_pay += payr_val; t_stu += s_count
+            t_rev += rev_val; t_log += (logi_val + asset_val); t_pay += payr_val; t_rent += rent_val; t_stu += s_count
 
             matrix.append({
                 "hostel_id": h.id, "hostel_name": h.name, "income": rev_val, "groceries": logi_val + asset_val,
-                "payroll_burn": payr_val, "net_profit": rev_val - (logi_val + asset_val + payr_val),
-                "profit_margin": round(((rev_val - (logi_val + asset_val + payr_val)) / rev_val * 100), 1) if rev_val > 0 else 0
+                "payroll_burn": payr_val, "accommodation_rent": rent_val,
+                "net_profit": rev_val - (logi_val + asset_val + payr_val + rent_val),
+                "profit_margin": round(((rev_val - (logi_val + asset_val + payr_val + rent_val)) / rev_val * 100), 1) if rev_val > 0 else 0
             })
 
         students_den = t_stu if t_stu > 0 else 1
@@ -122,8 +172,9 @@ class BranchProfitLossView(APIView):
             "matrix": matrix,
             "summary": {
                 "total_revenue": t_rev, "total_logistics": t_log, "total_payroll": t_pay,
-                "net_margin": t_rev - (t_log + t_pay),
-                "avg_revenue": t_rev / students_den, "avg_cost": (t_log + t_pay) / students_den,
+                "total_accommodation_rent": t_rent,
+                "net_margin": t_rev - (t_log + t_pay + t_rent),
+                "avg_revenue": t_rev / students_den, "avg_cost": (t_log + t_pay + t_rent) / students_den,
                 "student_count": t_stu
             }
         })
@@ -291,10 +342,65 @@ class SendPOWhatsAppView(APIView):
 
 class ReceiptOCRView(APIView):
     permission_classes = [IsAuthenticated]
+
     def post(self, request):
-        if not pytesseract: return Response({"detail": "OCR Fail"}, status=501)
-        file = request.FILES.get('image'); img = Image.open(file); text = pytesseract.image_to_string(img); prices = re.findall(r'(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)', text); nums = [float(p.replace(',', '')) for p in prices if p]
-        return Response({"detected_total": max(nums) if nums else 0})
+        api_key = getattr(settings, "GEMINI_API_KEY", None)
+        if not api_key:
+            logger.error("GEMINI_API_KEY not configured")
+            return Response({"detail": "GEMINI_API_KEY is not configured on the server."}, status=500)
+
+        file = request.FILES.get('image')
+        if not file:
+            return Response({"detail": "No image provided."}, status=400)
+
+        try:
+            from google import genai
+            from google.genai import types
+        except ImportError:
+            logger.error("google-genai not installed")
+            return Response({"detail": "The google-genai package is missing."}, status=500)
+
+        client = genai.Client(api_key=api_key)
+
+        # Build parts: prompt text FIRST, then image bytes (exactly like read-slip.py)
+        prompt = """
+        Analyze this purchase receipt image. Extract all raw numerical price amounts.
+        Provide your response in the following strict format:
+
+        [PRICES_START]
+        (List each detected number on a new line)
+        [PRICES_END]
+        """
+
+        file.seek(0)
+        parts = [
+            types.Part.from_text(text=prompt),
+            types.Part.from_bytes(data=file.read(), mime_type=file.content_type or "image/jpeg")
+        ]
+        user_content = types.Content(role="user", parts=parts)
+
+        try:
+            logger.debug("Calling Gemini model=gemini-3.6-flash with single image")
+            response = client.models.generate_content(
+                model="gemini-3.6-flash",
+                contents=user_content
+            )
+            result_text = response.text
+            logger.info("Gemini raw response: %s", result_text)
+
+            nums = []
+            if "[PRICES_START]" in result_text and "[PRICES_END]" in result_text:
+                prices_block = result_text.split("[PRICES_START]")[1].split("[PRICES_END]")[0].strip()
+                for line in prices_block.split("\n"):
+                    match = re.search(r'(\d+(?:\.\d+)?)', line)
+                    if match:
+                        nums.append(float(match.group(1)))
+
+            return Response({"detected_total": max(nums) if nums else 0})
+
+        except Exception as e:
+            logger.exception("Gemini call failed")
+            return Response({"detail": f"AI OCR extraction failed: {str(e)}"}, status=502)
 
 class GenerateAllItemLabelsPDFView(APIView):
     permission_classes = [IsAuthenticated]
@@ -308,7 +414,6 @@ class GenerateAllItemLabelsPDFView(APIView):
             table_data.append(row)
         t = Table(table_data, colWidths=[1.8*inch]*4); t.setStyle(TableStyle([('ALIGN', (0,0), (-1,-1), 'CENTER'), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'), ('GRID', (0,0), (-1,-1), 0.5, colors.grey)])); elements.append(t); doc.build(elements); return response
 
-# --- Standard Viewsets ---
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all().order_by("name"); serializer_class = CategorySerializer; permission_classes = [IsHostelManagerOrAbove]
 class UnitViewSet(viewsets.ModelViewSet):

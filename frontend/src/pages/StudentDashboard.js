@@ -449,7 +449,14 @@ export default function StudentDashboard() {
                         {entry.status.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td>{formatPKR(entry.amount)}</td>
+                    <td>
+                      {formatPKR(entry.total ?? entry.amount)}
+                      {entry.utility_bill > 0 && (
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                          (Fee {formatPKR(entry.amount)} + Utility {formatPKR(entry.utility_bill)})
+                        </div>
+                      )}
+                    </td>
                     <td style={{ color: entry.fine > 0 ? 'var(--danger)' : 'inherit' }}>{formatPKR(entry.fine)}</td>
                     <td>
                       {(entry.status === 'OUTSTANDING' || entry.status === 'REJECTED') && (

@@ -343,7 +343,8 @@ class UserCreateUpdateSerializer(serializers.ModelSerializer):
         for utility_data in utilities_data:
             if not isinstance(utility_data, dict):
                 continue
-            payload = {key: value for key, value in utility_data.items() if key not in {"id"}}
+            ALLOWED_UTILITY_FIELDS = {"name", "amount", "is_active"}
+            payload = {key: value for key, value in utility_data.items() if key in ALLOWED_UTILITY_FIELDS}
             if not payload.get("name") and payload.get("amount") is None:
                 continue
 

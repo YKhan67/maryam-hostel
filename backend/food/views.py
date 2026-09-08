@@ -36,12 +36,69 @@ class MealViewSet(viewsets.ModelViewSet):
     serializer_class = MealSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=['get', 'post'])
     def recipes(self, request, pk=None):
         meal = self.get_object()
-        recipes = meal.recipes.all()
-        serializer = MealRecipeSerializer(recipes, many=True)
-        return Response(serializer.data)
+
+        if request.method == 'GET':
+            recipes = meal.recipes.all()
+            serializer = MealRecipeSerializer(recipes, many=True)
+            return Response(serializer.data)
+
+        serializer = MealRecipeSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(meal=meal)
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    @action(
+        detail=True,
+        methods=['patch', 'delete'],
+        url_path=r'recipes/(?P<recipe_id>[^/.]+)',
+        url_name='recipe-detail'
+    )
+    def recipe_detail(self, request, pk=None, recipe_id=None):
+        meal = self.get_object()
+
+        try:
+            recipe = meal.recipes.get(pk=recipe_id)
+        except MealRecipe.DoesNotExist:
+            return Response(
+                {"error": "Recipe ingredient not found for this meal."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if request.method == 'PATCH':
+            serializer = MealRecipeSerializer(
+                recipe,
+                data=request.data,
+                partial=True,
+                context={'request': request}
+            )
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        recipe.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class DailyMenuViewSet(viewsets.ModelViewSet):
@@ -78,12 +135,12 @@ class DailyMenuViewSet(viewsets.ModelViewSet):
     def today(self, request):
         today = date.today()
         user = request.user
-        
+
         if user.role == "SUPER_ADMIN":
             menu = DailyMenu.objects.filter(date=today).order_by('meal_type')
             serializer = DailyMenuSerializer(menu, many=True)
             return Response(serializer.data)
-        
+
         if hasattr(user, 'role') and user.role == 'STUDENT':
             try:
                 student = user.student_profile
@@ -104,17 +161,17 @@ class DailyMenuViewSet(viewsets.ModelViewSet):
         today = date.today()
         start_of_week = today - timedelta(days=today.weekday())
         end_of_week = start_of_week + timedelta(days=6)
-        
+
         user = request.user
-        
+
         if user.role == "SUPER_ADMIN":
             menu = DailyMenu.objects.filter(
-                date__gte=start_of_week, 
+                date__gte=start_of_week,
                 date__lte=end_of_week
             ).order_by('date', 'meal_type')
             serializer = DailyMenuSerializer(menu, many=True)
             return Response(serializer.data)
-        
+
         if hasattr(user, 'role') and user.role == 'STUDENT':
             try:
                 student = user.student_profile
@@ -127,11 +184,11 @@ class DailyMenuViewSet(viewsets.ModelViewSet):
             return Response([], status=200)
 
         menu = DailyMenu.objects.filter(
-            hostel=hostel, 
-            date__gte=start_of_week, 
+            hostel=hostel,
+            date__gte=start_of_week,
             date__lte=end_of_week
         ).order_by('date', 'meal_type')
-        
+
         serializer = DailyMenuSerializer(menu, many=True)
         return Response(serializer.data)
 
@@ -139,32 +196,32 @@ class DailyMenuViewSet(viewsets.ModelViewSet):
     def feedback(self, request, pk=None):
         daily_menu = self.get_object()
         user = request.user
-        
+
         if user.role != 'STUDENT':
             return Response({"error": "Only students can provide feedback"}, status=403)
-        
+
         try:
             student = user.student_profile
         except StudentProfile.DoesNotExist:
             return Response({"error": "Student profile not found"}, status=400)
-        
+
         rating = request.data.get('rating')
         comment = request.data.get('comment', '')
-        
+
         if not rating or rating < 1 or rating > 5:
             return Response({"error": "Rating must be between 1 and 5"}, status=400)
-        
+
         feedback, created = MealFeedback.objects.get_or_create(
             student=student,
             daily_menu=daily_menu,
             defaults={'rating': rating, 'comment': comment}
         )
-        
+
         if not created:
             feedback.rating = rating
             feedback.comment = comment
             feedback.save()
-        
+
         serializer = MealFeedbackSerializer(feedback)
         return Response(serializer.data)
 
@@ -201,43 +258,43 @@ class GroceryRequirementViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def generate(self, request):
         user = request.user
-        
+
         if user.role not in ['SUPER_ADMIN', 'HOSTEL_MANAGER', 'PARTNER']:
             return Response({"error": "Permission denied"}, status=403)
-        
+
         hostel_id = request.data.get('hostel')
         start_date = request.data.get('start_date')
         end_date = request.data.get('end_date')
         servings_per_person = int(request.data.get('servings_per_person', 1))
         global_waste_factor = float(request.data.get('waste_factor', 0.015))
-        
+
         if not hostel_id or not start_date or not end_date:
             return Response({"error": "hostel, start_date, and end_date are required"}, status=400)
-        
+
         try:
             hostel = Hostel.objects.get(id=hostel_id)
         except Hostel.DoesNotExist:
             return Response({"error": "Hostel not found"}, status=404)
-        
+
         active_students = StudentProfile.objects.filter(
             hostel=hostel,
             is_active=True,
             user__is_active=True
         ).count()
-        
+
         if active_students == 0:
             return Response({
                 "error": "No active students found in this hostel",
                 "hostel": hostel.name,
                 "active_students": 0
             }, status=400)
-        
+
         menus = DailyMenu.objects.filter(
             hostel=hostel,
             date__gte=start_date,
             date__lte=end_date
         ).select_related('meal')
-        
+
         if not menus.exists():
             return Response({
                 "error": "No meals scheduled in this date range",
@@ -246,10 +303,10 @@ class GroceryRequirementViewSet(viewsets.ModelViewSet):
                 "start_date": start_date,
                 "end_date": end_date
             }, status=400)
-        
+
         ingredient_totals = {}
         total_meals_count = menus.count()
-        
+
         for daily_menu in menus:
             for recipe in daily_menu.meal.recipes.all():
                 item_key = recipe.item.id
@@ -261,14 +318,14 @@ class GroceryRequirementViewSet(viewsets.ModelViewSet):
                         'estimated_cost': 0,
                         'waste_factor': float(recipe.waste_factor or global_waste_factor),
                     }
-                
+
                 base_quantity = float(recipe.quantity_required) * active_students * servings_per_person
                 waste = float(recipe.waste_factor or global_waste_factor)
                 quantity_with_waste = base_quantity * (1 + waste)
-                
+
                 ingredient_totals[item_key]['quantity'] += quantity_with_waste
                 ingredient_totals[item_key]['estimated_cost'] += float(recipe.estimated_cost or 0) * quantity_with_waste
-        
+
         created_items = []
         for item_id, data in ingredient_totals.items():
             grocery_item, created = GroceryRequirement.objects.get_or_create(
@@ -291,7 +348,7 @@ class GroceryRequirementViewSet(viewsets.ModelViewSet):
                 grocery_item.estimated_cost = data['estimated_cost']
                 grocery_item.notes = f"Based on {active_students} active students, {total_meals_count} meals, {servings_per_person} serving(s) per person. Waste factor: {data['waste_factor']*100:.1f}%"
                 grocery_item.save()
-        
+
         return Response({
             "message": f"Generated grocery requirements for {len(created_items)} items",
             "items_created": len(created_items),
@@ -309,12 +366,12 @@ class ExportMealTemplateView(APIView):
 
     def get(self, request):
         wb = openpyxl.Workbook()
-        
+
         ws1 = wb.active
         ws1.title = "Categories"
         headers = ["Name", "Emoji", "Description"]
         ws1.append(headers)
-        
+
         categories = MealCategory.objects.all()
         if categories.exists():
             for cat in categories:
@@ -333,7 +390,7 @@ class ExportMealTemplateView(APIView):
         ws2 = wb.create_sheet("Meals")
         headers = ["Name", "Description", "Category", "Dietary Tags", "Prep Time (mins)"]
         ws2.append(headers)
-        
+
         meals = Meal.objects.select_related('category').all()
         if meals.exists():
             for meal in meals:
@@ -359,11 +416,11 @@ class ExportMealTemplateView(APIView):
         ws3 = wb.create_sheet("Schedule")
         headers = ["Date", "Hostel Name", "Meal Type", "Meal Name", "Is Featured", "Special Note"]
         ws3.append(headers)
-        
+
         today = datetime.now().date()
         hostels = Hostel.objects.all()
         hostel_name = hostels[0].name if hostels.exists() else "Your Hostel Name"
-        
+
         for i in range(7):
             date_obj = today + timedelta(days=i)
             ws3.append([
@@ -423,7 +480,7 @@ class ImportMealExcelView(APIView):
             )
 
         file = request.FILES['file']
-        
+
         if not file.name.endswith(('.xlsx', '.xls')):
             return Response(
                 {"error": "Invalid file format. Please upload .xlsx or .xls file"},
@@ -457,7 +514,7 @@ class ImportMealExcelView(APIView):
                         name = str(row[0]).strip() if row[0] else ""
                         emoji = str(row[1]).strip() if row[1] else ""
                         description = str(row[2]).strip() if row[2] else ""
-                        
+
                         if name:
                             category, created = MealCategory.objects.update_or_create(
                                 name=name.upper(),
@@ -481,13 +538,13 @@ class ImportMealExcelView(APIView):
                         category_name = str(row[2]).strip() if row[2] else ""
                         dietary_tags = str(row[3]).strip() if row[3] else ""
                         prep_time = int(row[4]) if row[4] else 30
-                        
+
                         if name and category_name:
                             category = MealCategory.objects.filter(name=category_name.upper()).first()
                             if not category:
                                 results["errors"].append(f"Category '{category_name}' not found for meal '{name}'")
                                 continue
-                            
+
                             meal, created = Meal.objects.update_or_create(
                                 name=name,
                                 defaults={
@@ -507,7 +564,7 @@ class ImportMealExcelView(APIView):
             if "Schedule" in wb.sheetnames:
                 ws = wb["Schedule"]
                 results["debug"].append(f"Schedule sheet found. Rows count: {ws.max_row - 1}")
-                
+
                 for row_idx, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
                     if not row or not row[0]:
                         continue
@@ -518,32 +575,32 @@ class ImportMealExcelView(APIView):
                         meal_name = str(row[3]).strip() if row[3] else ""
                         is_featured = str(row[4]).strip() if row[4] else "No"
                         special_note = str(row[5]).strip() if row[5] else ""
-                        
+
                         if not date_str or not hostel_name or not meal_type or not meal_name:
                             results["errors"].append(f"Row {row_idx}: Missing required fields")
                             continue
-                        
+
                         try:
                             date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
                         except ValueError:
                             results["errors"].append(f"Row {row_idx}: Invalid date format '{date_str}'")
                             continue
-                        
+
                         hostel = Hostel.objects.filter(name__icontains=hostel_name).first()
                         if not hostel:
                             results["errors"].append(f"Row {row_idx}: Hostel '{hostel_name}' not found")
                             continue
-                        
+
                         meal = Meal.objects.filter(name__icontains=meal_name).first()
                         if not meal:
                             results["errors"].append(f"Row {row_idx}: Meal '{meal_name}' not found")
                             continue
-                        
+
                         valid_meal_types = ['BREAKFAST', 'BRUNCH', 'LUNCH', 'SNACKS', 'DINNER']
                         if meal_type.upper() not in valid_meal_types:
                             results["errors"].append(f"Row {row_idx}: Invalid meal type '{meal_type}'")
                             continue
-                        
+
                         menu, created = DailyMenu.objects.update_or_create(
                             hostel=hostel,
                             date=date_obj,
@@ -558,7 +615,7 @@ class ImportMealExcelView(APIView):
                             results["schedules_created"] += 1
                         else:
                             results["schedules_updated"] += 1
-                            
+
                     except Exception as e:
                         results["errors"].append(f"Row {row_idx}: {str(e)}")
 
@@ -579,12 +636,12 @@ class ExportRecipeTemplateView(APIView):
 
     def get(self, request):
         wb = openpyxl.Workbook()
-        
+
         ws = wb.active
         ws.title = "Recipes"
         headers = ["Meal Name", "Item Name", "Quantity", "Unit", "Estimated Cost", "Waste Factor (%)"]
         ws.append(headers)
-        
+
         sample_recipes = [
             ["Paratha & Chai", "Flour", "0.5", "kg", "150", "1.5"],
             ["Paratha & Chai", "Eggs", "4", "pieces", "40", "1.0"],
@@ -633,7 +690,7 @@ class ImportRecipeExcelView(APIView):
             )
 
         file = request.FILES['file']
-        
+
         if not file.name.endswith(('.xlsx', '.xls')):
             return Response(
                 {"error": "Invalid file format. Please upload .xlsx or .xls file"},
@@ -655,7 +712,7 @@ class ImportRecipeExcelView(APIView):
                 )
 
             ws = wb["Recipes"]
-            
+
             meal_id = request.data.get('meal_id')
             target_meal = None
             if meal_id:

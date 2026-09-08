@@ -158,7 +158,7 @@ export default function ParentPortalPage() {
                         {entry.status}
                       </span>
                     </td>
-                    <td>{formatPKR(entry.amount)}</td>
+                    <td>{formatPKR(entry.total)}</td>
                     <td style={{ color: entry.fine > 0 ? '#d64545' : 'inherit' }}>{formatPKR(entry.fine)}</td>
                     <td style={{ fontWeight: 800 }}>{formatPKR(entry.total)}</td>
                   </tr>

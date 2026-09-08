@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from .models import AssetCategory, Asset, PartnerCapital, Liability
+from .models import (
+    AssetCategory, Asset, PartnerCapital, Liability, PropertyRentalContract,
+    PropertyRentAccrual, InvestorPropertyAccess, InvestorPropertyOwnership,
+)
 
 class AssetCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,4 +30,26 @@ class LiabilitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Liability
+        fields = '__all__'
+
+class PropertyRentalContractSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PropertyRentalContract
+        fields = '__all__'
+
+class PropertyRentAccrualSerializer(serializers.ModelSerializer):
+    outstanding_amount = serializers.DecimalField(read_only=True, max_digits=15, decimal_places=2)
+
+    class Meta:
+        model = PropertyRentAccrual
+        fields = '__all__'
+
+class InvestorPropertyAccessSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InvestorPropertyAccess
+        fields = '__all__'
+
+class InvestorPropertyOwnershipSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InvestorPropertyOwnership
         fields = '__all__'

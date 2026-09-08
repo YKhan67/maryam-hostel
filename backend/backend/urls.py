@@ -1,5 +1,3 @@
-# backend/backend/urls.py
-
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
@@ -9,8 +7,9 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 
 from accounts.views import UserViewSet, MeView, ChangePasswordView, ModulePermissionViewSet
 from hostels.views import (
-    CityViewSet, HostelViewSet, BuildingViewSet, FloorViewSet,
-    RoomViewSet, BedViewSet, StudentProfileViewSet, ManagementKPIView
+    CityViewSet, HostelViewSet, PropertyViewSet, BuildingViewSet, FloorViewSet,
+    RoomViewSet, BedViewSet, BedAllocationViewSet, StudentProfileViewSet,
+    ManagementKPIView
 )
 from inventory.views import (
     CategoryViewSet, UnitViewSet, ItemViewSet, VendorViewSet,
@@ -20,6 +19,7 @@ from inventory.views import (
     BranchProfitLossView, ExportPnLReportView, ReceiptOCRView,
     GeneratePurchaseOrderView, SendPOWhatsAppView, GenerateAllItemLabelsPDFView,
 )
+from inventory.receipt_scan import ScanReceiptView, ScanReceiptSaveView
 from fees.views import (
     FeeHeadViewSet, FeeRuleViewSet, MonthlyFeeViewSet, PaymentProofViewSet,
 )
@@ -29,10 +29,9 @@ from rest_framework_simplejwt.views import (
 from django.conf import settings
 from django.conf.urls.static import static
 
-# Custom Logout View
 def logout_view(request):
     logout(request)
-    return redirect("/")
+    return redirect("/admin/")
 
 router = DefaultRouter()
 
@@ -43,10 +42,12 @@ router.register(r"module-permissions", ModulePermissionViewSet, basename="module
 # Hostels
 router.register(r"cities", CityViewSet, basename="city")
 router.register(r"hostels", HostelViewSet, basename="hostel")
+router.register(r"properties", PropertyViewSet, basename="property")
 router.register(r"buildings", BuildingViewSet, basename="building")
 router.register(r"floors", FloorViewSet, basename="floor")
 router.register(r"rooms", RoomViewSet, basename="room")
 router.register(r"beds", BedViewSet, basename="bed")
+router.register(r"bed-allocations", BedAllocationViewSet, basename="bed-allocation")
 router.register(r"students", StudentProfileViewSet, basename="student")
 
 # Inventory
@@ -67,9 +68,12 @@ urlpatterns = [
     path("admin/logout/", logout_view),
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
+
+    # Business Intelligence
+    path("api/bi/", include("bi.urls")),
     
     # Food App
-    path("api/food/", include("food.urls")),  # <-- Make sure this line exists
+    path("api/food/", include("food.urls")),
     
     path("api/me/", MeView.as_view(), name="me"),
     path("api/change-password/", ChangePasswordView.as_view(), name="change-password"),
@@ -86,7 +90,8 @@ urlpatterns = [
     path("api/inventory/consumption_analytics/", ConsumptionAnalyticsView.as_view(), name="consumption-analytics"),
     path("api/inventory/branch_pnl/", BranchProfitLossView.as_view(), name="branch-pnl"),
     path("api/inventory/export_pnl/", ExportPnLReportView.as_view(), name="export-pnl"),
-    path("api/inventory/ocr/", ReceiptOCRView.as_view(), name="ocr-scan"),
+    path("api/inventory/scan-receipt/", ScanReceiptView.as_view(), name="inventory-scan-receipt"),
+    path("api/inventory/scan-receipt/save/", ScanReceiptSaveView.as_view(), name="inventory-scan-receipt-save"),
     path("api/inventory/purchases/<int:pk>/po/", GeneratePurchaseOrderView.as_view(), name="generate-po"),
     path("api/inventory/purchases/<int:pk>/send_vendor/", SendPOWhatsAppView.as_view(), name="send-vendor-whatsapp"),
     path("api/inventory/print_all_labels/", GenerateAllItemLabelsPDFView.as_view(), name="print-all-labels"),

@@ -31,9 +31,11 @@ class FeeRule(models.Model):
         if on_date <= due_date: return Decimal("0")
         days_late = (on_date - due_date).days
         if days_late <= 0: return Decimal("0")
-        if self.late_fee_type == "FIXED": return self.fixed_amount
-        if self.late_fee_type == "PER_DAY": return self.per_day_amount * days_late
-        return Decimal("0")
+        # Delegate the actual FIXED vs PER_DAY math to fees/utils.py so this logic
+        # only lives in one place (local import avoids a circular import, since
+        # utils.py imports from this module at load time).
+        from fees.utils import late_fee_for_days
+        return late_fee_for_days(self, days_late)
 
 class MonthlyFee(models.Model):
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="fees")
@@ -44,6 +46,12 @@ class MonthlyFee(models.Model):
     is_paid = models.BooleanField(default=False)
     is_partially_paid = models.BooleanField(default=False)
     late_fee_applied = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    # Set by WaiveFineView. Needed because zeroing/reducing late_fee_applied
+    # alone leaves no record that a waiver happened - a genuinely-waived fee
+    # becomes indistinguishable from one that never had a fine, which makes
+    # "how many students had their fine waived" unanswerable without this.
+    fine_was_waived = models.BooleanField(default=False)
+    fine_waived_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     @property
@@ -57,11 +65,12 @@ class MonthlyFee(models.Model):
     def get_rule(self): return self.fee_head.rules.first()
 
     def get_due_date(self) -> date:
-        rule = self.get_rule(); base = self.month; year, month = base.year, base.month; due_day = rule.due_day if rule else 4
-        try: return date(year, month, due_day)
-        except ValueError:
-            next_m = date(year + (1 if month == 12 else 0), (1 if month == 12 else month + 1), 1)
-            return next_m - timedelta(days=1)
+        # Delegate to fees/utils.py so due-date math (incl. month-end clamping)
+        # only lives in one place (local import avoids a circular import).
+        from fees.utils import due_date_for_month
+        rule = self.get_rule()
+        due_day = rule.due_day if (rule and rule.due_day is not None) else 4
+        return due_date_for_month(self.month, due_day)
 
     def refresh_late_fee(self, on_date: date | None = None, save: bool = True) -> Decimal:
         if not on_date: on_date = date.today()
@@ -70,6 +79,34 @@ class MonthlyFee(models.Model):
         self.late_fee_applied = new_late_fee
         if save: self.save(update_fields=["late_fee_applied"])
         return new_late_fee
+
+class StudentUtilityBill(models.Model):
+    """
+    Monthly snapshot of a student's utility charge.
+
+    Previously the "utility bill" shown on dashboards was only ever a live
+    total of currently-active StudentUtilityCharge rows (hostels app) - there
+    was no record of what a student was actually charged in a past month.
+    This gives it real per-month history, generated alongside MonthlyFee in
+    fees/services.py::generate_monthly_fees().
+
+    It's billed and collected together with that month's MonthlyFee (no
+    separate payment proof needed - utility money is received as a lump sum
+    from the utility company, not tracked per-student), so is_paid mirrors
+    the fee's own paid status rather than being tracked independently.
+    """
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="utility_bills")
+    month = models.DateField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    is_paid = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("student", "month")
+
+    def __str__(self): return f"{self.student} - Utility - {self.month:%b %Y}"
+
 
 class Receipt(models.Model):
     """
@@ -110,6 +147,16 @@ class PaymentProof(models.Model):
         if self.status == "APPROVED" and (old_status != "APPROVED"):
             fee = self.fee
             total_payable = fee.amount + fee.refresh_late_fee(save=False)
+
+            # Fold in that month's utility bill - collected together with the
+            # fee in practice, no separate proof needed for it.
+            utility_bill = StudentUtilityBill.objects.filter(student=fee.student, month=fee.month).first()
+            if utility_bill and not utility_bill.is_paid:
+                total_payable += utility_bill.amount
+                utility_bill.amount_paid = utility_bill.amount
+                utility_bill.is_paid = True
+                utility_bill.save(update_fields=["amount_paid", "is_paid"])
+
             fee.amount_paid = total_payable
             fee.is_paid = True
             fee.is_partially_paid = False

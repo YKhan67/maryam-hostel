@@ -191,6 +191,11 @@ export default function FeeManagementPage() {
         amount: paymentAmount || 0,
       };
 
+      if (!markAllMonths) {
+        payload.year = Number(markYear);
+        payload.month = Number(markMonth);
+      }
+
       if (markScope === "STUDENT" && markStudentId) {
         payload.student_id = Number(markStudentId);
       }

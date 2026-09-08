@@ -46,7 +46,7 @@ export default function InvestorPortalPage() {
   const matrix = dashboardData?.matrix || [];
 
   const totalIncome = summary.total_revenue || 0;
-  const totalExpenses = (summary.total_logistics || 0) + (summary.total_payroll || 0);
+  const totalExpenses = (summary.total_logistics || 0) + (summary.total_payroll || 0) + (summary.total_accommodation_rent || 0);
   const totalNet = summary.net_margin || 0;
 
   return (
@@ -61,7 +61,7 @@ export default function InvestorPortalPage() {
         <div className="card kpi-card">
           <div className="card-title">Operational Burn</div>
           <div className="card-value" style={{ color: 'var(--danger)' }}>{formatCurrency(totalExpenses)}</div>
-          <div className="card-subtext">Groceries + Payroll cost</div>
+          <div className="card-subtext">Groceries + Payroll + accommodation</div>
         </div>
         <div className="card kpi-card">
           <div className="card-title">Net Profitability</div>
@@ -98,6 +98,9 @@ export default function InvestorPortalPage() {
                 <th>Revenue</th>
                 <th>Groceries</th>
                 <th>Payroll</th>
+                <th>Accommodation</th>
+                <th>Ownership</th>
+                <th>Investor Profit</th>
                 <th>Net Profit</th>
                 <th>Margin</th>
               </tr>
@@ -109,12 +112,15 @@ export default function InvestorPortalPage() {
                   <td style={{ color: 'var(--success)', fontWeight: 600 }}>{formatCurrency(branch.income)}</td>
                   <td>{formatCurrency(branch.groceries)}</td>
                   <td style={{ color: 'var(--brand-gold)' }}>{formatCurrency(branch.payroll_burn)}</td>
+                  <td>{formatCurrency(branch.accommodation_rent)}</td>
+                  <td>{branch.ownership_percentage ?? "-"}%</td>
+                  <td style={{ fontWeight: 700 }}>{formatCurrency(branch.investor_profit ?? branch.net_profit)}</td>
                   <td style={{ fontWeight: 800 }}>{formatCurrency(branch.net_profit)}</td>
                   <td style={{ fontWeight: 700 }}>{branch.profit_margin}%</td>
                 </tr>
               ))}
               {matrix.length === 0 && (
-                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px' }}>No financial data available for this cycle.</td></tr>
+                <tr><td colSpan="9" style={{ textAlign: 'center', padding: '40px' }}>No financial data available for this cycle.</td></tr>
               )}
             </tbody>
           </table>

@@ -14,6 +14,8 @@ from .api_views import (
     UnitEconomicsView,
     GenerateReceiptPDFView,
     ParentSecureLedgerView,
+    StudentFeeBreakdownView,
+    StudentFeeBreakdownExportView,
 )
 from .views import (
     FeeHeadViewSet,
@@ -78,6 +80,16 @@ urlpatterns = [
         "dashboard/hostel-income/",
         HostelIncomeSummary.as_view(),
         name="fees-dashboard-hostel-income",
+    ),
+    path(
+        "dashboard/student-breakdown/",
+        StudentFeeBreakdownView.as_view(),
+        name="fees-dashboard-student-breakdown",
+    ),
+    path(
+        "dashboard/student-breakdown/export/",
+        StudentFeeBreakdownExportView.as_view(),
+        name="fees-dashboard-student-breakdown-export",
     ),
     
     # Action endpoints

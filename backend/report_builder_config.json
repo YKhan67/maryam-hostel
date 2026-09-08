@@ -1,0 +1,3335 @@
+[
+  {
+    "table": "accounts_modulepermission",
+    "name": "Module Permission",
+    "label": "Module Permission",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "role",
+        "label": "Role",
+        "type": "charfield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "user",
+        "label": "User",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "module_name",
+        "label": "Module Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "can_view",
+        "label": "Can View",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "can_add",
+        "label": "Can Add",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "can_edit",
+        "label": "Can Edit",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "can_delete",
+        "label": "Can Delete",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "user": "accounts_user"
+    }
+  },
+  {
+    "table": "accounts_user",
+    "name": "User",
+    "label": "User",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "password",
+        "label": "Password",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "last_login",
+        "label": "Last Login",
+        "type": "datetimefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "is_superuser",
+        "label": "Is Superuser",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "username",
+        "label": "Username",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "first_name",
+        "label": "First Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "last_name",
+        "label": "Last Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "email",
+        "label": "Email",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_staff",
+        "label": "Is Staff",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_active",
+        "label": "Is Active",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "date_joined",
+        "label": "Date Joined",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "role",
+        "label": "Role",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "hostel",
+        "label": "Hostel",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "groups",
+        "label": "Groups",
+        "type": "manytomanyfield",
+        "null": false,
+        "is_relation": true,
+        "many_to_many": "auth_group"
+      },
+      {
+        "name": "user_permissions",
+        "label": "User Permissions",
+        "type": "manytomanyfield",
+        "null": false,
+        "is_relation": true,
+        "many_to_many": "auth_permission"
+      }
+    ],
+    "foreign_keys": {
+      "hostel": "hostels_hostel",
+      "groups": "auth_group",
+      "user_permissions": "auth_permission"
+    }
+  },
+  {
+    "table": "accounts_user_groups",
+    "name": "Accounts User Groups",
+    "label": "Accounts User Groups",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "integer",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "user_id",
+        "label": "User Id",
+        "type": "bigint",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "group_id",
+        "label": "Group Id",
+        "type": "integer",
+        "null": true,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {}
+  },
+  {
+    "table": "accounts_user_user_permissions",
+    "name": "Accounts User User Permissions",
+    "label": "Accounts User User Permissions",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "integer",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "user_id",
+        "label": "User Id",
+        "type": "bigint",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "permission_id",
+        "label": "Permission Id",
+        "type": "integer",
+        "null": true,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {}
+  },
+  {
+    "table": "bi_customreport",
+    "name": "Custom Report",
+    "label": "Custom Report",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "description",
+        "label": "Description",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "tables",
+        "label": "Tables",
+        "type": "jsonfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "fields",
+        "label": "Fields",
+        "type": "jsonfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "filters",
+        "label": "Filters",
+        "type": "jsonfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "group_by",
+        "label": "Group By",
+        "type": "jsonfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "sort_by",
+        "label": "Sort By",
+        "type": "jsonfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "date_range",
+        "label": "Date Range",
+        "type": "jsonfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "distinct",
+        "label": "Distinct",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_scheduled",
+        "label": "Is Scheduled",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "schedule_frequency",
+        "label": "Schedule Frequency",
+        "type": "charfield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "schedule_time",
+        "label": "Schedule Time",
+        "type": "timefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "schedule_recipients",
+        "label": "Schedule Recipients",
+        "type": "jsonfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_shared",
+        "label": "Is Shared",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "shared_with_roles",
+        "label": "Shared With Roles",
+        "type": "jsonfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "created_by",
+        "label": "Created By",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "created_at",
+        "label": "Created At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "updated_at",
+        "label": "Updated At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "last_run",
+        "label": "Last Run",
+        "type": "datetimefield",
+        "null": true,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "created_by": "accounts_user"
+    }
+  },
+  {
+    "table": "bi_customreportresult",
+    "name": "Custom Report Result",
+    "label": "Custom Report Result",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "report",
+        "label": "Report",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "bi_customreport"
+      },
+      {
+        "name": "data",
+        "label": "Data",
+        "type": "jsonfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "generated_by",
+        "label": "Generated By",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "generated_at",
+        "label": "Generated At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "report": "bi_customreport",
+      "generated_by": "accounts_user"
+    }
+  },
+  {
+    "table": "bi_reporttemplate",
+    "name": "Report Template",
+    "label": "Report Template",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "report_type",
+        "label": "Report Type",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "description",
+        "label": "Description",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "config",
+        "label": "Config",
+        "type": "jsonfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_active",
+        "label": "Is Active",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "created_by",
+        "label": "Created By",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "created_at",
+        "label": "Created At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "updated_at",
+        "label": "Updated At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "created_by": "accounts_user"
+    }
+  },
+  {
+    "table": "bi_savedreport",
+    "name": "Saved Report",
+    "label": "Saved Report",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "template",
+        "label": "Template",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "bi_reporttemplate"
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "filters",
+        "label": "Filters",
+        "type": "jsonfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "data",
+        "label": "Data",
+        "type": "jsonfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "created_by",
+        "label": "Created By",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "created_at",
+        "label": "Created At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "last_run",
+        "label": "Last Run",
+        "type": "datetimefield",
+        "null": true,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "template": "bi_reporttemplate",
+      "created_by": "accounts_user"
+    }
+  },
+  {
+    "table": "communication_slasetting",
+    "name": "Sla Setting",
+    "label": "Sla Setting",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "category",
+        "label": "Category",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "response_time_hours",
+        "label": "Response Time Hours",
+        "type": "positiveintegerfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {}
+  },
+  {
+    "table": "communication_ticket",
+    "name": "Ticket",
+    "label": "Ticket",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "student",
+        "label": "Student",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_studentprofile"
+      },
+      {
+        "name": "hostel",
+        "label": "Hostel",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "asset",
+        "label": "Asset",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "finance_asset"
+      },
+      {
+        "name": "category",
+        "label": "Category",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "subject",
+        "label": "Subject",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "description",
+        "label": "Description",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "status",
+        "label": "Status",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "assigned_to",
+        "label": "Assigned To",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "created_at",
+        "label": "Created At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "updated_at",
+        "label": "Updated At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "resolved_at",
+        "label": "Resolved At",
+        "type": "datetimefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "is_escalated",
+        "label": "Is Escalated",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "last_reminded_at",
+        "label": "Last Reminded At",
+        "type": "datetimefield",
+        "null": true,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "student": "hostels_studentprofile",
+      "hostel": "hostels_hostel",
+      "asset": "finance_asset",
+      "assigned_to": "accounts_user"
+    }
+  },
+  {
+    "table": "fees_feehead",
+    "name": "Fee Head",
+    "label": "Fee Head",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "description",
+        "label": "Description",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_recurring",
+        "label": "Is Recurring",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "frequency",
+        "label": "Frequency",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "default_amount",
+        "label": "Default Amount",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {}
+  },
+  {
+    "table": "fees_feerule",
+    "name": "Fee Rule",
+    "label": "Fee Rule",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "fee_head",
+        "label": "Fee Head",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "fees_feehead"
+      },
+      {
+        "name": "due_day",
+        "label": "Due Day",
+        "type": "positiveintegerfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "late_fee_type",
+        "label": "Late Fee Type",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "fixed_amount",
+        "label": "Fixed Amount",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "per_day_amount",
+        "label": "Per Day Amount",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "fee_head": "fees_feehead"
+    }
+  },
+  {
+    "table": "fees_monthlyfee",
+    "name": "Monthly Fee",
+    "label": "Monthly Fee",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "student",
+        "label": "Student",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_studentprofile"
+      },
+      {
+        "name": "fee_head",
+        "label": "Fee Head",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "fees_feehead"
+      },
+      {
+        "name": "month",
+        "label": "Month",
+        "type": "datefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "amount",
+        "label": "Amount",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "amount_paid",
+        "label": "Amount Paid",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_paid",
+        "label": "Is Paid",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_partially_paid",
+        "label": "Is Partially Paid",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "late_fee_applied",
+        "label": "Late Fee Applied",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "fine_was_waived",
+        "label": "Fine Was Waived",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "fine_waived_amount",
+        "label": "Fine Waived Amount",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "created_at",
+        "label": "Created At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "student": "hostels_studentprofile",
+      "fee_head": "fees_feehead"
+    }
+  },
+  {
+    "table": "fees_paymentproof",
+    "name": "Payment Proof",
+    "label": "Payment Proof",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "fee",
+        "label": "Fee",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "fees_monthlyfee"
+      },
+      {
+        "name": "uploaded_by",
+        "label": "Uploaded By",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "uploaded_on",
+        "label": "Uploaded On",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "file",
+        "label": "File",
+        "type": "filefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "status",
+        "label": "Status",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "remarks",
+        "label": "Remarks",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "fee": "fees_monthlyfee",
+      "uploaded_by": "accounts_user"
+    }
+  },
+  {
+    "table": "fees_receipt",
+    "name": "Receipt",
+    "label": "Receipt",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "receipt_no",
+        "label": "Receipt No",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "fee",
+        "label": "Fee",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "fees_monthlyfee"
+      },
+      {
+        "name": "amount",
+        "label": "Amount",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "date_issued",
+        "label": "Date Issued",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "payment_method",
+        "label": "Payment Method",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "fee": "fees_monthlyfee"
+    }
+  },
+  {
+    "table": "fees_securitydeposit",
+    "name": "Security Deposit",
+    "label": "Security Deposit",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "student",
+        "label": "Student",
+        "type": "onetoonefield",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_studentprofile"
+      },
+      {
+        "name": "amount",
+        "label": "Amount",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "date_paid",
+        "label": "Date Paid",
+        "type": "datefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "status",
+        "label": "Status",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "refund_date",
+        "label": "Refund Date",
+        "type": "datefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "remarks",
+        "label": "Remarks",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "student": "hostels_studentprofile"
+    }
+  },
+  {
+    "table": "fees_studentutilitybill",
+    "name": "Student Utility Bill",
+    "label": "Student Utility Bill",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "student",
+        "label": "Student",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_studentprofile"
+      },
+      {
+        "name": "month",
+        "label": "Month",
+        "type": "datefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "amount",
+        "label": "Amount",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "amount_paid",
+        "label": "Amount Paid",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_paid",
+        "label": "Is Paid",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "created_at",
+        "label": "Created At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "student": "hostels_studentprofile"
+    }
+  },
+  {
+    "table": "finance_asset",
+    "name": "Asset",
+    "label": "Asset",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "category",
+        "label": "Category",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "finance_assetcategory"
+      },
+      {
+        "name": "hostel",
+        "label": "Hostel",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "serial_number",
+        "label": "Serial Number",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "quantity",
+        "label": "Quantity",
+        "type": "positiveintegerfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "purchase_date",
+        "label": "Purchase Date",
+        "type": "datefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "purchase_price",
+        "label": "Purchase Price",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "current_value",
+        "label": "Current Value",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "warranty_expiry",
+        "label": "Warranty Expiry",
+        "type": "datefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "status",
+        "label": "Status",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "sale_price",
+        "label": "Sale Price",
+        "type": "decimalfield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "sold_date",
+        "label": "Sold Date",
+        "type": "datefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "remarks",
+        "label": "Remarks",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "created_at",
+        "label": "Created At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "updated_at",
+        "label": "Updated At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "category": "finance_assetcategory",
+      "hostel": "hostels_hostel"
+    }
+  },
+  {
+    "table": "finance_assetcategory",
+    "name": "Asset Category",
+    "label": "Asset Category",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "depreciation_rate_annual",
+        "label": "Depreciation Rate Annual",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {}
+  },
+  {
+    "table": "finance_liability",
+    "name": "Liability",
+    "label": "Liability",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "type",
+        "label": "Type",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "hostel",
+        "label": "Hostel",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "total_amount",
+        "label": "Total Amount",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "remaining_amount",
+        "label": "Remaining Amount",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "due_date",
+        "label": "Due Date",
+        "type": "datefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "is_settled",
+        "label": "Is Settled",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "hostel": "hostels_hostel"
+    }
+  },
+  {
+    "table": "finance_partnercapital",
+    "name": "Partner Capital",
+    "label": "Partner Capital",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "partner",
+        "label": "Partner",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "hostel",
+        "label": "Hostel",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "amount",
+        "label": "Amount",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "date_invested",
+        "label": "Date Invested",
+        "type": "datefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "remarks",
+        "label": "Remarks",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "partner": "accounts_user",
+      "hostel": "hostels_hostel"
+    }
+  },
+  {
+    "table": "food_dailymenu",
+    "name": "Daily Menu",
+    "label": "Daily Menu",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "hostel",
+        "label": "Hostel",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "date",
+        "label": "Date",
+        "type": "datefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "meal_type",
+        "label": "Meal Type",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "meal",
+        "label": "Meal",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "special_note",
+        "label": "Special Note",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_featured",
+        "label": "Is Featured",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "created_at",
+        "label": "Created At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "updated_at",
+        "label": "Updated At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "created_by",
+        "label": "Created By",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "accounts_user"
+      }
+    ],
+    "foreign_keys": {
+      "hostel": "hostels_hostel",
+      "meal": "food_meal",
+      "created_by": "accounts_user"
+    }
+  },
+  {
+    "table": "food_groceryrequirement",
+    "name": "Grocery Requirement",
+    "label": "Grocery Requirement",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "hostel",
+        "label": "Hostel",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "start_date",
+        "label": "Start Date",
+        "type": "datefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "end_date",
+        "label": "End Date",
+        "type": "datefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "item",
+        "label": "Item",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "inventory_item"
+      },
+      {
+        "name": "quantity_needed",
+        "label": "Quantity Needed",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "unit",
+        "label": "Unit",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "estimated_cost",
+        "label": "Estimated Cost",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "actual_cost",
+        "label": "Actual Cost",
+        "type": "decimalfield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "status",
+        "label": "Status",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "notes",
+        "label": "Notes",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "created_at",
+        "label": "Created At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "updated_at",
+        "label": "Updated At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "hostel": "hostels_hostel",
+      "item": "inventory_item"
+    }
+  },
+  {
+    "table": "food_meal",
+    "name": "Meal",
+    "label": "Meal",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "description",
+        "label": "Description",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "category",
+        "label": "Category",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "food_mealcategory"
+      },
+      {
+        "name": "dietary_tags",
+        "label": "Dietary Tags",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "preparation_time",
+        "label": "Preparation Time",
+        "type": "positiveintegerfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "calories",
+        "label": "Calories",
+        "type": "positiveintegerfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "protein",
+        "label": "Protein",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_active",
+        "label": "Is Active",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "created_at",
+        "label": "Created At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "updated_at",
+        "label": "Updated At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "category": "food_mealcategory"
+    }
+  },
+  {
+    "table": "food_mealcategory",
+    "name": "Meal Category",
+    "label": "Meal Category",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "emoji",
+        "label": "Emoji",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "description",
+        "label": "Description",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_active",
+        "label": "Is Active",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {}
+  },
+  {
+    "table": "food_mealfeedback",
+    "name": "Meal Feedback",
+    "label": "Meal Feedback",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "student",
+        "label": "Student",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_studentprofile"
+      },
+      {
+        "name": "daily_menu",
+        "label": "Daily Menu",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "food_dailymenu"
+      },
+      {
+        "name": "rating",
+        "label": "Rating",
+        "type": "positivesmallintegerfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "comment",
+        "label": "Comment",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "created_at",
+        "label": "Created At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "student": "hostels_studentprofile",
+      "daily_menu": "food_dailymenu"
+    }
+  },
+  {
+    "table": "food_mealrecipe",
+    "name": "Meal Recipe",
+    "label": "Meal Recipe",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "meal",
+        "label": "Meal",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "item",
+        "label": "Item",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "inventory_item"
+      },
+      {
+        "name": "quantity_required",
+        "label": "Quantity Required",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "unit",
+        "label": "Unit",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "estimated_cost",
+        "label": "Estimated Cost",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "waste_factor",
+        "label": "Waste Factor",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "substitute_item",
+        "label": "Substitute Item",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "inventory_item"
+      }
+    ],
+    "foreign_keys": {
+      "meal": "food_meal",
+      "item": "inventory_item",
+      "substitute_item": "inventory_item"
+    }
+  },
+  {
+    "table": "food_weeklymenutemplate",
+    "name": "Weekly Menu Template",
+    "label": "Weekly Menu Template",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "description",
+        "label": "Description",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "hostel",
+        "label": "Hostel",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "monday_breakfast",
+        "label": "Monday Breakfast",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "monday_lunch",
+        "label": "Monday Lunch",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "monday_dinner",
+        "label": "Monday Dinner",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "tuesday_breakfast",
+        "label": "Tuesday Breakfast",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "tuesday_lunch",
+        "label": "Tuesday Lunch",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "tuesday_dinner",
+        "label": "Tuesday Dinner",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "wednesday_breakfast",
+        "label": "Wednesday Breakfast",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "wednesday_lunch",
+        "label": "Wednesday Lunch",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "wednesday_dinner",
+        "label": "Wednesday Dinner",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "thursday_breakfast",
+        "label": "Thursday Breakfast",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "thursday_lunch",
+        "label": "Thursday Lunch",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "thursday_dinner",
+        "label": "Thursday Dinner",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "friday_breakfast",
+        "label": "Friday Breakfast",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "friday_lunch",
+        "label": "Friday Lunch",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "friday_dinner",
+        "label": "Friday Dinner",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "saturday_breakfast",
+        "label": "Saturday Breakfast",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "saturday_lunch",
+        "label": "Saturday Lunch",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "saturday_dinner",
+        "label": "Saturday Dinner",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "sunday_breakfast",
+        "label": "Sunday Breakfast",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "sunday_lunch",
+        "label": "Sunday Lunch",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "sunday_dinner",
+        "label": "Sunday Dinner",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "food_meal"
+      },
+      {
+        "name": "is_active",
+        "label": "Is Active",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "created_at",
+        "label": "Created At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "hostel": "hostels_hostel",
+      "monday_breakfast": "food_meal",
+      "monday_lunch": "food_meal",
+      "monday_dinner": "food_meal",
+      "tuesday_breakfast": "food_meal",
+      "tuesday_lunch": "food_meal",
+      "tuesday_dinner": "food_meal",
+      "wednesday_breakfast": "food_meal",
+      "wednesday_lunch": "food_meal",
+      "wednesday_dinner": "food_meal",
+      "thursday_breakfast": "food_meal",
+      "thursday_lunch": "food_meal",
+      "thursday_dinner": "food_meal",
+      "friday_breakfast": "food_meal",
+      "friday_lunch": "food_meal",
+      "friday_dinner": "food_meal",
+      "saturday_breakfast": "food_meal",
+      "saturday_lunch": "food_meal",
+      "saturday_dinner": "food_meal",
+      "sunday_breakfast": "food_meal",
+      "sunday_lunch": "food_meal",
+      "sunday_dinner": "food_meal"
+    }
+  },
+  {
+    "table": "hostels_bed",
+    "name": "Bed",
+    "label": "Bed",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "room",
+        "label": "Room",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_room"
+      },
+      {
+        "name": "label",
+        "label": "Label",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_occupied",
+        "label": "Is Occupied",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "room": "hostels_room"
+    }
+  },
+  {
+    "table": "hostels_building",
+    "name": "Building",
+    "label": "Building",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "hostel",
+        "label": "Hostel",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "hostel": "hostels_hostel"
+    }
+  },
+  {
+    "table": "hostels_city",
+    "name": "City",
+    "label": "City",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "state",
+        "label": "State",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "country",
+        "label": "Country",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {}
+  },
+  {
+    "table": "hostels_floor",
+    "name": "Floor",
+    "label": "Floor",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "building",
+        "label": "Building",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_building"
+      },
+      {
+        "name": "number",
+        "label": "Number",
+        "type": "integerfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "building": "hostels_building"
+    }
+  },
+  {
+    "table": "hostels_hostel",
+    "name": "Hostel",
+    "label": "Hostel",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "code",
+        "label": "Code",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "city",
+        "label": "City",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_city"
+      },
+      {
+        "name": "address",
+        "label": "Address",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "phone",
+        "label": "Phone",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_active",
+        "label": "Is Active",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "city": "hostels_city"
+    }
+  },
+  {
+    "table": "hostels_room",
+    "name": "Room",
+    "label": "Room",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "floor",
+        "label": "Floor",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_floor"
+      },
+      {
+        "name": "number",
+        "label": "Number",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "room_type",
+        "label": "Room Type",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_ac",
+        "label": "Is Ac",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "base_rent",
+        "label": "Base Rent",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "floor": "hostels_floor"
+    }
+  },
+  {
+    "table": "hostels_studentprofile",
+    "name": "Student Profile",
+    "label": "Student Profile",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "user",
+        "label": "User",
+        "type": "onetoonefield",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "hostel",
+        "label": "Hostel",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "bed",
+        "label": "Bed",
+        "type": "onetoonefield",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "hostels_bed"
+      },
+      {
+        "name": "mobile",
+        "label": "Mobile",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "whatsapp",
+        "label": "Whatsapp",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "guardian_name",
+        "label": "Guardian Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "guardian_phone",
+        "label": "Guardian Phone",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "guardian_nic_number",
+        "label": "Guardian Nic Number",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "parent_name",
+        "label": "Parent Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "parent_phone",
+        "label": "Parent Phone",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "parent_whatsapp",
+        "label": "Parent Whatsapp",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "parent_nic_number",
+        "label": "Parent Nic Number",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "college_name",
+        "label": "College Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "nic_number",
+        "label": "Nic Number",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "nic_front_picture",
+        "label": "Nic Front Picture",
+        "type": "filefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "nic_back_picture",
+        "label": "Nic Back Picture",
+        "type": "filefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "profile_picture",
+        "label": "Profile Picture",
+        "type": "filefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "monthly_rent",
+        "label": "Monthly Rent",
+        "type": "decimalfield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "course",
+        "label": "Course",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "year",
+        "label": "Year",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_active",
+        "label": "Is Active",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "joined_on",
+        "label": "Joined On",
+        "type": "datefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "left_on",
+        "label": "Left On",
+        "type": "datefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "parent_link_token",
+        "label": "Parent Link Token",
+        "type": "charfield",
+        "null": true,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "user": "accounts_user",
+      "hostel": "hostels_hostel",
+      "bed": "hostels_bed"
+    }
+  },
+  {
+    "table": "hostels_studentutilitycharge",
+    "name": "Student Utility Charge",
+    "label": "Student Utility Charge",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "student",
+        "label": "Student",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_studentprofile"
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "amount",
+        "label": "Amount",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_active",
+        "label": "Is Active",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "created_at",
+        "label": "Created At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "updated_at",
+        "label": "Updated At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "student": "hostels_studentprofile"
+    }
+  },
+  {
+    "table": "inventory_category",
+    "name": "Category",
+    "label": "Category",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {}
+  },
+  {
+    "table": "inventory_consumption",
+    "name": "Consumption",
+    "label": "Consumption",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "hostel",
+        "label": "Hostel",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "date",
+        "label": "Date",
+        "type": "datefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "item",
+        "label": "Item",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "inventory_item"
+      },
+      {
+        "name": "quantity",
+        "label": "Quantity",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "photo",
+        "label": "Photo",
+        "type": "filefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "remarks",
+        "label": "Remarks",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "created_at",
+        "label": "Created At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "hostel": "hostels_hostel",
+      "item": "inventory_item"
+    }
+  },
+  {
+    "table": "inventory_item",
+    "name": "Item",
+    "label": "Item",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "code",
+        "label": "Code",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "category",
+        "label": "Category",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "inventory_category"
+      },
+      {
+        "name": "unit",
+        "label": "Unit",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "inventory_unit"
+      },
+      {
+        "name": "reorder_level",
+        "label": "Reorder Level",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_active",
+        "label": "Is Active",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "category": "inventory_category",
+      "unit": "inventory_unit"
+    }
+  },
+  {
+    "table": "inventory_purchase",
+    "name": "Purchase",
+    "label": "Purchase",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "hostel",
+        "label": "Hostel",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "hostels_hostel"
+      },
+      {
+        "name": "date",
+        "label": "Date",
+        "type": "datefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "vendor",
+        "label": "Vendor",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "inventory_vendor"
+      },
+      {
+        "name": "invoice_no",
+        "label": "Invoice No",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "invoice_photo",
+        "label": "Invoice Photo",
+        "type": "filefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "items_photo",
+        "label": "Items Photo",
+        "type": "filefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "item",
+        "label": "Item",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "inventory_item"
+      },
+      {
+        "name": "quantity",
+        "label": "Quantity",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "price_per_unit",
+        "label": "Price Per Unit",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "status",
+        "label": "Status",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "approved_by",
+        "label": "Approved By",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "rejection_remarks",
+        "label": "Rejection Remarks",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "created_at",
+        "label": "Created At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "hostel": "hostels_hostel",
+      "vendor": "inventory_vendor",
+      "item": "inventory_item",
+      "approved_by": "accounts_user"
+    }
+  },
+  {
+    "table": "inventory_unit",
+    "name": "Unit",
+    "label": "Unit",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {}
+  },
+  {
+    "table": "inventory_vendor",
+    "name": "Vendor",
+    "label": "Vendor",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "contact_person",
+        "label": "Contact Person",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "phone",
+        "label": "Phone",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "whatsapp",
+        "label": "Whatsapp",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "address",
+        "label": "Address",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {}
+  },
+  {
+    "table": "payroll_employeeprofile",
+    "name": "Employee Profile",
+    "label": "Employee Profile",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "user",
+        "label": "User",
+        "type": "onetoonefield",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "accounts_user"
+      },
+      {
+        "name": "designation",
+        "label": "Designation",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "pay_type",
+        "label": "Pay Type",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "nic_number",
+        "label": "Nic Number",
+        "type": "charfield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "nic_front_picture",
+        "label": "Nic Front Picture",
+        "type": "filefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "nic_back_picture",
+        "label": "Nic Back Picture",
+        "type": "filefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "profile_picture",
+        "label": "Profile Picture",
+        "type": "filefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "mobile",
+        "label": "Mobile",
+        "type": "charfield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "whatsapp",
+        "label": "Whatsapp",
+        "type": "charfield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "base_salary",
+        "label": "Base Salary",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "housing_allowance",
+        "label": "Housing Allowance",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "fuel_allowance",
+        "label": "Fuel Allowance",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "other_allowance",
+        "label": "Other Allowance",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "rate_per_task",
+        "label": "Rate Per Task",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "bank_name",
+        "label": "Bank Name",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "iban",
+        "label": "Iban",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "joined_on",
+        "label": "Joined On",
+        "type": "datefield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "is_active",
+        "label": "Is Active",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "user": "accounts_user"
+    }
+  },
+  {
+    "table": "payroll_payrollrecord",
+    "name": "Payroll Record",
+    "label": "Payroll Record",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "month",
+        "label": "Month",
+        "type": "datefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "status",
+        "label": "Status",
+        "type": "charfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "total_net_payout",
+        "label": "Total Net Payout",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "created_at",
+        "label": "Created At",
+        "type": "datetimefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "authorized_by",
+        "label": "Authorized By",
+        "type": "foreignkey",
+        "null": true,
+        "is_relation": true,
+        "foreign_key": "accounts_user"
+      }
+    ],
+    "foreign_keys": {
+      "authorized_by": "accounts_user"
+    }
+  },
+  {
+    "table": "payroll_salaryadvance",
+    "name": "Salary Advance",
+    "label": "Salary Advance",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "employee",
+        "label": "Employee",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "payroll_employeeprofile"
+      },
+      {
+        "name": "amount",
+        "label": "Amount",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "date_given",
+        "label": "Date Given",
+        "type": "datefield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "is_deducted",
+        "label": "Is Deducted",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "remarks",
+        "label": "Remarks",
+        "type": "textfield",
+        "null": false,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "employee": "payroll_employeeprofile"
+    }
+  },
+  {
+    "table": "payroll_salaryslip",
+    "name": "Salary Slip",
+    "label": "Salary Slip",
+    "fields": [
+      {
+        "name": "id",
+        "label": "Id",
+        "type": "bigautofield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "payroll_master",
+        "label": "Payroll Master",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "payroll_payrollrecord"
+      },
+      {
+        "name": "employee",
+        "label": "Employee",
+        "type": "foreignkey",
+        "null": false,
+        "is_relation": true,
+        "foreign_key": "payroll_employeeprofile"
+      },
+      {
+        "name": "base_pay",
+        "label": "Base Pay",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "allowances",
+        "label": "Allowances",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "task_count",
+        "label": "Task Count",
+        "type": "integerfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "task_pay",
+        "label": "Task Pay",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "bonus",
+        "label": "Bonus",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "deductions",
+        "label": "Deductions",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "advance_deduction",
+        "label": "Advance Deduction",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "net_salary",
+        "label": "Net Salary",
+        "type": "decimalfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "receipt_no",
+        "label": "Receipt No",
+        "type": "charfield",
+        "null": true,
+        "is_relation": false
+      },
+      {
+        "name": "is_disbursed",
+        "label": "Is Disbursed",
+        "type": "booleanfield",
+        "null": false,
+        "is_relation": false
+      },
+      {
+        "name": "disbursed_at",
+        "label": "Disbursed At",
+        "type": "datetimefield",
+        "null": true,
+        "is_relation": false
+      }
+    ],
+    "foreign_keys": {
+      "payroll_master": "payroll_payrollrecord",
+      "employee": "payroll_employeeprofile"
+    }
+  }
+]

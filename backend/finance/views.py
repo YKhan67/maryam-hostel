@@ -7,10 +7,15 @@ from datetime import date
 import logging
 
 # Internal Imports
-from .models import AssetCategory, Asset, PartnerCapital, Liability
+from .models import (
+    AssetCategory, Asset, PartnerCapital, Liability, PropertyRentalContract,
+    PropertyRentAccrual, InvestorPropertyAccess, InvestorPropertyOwnership,
+)
 from .serializers import (
     AssetCategorySerializer, AssetSerializer, 
-    PartnerCapitalSerializer, LiabilitySerializer
+    PartnerCapitalSerializer, LiabilitySerializer, PropertyRentalContractSerializer,
+    PropertyRentAccrualSerializer, InvestorPropertyAccessSerializer,
+    InvestorPropertyOwnershipSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -57,7 +62,19 @@ class BalanceSheetView(APIView):
             else:
                 scope_hostels = Hostel.objects.all()
 
-            fixed_val = Asset.objects.filter(hostel__in=scope_hostels, status__in=['ACTIVE', 'MAINTENANCE']).aggregate(s=Sum('current_value'))['s'] or Decimal('0')
+            scope_properties = None
+            if user.role == "PARTNER":
+                accessible_properties = InvestorPropertyAccess.objects.filter(
+                    investor=user, can_view_financials=True
+                ).values_list("property_id", flat=True)
+                if accessible_properties.exists():
+                    scope_properties = accessible_properties
+                    scope_hostels = Hostel.objects.filter(properties__id__in=scope_properties).distinct()
+
+            assets_qs = Asset.objects.filter(hostel__in=scope_hostels, status__in=['ACTIVE', 'MAINTENANCE'])
+            if scope_properties is not None:
+                assets_qs = assets_qs.filter(property_id__in=scope_properties) | assets_qs.filter(property__isnull=True)
+            fixed_val = assets_qs.aggregate(s=Sum('current_value'))['s'] or Decimal('0')
             from fees.models import MonthlyFee
             student_dues = MonthlyFee.objects.filter(student__hostel__in=scope_hostels, is_paid=False).aggregate(s=Sum('amount'))['s'] or Decimal('0')
             from inventory.models import Purchase, Consumption, Item
@@ -74,14 +91,18 @@ class BalanceSheetView(APIView):
             from fees.models import SecurityDeposit
             sec_liab = SecurityDeposit.objects.filter(student__hostel__in=scope_hostels, status='HELD').aggregate(s=Sum('amount'))['s'] or Decimal('0')
             other_liab = Liability.objects.filter(hostel__in=scope_hostels, is_settled=False).aggregate(s=Sum('remaining_amount'))['s'] or Decimal('0')
+            rent_payable = PropertyRentAccrual.objects.filter(property__hostel__in=scope_hostels)
+            if scope_properties is not None:
+                rent_payable = rent_payable.filter(property_id__in=scope_properties)
+            rent_payable = sum((accrual.outstanding_amount for accrual in rent_payable), Decimal('0'))
 
             t_assets = float(fixed_val + student_dues + total_inventory_value)
-            t_liab = float(sec_liab + other_liab)
+            t_liab = float(sec_liab + other_liab + rent_payable)
 
             return Response({
                 "date": date.today().isoformat(),
                 "assets": {"fixed_assets": float(fixed_val), "student_receivables": float(student_dues), "inventory_valuation": float(total_inventory_value), "total": t_assets},
-                "liabilities": {"security_deposits": float(sec_liab), "accrued_expenses": float(other_liab), "total": t_liab},
+                "liabilities": {"security_deposits": float(sec_liab), "accrued_expenses": float(other_liab), "rent_payable": float(rent_payable), "total": t_liab},
                 "equity": t_assets - t_liab
             })
         except Exception as e:
@@ -93,3 +114,23 @@ class PartnerCapitalViewSet(viewsets.ModelViewSet):
     queryset = PartnerCapital.objects.all(); serializer_class = PartnerCapitalSerializer; permission_classes = [IsHostelManagerOrAbove]
 class LiabilityViewSet(viewsets.ModelViewSet):
     queryset = Liability.objects.all(); serializer_class = LiabilitySerializer; permission_classes = [IsHostelManagerOrAbove]
+
+class PropertyRentalContractViewSet(viewsets.ModelViewSet):
+    queryset = PropertyRentalContract.objects.select_related("property__hostel").all()
+    serializer_class = PropertyRentalContractSerializer
+    permission_classes = [IsHostelManagerOrAbove]
+
+class PropertyRentAccrualViewSet(viewsets.ModelViewSet):
+    queryset = PropertyRentAccrual.objects.select_related("property", "contract").all()
+    serializer_class = PropertyRentAccrualSerializer
+    permission_classes = [IsHostelManagerOrAbove]
+
+class InvestorPropertyAccessViewSet(viewsets.ModelViewSet):
+    queryset = InvestorPropertyAccess.objects.select_related("investor", "property").all()
+    serializer_class = InvestorPropertyAccessSerializer
+    permission_classes = [IsHostelManagerOrAbove]
+
+class InvestorPropertyOwnershipViewSet(viewsets.ModelViewSet):
+    queryset = InvestorPropertyOwnership.objects.select_related("investor", "property").all()
+    serializer_class = InvestorPropertyOwnershipSerializer
+    permission_classes = [IsHostelManagerOrAbove]

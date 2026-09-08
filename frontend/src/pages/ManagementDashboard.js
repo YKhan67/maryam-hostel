@@ -97,6 +97,12 @@ export default function ManagementDashboard() {
               <div className="card-subtext">Purchases paid</div>
             </div>
 
+            <div className="card kpi-card">
+              <div className="card-title">Accommodation Rent</div>
+              <div className="card-value">{formatCurrency(data?.summary?.total_accommodation_rent || 0)}</div>
+              <div className="card-subtext">Accrued property rent</div>
+            </div>
+
             <div className="card kpi-card" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
               <div className="card-title" style={{ color: '#166534' }}>Total Gross Revenue</div>
               <div className="card-value" style={{ color: '#15803d' }}>{formatCurrency(data?.summary?.total_revenue || 0)}</div>
@@ -114,6 +120,7 @@ export default function ManagementDashboard() {
                     <th>Revenue</th>
                     <th>Groceries</th>
                     <th>Payroll</th>
+                    <th>Accommodation</th>
                     <th>Net Profit</th>
                     <th>Margin %</th>
                   </tr>
@@ -125,6 +132,7 @@ export default function ManagementDashboard() {
                       <td style={{ color: '#10b981', fontWeight: 600 }}>{formatCurrency(row.income)}</td>
                       <td>{formatCurrency(row.groceries)}</td>
                       <td style={{ color: 'var(--brand-gold)' }}>{formatCurrency(row.payroll_burn)}</td>
+                      <td>{formatCurrency(row.accommodation_rent)}</td>
                       <td style={{ fontWeight: 800 }}>{formatCurrency(row.net_profit)}</td>
                       <td style={{ fontWeight: 700 }}>
                         <span className={`badge ${row.profit_margin > 0 ? 'badge-success' : 'badge-danger'}`}>

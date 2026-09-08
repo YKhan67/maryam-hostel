@@ -1,7 +1,10 @@
 # backend/hostels/serializers.py
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
-from .models import City, Hostel, Building, Floor, Room, Bed, StudentProfile, StudentUtilityCharge
+from .models import (
+    City, Hostel, Property, Building, Floor, Room, Bed,
+    BedAllocation, StudentProfile, StudentUtilityCharge,
+)
 from accounts.serializers import UserSerializer
 
 class CitySerializer(serializers.ModelSerializer):
@@ -18,6 +21,13 @@ class HostelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hostel
         fields = ["id", "name", "code", "city", "city_id", "address", "phone", "is_active"]
+
+class PropertySerializer(serializers.ModelSerializer):
+    hostel_name = serializers.CharField(source="hostel.name", read_only=True)
+
+    class Meta:
+        model = Property
+        fields = "__all__"
 
 class BuildingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,6 +48,35 @@ class BedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bed
         fields = "__all__"
+        read_only_fields = ["is_occupied"]
+
+class BedAllocationSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source="student.user.get_full_name", read_only=True)
+    student_username = serializers.CharField(source="student.user.username", read_only=True)
+    bed_label = serializers.CharField(source="bed.label", read_only=True)
+    room_number = serializers.CharField(source="bed.room.number", read_only=True)
+    property_name = serializers.CharField(source="bed.room.floor.building.property.name", read_only=True)
+
+    class Meta:
+        model = BedAllocation
+        fields = [
+            "id", "student", "student_name", "student_username", "bed", "bed_label",
+            "room_number", "property_name", "previous_bed", "move_in_date", "move_out_date",
+            "reason", "notes", "is_active", "created_by", "created_at",
+        ]
+        read_only_fields = ["created_by", "created_at"]
+
+class BedAllocationActionSerializer(serializers.Serializer):
+    bed_id = serializers.PrimaryKeyRelatedField(queryset=Bed.objects.all(), source="bed")
+    move_in_date = serializers.DateField(required=False)
+    move_out_date = serializers.DateField(required=False)
+    reason = serializers.CharField(required=False, allow_blank=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
+
+class BedReleaseActionSerializer(serializers.Serializer):
+    move_out_date = serializers.DateField(required=False)
+    reason = serializers.CharField(required=False, allow_blank=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
 class StudentUtilityChargeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -66,6 +105,7 @@ class StudentProfileSerializer(serializers.ModelSerializer):
             "is_active", "joined_on", "left_on",
             "utilities", "monthly_rent", "security_deposit",
         ]
+        read_only_fields = ["bed"]
 
     def get_security_deposit(self, obj):
         """Get security deposit amount if exists, or 0 if not set."""

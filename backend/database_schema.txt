@@ -1,0 +1,944 @@
+================================================================================
+📊 DATABASE SCHEMA
+================================================================================
+Generated: 2026-09-03T09:15:53.772589
+Total Tables: 63
+
+
+📋 Module Permission (accounts_modulepermission)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - role: CharField (NULL)
+      - user: ForeignKey (NULL) → accounts_user (FK)
+      - module_name: CharField (NOT NULL)
+      - can_view: BooleanField (NOT NULL)
+      - can_add: BooleanField (NOT NULL)
+      - can_edit: BooleanField (NOT NULL)
+      - can_delete: BooleanField (NOT NULL)
+   Relationships: 1
+      - user → accounts_user
+   Total fields: 8
+
+📋 User (accounts_user)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - password: CharField (NOT NULL)
+      - last_login: DateTimeField (NULL)
+      - is_superuser: BooleanField (NOT NULL)
+      - username: CharField (NOT NULL)
+      - first_name: CharField (NOT NULL)
+      - last_name: CharField (NOT NULL)
+      - email: CharField (NOT NULL)
+      - is_staff: BooleanField (NOT NULL)
+      - is_active: BooleanField (NOT NULL)
+      - date_joined: DateTimeField (NOT NULL)
+      - role: CharField (NOT NULL)
+      - hostel: ForeignKey (NULL) → hostels_hostel (FK)
+      - groups: ManyToManyField (NOT NULL) → auth_group (M2M)
+      - user_permissions: ManyToManyField (NOT NULL) → auth_permission (M2M)
+   Relationships: 3
+      - hostel → hostels_hostel
+      - groups → auth_group
+      - user_permissions → auth_permission
+   Total fields: 15
+
+📋 Accounts User Groups (accounts_user_groups)
+------------------------------------------------------------
+   Fields:
+      - id: INTEGER (NULL)
+      - user_id: bigint (NULL)
+      - group_id: INTEGER (NULL)
+   Total fields: 3
+
+📋 Accounts User User Permissions (accounts_user_user_permissions)
+------------------------------------------------------------
+   Fields:
+      - id: INTEGER (NULL)
+      - user_id: bigint (NULL)
+      - permission_id: INTEGER (NULL)
+   Total fields: 3
+
+📋 Group (auth_group)
+------------------------------------------------------------
+   Fields:
+      - id: AutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+      - permissions: ManyToManyField (NOT NULL) → auth_permission (M2M)
+   Relationships: 1
+      - permissions → auth_permission
+   Total fields: 3
+
+📋 Auth Group Permissions (auth_group_permissions)
+------------------------------------------------------------
+   Fields:
+      - id: INTEGER (NULL)
+      - group_id: INTEGER (NULL)
+      - permission_id: INTEGER (NULL)
+   Total fields: 3
+
+📋 Permission (auth_permission)
+------------------------------------------------------------
+   Fields:
+      - id: AutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+      - content_type: ForeignKey (NOT NULL) → django_content_type (FK)
+      - codename: CharField (NOT NULL)
+   Relationships: 1
+      - content_type → django_content_type
+   Total fields: 4
+
+📋 Custom Report (bi_customreport)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+      - description: TextField (NOT NULL)
+      - tables: JSONField (NOT NULL)
+      - fields: JSONField (NOT NULL)
+      - filters: JSONField (NOT NULL)
+      - group_by: JSONField (NOT NULL)
+      - sort_by: JSONField (NOT NULL)
+      - date_range: JSONField (NOT NULL)
+      - distinct: BooleanField (NOT NULL)
+      - is_scheduled: BooleanField (NOT NULL)
+      - schedule_frequency: CharField (NULL)
+      - schedule_time: TimeField (NULL)
+      - schedule_recipients: JSONField (NOT NULL)
+      - is_shared: BooleanField (NOT NULL)
+      - shared_with_roles: JSONField (NOT NULL)
+      - created_by: ForeignKey (NOT NULL) → accounts_user (FK)
+      - created_at: DateTimeField (NOT NULL)
+      - updated_at: DateTimeField (NOT NULL)
+      - last_run: DateTimeField (NULL)
+   Relationships: 1
+      - created_by → accounts_user
+   Total fields: 20
+
+📋 Custom Report Result (bi_customreportresult)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - report: ForeignKey (NOT NULL) → bi_customreport (FK)
+      - data: JSONField (NOT NULL)
+      - generated_by: ForeignKey (NULL) → accounts_user (FK)
+      - generated_at: DateTimeField (NOT NULL)
+   Relationships: 2
+      - report → bi_customreport
+      - generated_by → accounts_user
+   Total fields: 5
+
+📋 Report Template (bi_reporttemplate)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+      - report_type: CharField (NOT NULL)
+      - description: TextField (NOT NULL)
+      - config: JSONField (NOT NULL)
+      - is_active: BooleanField (NOT NULL)
+      - created_by: ForeignKey (NULL) → accounts_user (FK)
+      - created_at: DateTimeField (NOT NULL)
+      - updated_at: DateTimeField (NOT NULL)
+   Relationships: 1
+      - created_by → accounts_user
+   Total fields: 9
+
+📋 Saved Report (bi_savedreport)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - template: ForeignKey (NOT NULL) → bi_reporttemplate (FK)
+      - name: CharField (NOT NULL)
+      - filters: JSONField (NOT NULL)
+      - data: JSONField (NOT NULL)
+      - created_by: ForeignKey (NOT NULL) → accounts_user (FK)
+      - created_at: DateTimeField (NOT NULL)
+      - last_run: DateTimeField (NULL)
+   Relationships: 2
+      - template → bi_reporttemplate
+      - created_by → accounts_user
+   Total fields: 8
+
+📋 Sla Setting (communication_slasetting)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - category: CharField (NOT NULL)
+      - response_time_hours: PositiveIntegerField (NOT NULL)
+   Total fields: 3
+
+📋 Ticket (communication_ticket)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - student: ForeignKey (NOT NULL) → hostels_studentprofile (FK)
+      - hostel: ForeignKey (NOT NULL) → hostels_hostel (FK)
+      - asset: ForeignKey (NULL) → finance_asset (FK)
+      - category: CharField (NOT NULL)
+      - subject: CharField (NOT NULL)
+      - description: TextField (NOT NULL)
+      - status: CharField (NOT NULL)
+      - assigned_to: ForeignKey (NULL) → accounts_user (FK)
+      - created_at: DateTimeField (NOT NULL)
+      - updated_at: DateTimeField (NOT NULL)
+      - resolved_at: DateTimeField (NULL)
+      - is_escalated: BooleanField (NOT NULL)
+      - last_reminded_at: DateTimeField (NULL)
+   Relationships: 4
+      - student → hostels_studentprofile
+      - hostel → hostels_hostel
+      - asset → finance_asset
+      - assigned_to → accounts_user
+   Total fields: 14
+
+📋 Log Entry (django_admin_log)
+------------------------------------------------------------
+   Fields:
+      - id: AutoField (NOT NULL)
+      - action_time: DateTimeField (NOT NULL)
+      - user: ForeignKey (NOT NULL) → accounts_user (FK)
+      - content_type: ForeignKey (NULL) → django_content_type (FK)
+      - object_id: TextField (NULL)
+      - object_repr: CharField (NOT NULL)
+      - action_flag: PositiveSmallIntegerField (NOT NULL)
+      - change_message: TextField (NOT NULL)
+   Relationships: 2
+      - user → accounts_user
+      - content_type → django_content_type
+   Total fields: 8
+
+📋 Clocked (django_celery_beat_clockedschedule)
+------------------------------------------------------------
+   Fields:
+      - id: AutoField (NOT NULL)
+      - clocked_time: DateTimeField (NOT NULL)
+   Total fields: 2
+
+📋 Crontab (django_celery_beat_crontabschedule)
+------------------------------------------------------------
+   Fields:
+      - id: AutoField (NOT NULL)
+      - minute: CharField (NOT NULL)
+      - hour: CharField (NOT NULL)
+      - day_of_month: CharField (NOT NULL)
+      - month_of_year: CharField (NOT NULL)
+      - day_of_week: CharField (NOT NULL)
+      - timezone: CharField (NOT NULL)
+   Total fields: 7
+
+📋 Interval (django_celery_beat_intervalschedule)
+------------------------------------------------------------
+   Fields:
+      - id: AutoField (NOT NULL)
+      - every: IntegerField (NOT NULL)
+      - period: CharField (NOT NULL)
+   Total fields: 3
+
+📋 Periodic Task (django_celery_beat_periodictask)
+------------------------------------------------------------
+   Fields:
+      - id: AutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+      - task: CharField (NOT NULL)
+      - interval: ForeignKey (NULL) → django_celery_beat_intervalschedule (FK)
+      - crontab: ForeignKey (NULL) → django_celery_beat_crontabschedule (FK)
+      - solar: ForeignKey (NULL) → django_celery_beat_solarschedule (FK)
+      - clocked: ForeignKey (NULL) → django_celery_beat_clockedschedule (FK)
+      - args: TextField (NOT NULL)
+      - kwargs: TextField (NOT NULL)
+      - queue: CharField (NULL)
+      - exchange: CharField (NULL)
+      - routing_key: CharField (NULL)
+      - headers: TextField (NOT NULL)
+      - priority: PositiveIntegerField (NULL)
+      - expires: DateTimeField (NULL)
+      - expire_seconds: PositiveIntegerField (NULL)
+      - one_off: BooleanField (NOT NULL)
+      - start_time: DateTimeField (NULL)
+      - enabled: BooleanField (NOT NULL)
+      - last_run_at: DateTimeField (NULL)
+      - total_run_count: PositiveIntegerField (NOT NULL)
+      - date_changed: DateTimeField (NOT NULL)
+      - description: TextField (NOT NULL)
+   Relationships: 4
+      - interval → django_celery_beat_intervalschedule
+      - crontab → django_celery_beat_crontabschedule
+      - solar → django_celery_beat_solarschedule
+      - clocked → django_celery_beat_clockedschedule
+   Total fields: 23
+
+📋 Periodic Task Track (django_celery_beat_periodictasks)
+------------------------------------------------------------
+   Fields:
+      - ident: SmallIntegerField (NOT NULL)
+      - last_update: DateTimeField (NOT NULL)
+   Total fields: 2
+
+📋 Solar Event (django_celery_beat_solarschedule)
+------------------------------------------------------------
+   Fields:
+      - id: AutoField (NOT NULL)
+      - event: CharField (NOT NULL)
+      - latitude: DecimalField (NOT NULL)
+      - longitude: DecimalField (NOT NULL)
+   Total fields: 4
+
+📋 Chord Counter (django_celery_results_chordcounter)
+------------------------------------------------------------
+   Fields:
+      - id: AutoField (NOT NULL)
+      - group_id: CharField (NOT NULL)
+      - sub_tasks: TextField (NOT NULL)
+      - count: PositiveIntegerField (NOT NULL)
+   Total fields: 4
+
+📋 Group Result (django_celery_results_groupresult)
+------------------------------------------------------------
+   Fields:
+      - id: AutoField (NOT NULL)
+      - group_id: CharField (NOT NULL)
+      - date_created: DateTimeField (NOT NULL)
+      - date_done: DateTimeField (NOT NULL)
+      - content_type: CharField (NOT NULL)
+      - content_encoding: CharField (NOT NULL)
+      - result: TextField (NULL)
+   Total fields: 7
+
+📋 Task Result (django_celery_results_taskresult)
+------------------------------------------------------------
+   Fields:
+      - id: AutoField (NOT NULL)
+      - task_id: CharField (NOT NULL)
+      - periodic_task_name: CharField (NULL)
+      - task_name: CharField (NULL)
+      - task_args: TextField (NULL)
+      - task_kwargs: TextField (NULL)
+      - status: CharField (NOT NULL)
+      - worker: CharField (NULL)
+      - content_type: CharField (NOT NULL)
+      - content_encoding: CharField (NOT NULL)
+      - result: TextField (NULL)
+      - date_created: DateTimeField (NOT NULL)
+      - date_started: DateTimeField (NULL)
+      - date_done: DateTimeField (NOT NULL)
+      - traceback: TextField (NULL)
+      - meta: TextField (NULL)
+   Total fields: 16
+
+📋 Content Type (django_content_type)
+------------------------------------------------------------
+   Fields:
+      - id: AutoField (NOT NULL)
+      - app_label: CharField (NOT NULL)
+      - model: CharField (NOT NULL)
+   Total fields: 3
+
+📋 Django Migrations (django_migrations)
+------------------------------------------------------------
+   Fields:
+      - id: INTEGER (NULL)
+      - app: varchar(255) (NULL)
+      - name: varchar(255) (NULL)
+      - applied: datetime (NULL)
+   Total fields: 4
+
+📋 Session (django_session)
+------------------------------------------------------------
+   Fields:
+      - session_key: CharField (NOT NULL)
+      - session_data: TextField (NOT NULL)
+      - expire_date: DateTimeField (NOT NULL)
+   Total fields: 3
+
+📋 Fee Head (fees_feehead)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+      - description: TextField (NOT NULL)
+      - is_recurring: BooleanField (NOT NULL)
+      - frequency: CharField (NOT NULL)
+      - default_amount: DecimalField (NOT NULL)
+   Total fields: 6
+
+📋 Fee Rule (fees_feerule)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - fee_head: ForeignKey (NOT NULL) → fees_feehead (FK)
+      - due_day: PositiveIntegerField (NOT NULL)
+      - late_fee_type: CharField (NOT NULL)
+      - fixed_amount: DecimalField (NOT NULL)
+      - per_day_amount: DecimalField (NOT NULL)
+   Relationships: 1
+      - fee_head → fees_feehead
+   Total fields: 6
+
+📋 Monthly Fee (fees_monthlyfee)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - student: ForeignKey (NOT NULL) → hostels_studentprofile (FK)
+      - fee_head: ForeignKey (NOT NULL) → fees_feehead (FK)
+      - month: DateField (NOT NULL)
+      - amount: DecimalField (NOT NULL)
+      - amount_paid: DecimalField (NOT NULL)
+      - is_paid: BooleanField (NOT NULL)
+      - is_partially_paid: BooleanField (NOT NULL)
+      - late_fee_applied: DecimalField (NOT NULL)
+      - fine_was_waived: BooleanField (NOT NULL)
+      - fine_waived_amount: DecimalField (NOT NULL)
+      - created_at: DateTimeField (NOT NULL)
+   Relationships: 2
+      - student → hostels_studentprofile
+      - fee_head → fees_feehead
+   Total fields: 12
+
+📋 Payment Proof (fees_paymentproof)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - fee: ForeignKey (NOT NULL) → fees_monthlyfee (FK)
+      - uploaded_by: ForeignKey (NOT NULL) → accounts_user (FK)
+      - uploaded_on: DateTimeField (NOT NULL)
+      - file: FileField (NOT NULL)
+      - status: CharField (NOT NULL)
+      - remarks: TextField (NOT NULL)
+   Relationships: 2
+      - fee → fees_monthlyfee
+      - uploaded_by → accounts_user
+   Total fields: 7
+
+📋 Receipt (fees_receipt)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - receipt_no: CharField (NOT NULL)
+      - fee: ForeignKey (NOT NULL) → fees_monthlyfee (FK)
+      - amount: DecimalField (NOT NULL)
+      - date_issued: DateTimeField (NOT NULL)
+      - payment_method: CharField (NOT NULL)
+   Relationships: 1
+      - fee → fees_monthlyfee
+   Total fields: 6
+
+📋 Security Deposit (fees_securitydeposit)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - student: OneToOneField (NOT NULL) → hostels_studentprofile (FK)
+      - amount: DecimalField (NOT NULL)
+      - date_paid: DateField (NOT NULL)
+      - status: CharField (NOT NULL)
+      - refund_date: DateField (NULL)
+      - remarks: TextField (NOT NULL)
+   Relationships: 1
+      - student → hostels_studentprofile
+   Total fields: 7
+
+📋 Student Utility Bill (fees_studentutilitybill)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - student: ForeignKey (NOT NULL) → hostels_studentprofile (FK)
+      - month: DateField (NOT NULL)
+      - amount: DecimalField (NOT NULL)
+      - amount_paid: DecimalField (NOT NULL)
+      - is_paid: BooleanField (NOT NULL)
+      - created_at: DateTimeField (NOT NULL)
+   Relationships: 1
+      - student → hostels_studentprofile
+   Total fields: 7
+
+📋 Asset (finance_asset)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+      - category: ForeignKey (NOT NULL) → finance_assetcategory (FK)
+      - hostel: ForeignKey (NOT NULL) → hostels_hostel (FK)
+      - serial_number: CharField (NOT NULL)
+      - quantity: PositiveIntegerField (NOT NULL)
+      - purchase_date: DateField (NOT NULL)
+      - purchase_price: DecimalField (NOT NULL)
+      - current_value: DecimalField (NOT NULL)
+      - warranty_expiry: DateField (NULL)
+      - status: CharField (NOT NULL)
+      - sale_price: DecimalField (NULL)
+      - sold_date: DateField (NULL)
+      - remarks: TextField (NOT NULL)
+      - created_at: DateTimeField (NOT NULL)
+      - updated_at: DateTimeField (NOT NULL)
+   Relationships: 2
+      - category → finance_assetcategory
+      - hostel → hostels_hostel
+   Total fields: 16
+
+📋 Asset Category (finance_assetcategory)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+      - depreciation_rate_annual: DecimalField (NOT NULL)
+   Total fields: 3
+
+📋 Liability (finance_liability)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+      - type: CharField (NOT NULL)
+      - hostel: ForeignKey (NOT NULL) → hostels_hostel (FK)
+      - total_amount: DecimalField (NOT NULL)
+      - remaining_amount: DecimalField (NOT NULL)
+      - due_date: DateField (NULL)
+      - is_settled: BooleanField (NOT NULL)
+   Relationships: 1
+      - hostel → hostels_hostel
+   Total fields: 8
+
+📋 Partner Capital (finance_partnercapital)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - partner: ForeignKey (NOT NULL) → accounts_user (FK)
+      - hostel: ForeignKey (NOT NULL) → hostels_hostel (FK)
+      - amount: DecimalField (NOT NULL)
+      - date_invested: DateField (NOT NULL)
+      - remarks: TextField (NOT NULL)
+   Relationships: 2
+      - partner → accounts_user
+      - hostel → hostels_hostel
+   Total fields: 6
+
+📋 Daily Menu (food_dailymenu)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - hostel: ForeignKey (NOT NULL) → hostels_hostel (FK)
+      - date: DateField (NOT NULL)
+      - meal_type: CharField (NOT NULL)
+      - meal: ForeignKey (NOT NULL) → food_meal (FK)
+      - special_note: TextField (NOT NULL)
+      - is_featured: BooleanField (NOT NULL)
+      - created_at: DateTimeField (NOT NULL)
+      - updated_at: DateTimeField (NOT NULL)
+      - created_by: ForeignKey (NULL) → accounts_user (FK)
+   Relationships: 3
+      - hostel → hostels_hostel
+      - meal → food_meal
+      - created_by → accounts_user
+   Total fields: 10
+
+📋 Grocery Requirement (food_groceryrequirement)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - hostel: ForeignKey (NOT NULL) → hostels_hostel (FK)
+      - start_date: DateField (NOT NULL)
+      - end_date: DateField (NOT NULL)
+      - item: ForeignKey (NOT NULL) → inventory_item (FK)
+      - quantity_needed: DecimalField (NOT NULL)
+      - unit: CharField (NOT NULL)
+      - estimated_cost: DecimalField (NOT NULL)
+      - actual_cost: DecimalField (NULL)
+      - status: CharField (NOT NULL)
+      - notes: TextField (NOT NULL)
+      - created_at: DateTimeField (NOT NULL)
+      - updated_at: DateTimeField (NOT NULL)
+   Relationships: 2
+      - hostel → hostels_hostel
+      - item → inventory_item
+   Total fields: 13
+
+📋 Meal (food_meal)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+      - description: TextField (NOT NULL)
+      - category: ForeignKey (NOT NULL) → food_mealcategory (FK)
+      - dietary_tags: CharField (NOT NULL)
+      - preparation_time: PositiveIntegerField (NOT NULL)
+      - calories: PositiveIntegerField (NOT NULL)
+      - protein: DecimalField (NOT NULL)
+      - is_active: BooleanField (NOT NULL)
+      - created_at: DateTimeField (NOT NULL)
+      - updated_at: DateTimeField (NOT NULL)
+   Relationships: 1
+      - category → food_mealcategory
+   Total fields: 11
+
+📋 Meal Category (food_mealcategory)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+      - emoji: CharField (NOT NULL)
+      - description: TextField (NOT NULL)
+      - is_active: BooleanField (NOT NULL)
+   Total fields: 5
+
+📋 Meal Feedback (food_mealfeedback)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - student: ForeignKey (NOT NULL) → hostels_studentprofile (FK)
+      - daily_menu: ForeignKey (NOT NULL) → food_dailymenu (FK)
+      - rating: PositiveSmallIntegerField (NOT NULL)
+      - comment: TextField (NOT NULL)
+      - created_at: DateTimeField (NOT NULL)
+   Relationships: 2
+      - student → hostels_studentprofile
+      - daily_menu → food_dailymenu
+   Total fields: 6
+
+📋 Meal Recipe (food_mealrecipe)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - meal: ForeignKey (NOT NULL) → food_meal (FK)
+      - item: ForeignKey (NOT NULL) → inventory_item (FK)
+      - quantity_required: DecimalField (NOT NULL)
+      - unit: CharField (NOT NULL)
+      - estimated_cost: DecimalField (NOT NULL)
+      - waste_factor: DecimalField (NOT NULL)
+      - substitute_item: ForeignKey (NULL) → inventory_item (FK)
+   Relationships: 3
+      - meal → food_meal
+      - item → inventory_item
+      - substitute_item → inventory_item
+   Total fields: 8
+
+📋 Weekly Menu Template (food_weeklymenutemplate)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+      - description: TextField (NOT NULL)
+      - hostel: ForeignKey (NOT NULL) → hostels_hostel (FK)
+      - monday_breakfast: ForeignKey (NULL) → food_meal (FK)
+      - monday_lunch: ForeignKey (NULL) → food_meal (FK)
+      - monday_dinner: ForeignKey (NULL) → food_meal (FK)
+      - tuesday_breakfast: ForeignKey (NULL) → food_meal (FK)
+      - tuesday_lunch: ForeignKey (NULL) → food_meal (FK)
+      - tuesday_dinner: ForeignKey (NULL) → food_meal (FK)
+      - wednesday_breakfast: ForeignKey (NULL) → food_meal (FK)
+      - wednesday_lunch: ForeignKey (NULL) → food_meal (FK)
+      - wednesday_dinner: ForeignKey (NULL) → food_meal (FK)
+      - thursday_breakfast: ForeignKey (NULL) → food_meal (FK)
+      - thursday_lunch: ForeignKey (NULL) → food_meal (FK)
+      - thursday_dinner: ForeignKey (NULL) → food_meal (FK)
+      - friday_breakfast: ForeignKey (NULL) → food_meal (FK)
+      - friday_lunch: ForeignKey (NULL) → food_meal (FK)
+      - friday_dinner: ForeignKey (NULL) → food_meal (FK)
+      - saturday_breakfast: ForeignKey (NULL) → food_meal (FK)
+      - saturday_lunch: ForeignKey (NULL) → food_meal (FK)
+      - saturday_dinner: ForeignKey (NULL) → food_meal (FK)
+      - sunday_breakfast: ForeignKey (NULL) → food_meal (FK)
+      - sunday_lunch: ForeignKey (NULL) → food_meal (FK)
+      - sunday_dinner: ForeignKey (NULL) → food_meal (FK)
+      - is_active: BooleanField (NOT NULL)
+      - created_at: DateTimeField (NOT NULL)
+   Relationships: 22
+      - hostel → hostels_hostel
+      - monday_breakfast → food_meal
+      - monday_lunch → food_meal
+      - monday_dinner → food_meal
+      - tuesday_breakfast → food_meal
+      - tuesday_lunch → food_meal
+      - tuesday_dinner → food_meal
+      - wednesday_breakfast → food_meal
+      - wednesday_lunch → food_meal
+      - wednesday_dinner → food_meal
+      - thursday_breakfast → food_meal
+      - thursday_lunch → food_meal
+      - thursday_dinner → food_meal
+      - friday_breakfast → food_meal
+      - friday_lunch → food_meal
+      - friday_dinner → food_meal
+      - saturday_breakfast → food_meal
+      - saturday_lunch → food_meal
+      - saturday_dinner → food_meal
+      - sunday_breakfast → food_meal
+      - sunday_lunch → food_meal
+      - sunday_dinner → food_meal
+   Total fields: 27
+
+📋 Bed (hostels_bed)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - room: ForeignKey (NOT NULL) → hostels_room (FK)
+      - label: CharField (NOT NULL)
+      - is_occupied: BooleanField (NOT NULL)
+   Relationships: 1
+      - room → hostels_room
+   Total fields: 4
+
+📋 Building (hostels_building)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - hostel: ForeignKey (NOT NULL) → hostels_hostel (FK)
+      - name: CharField (NOT NULL)
+   Relationships: 1
+      - hostel → hostels_hostel
+   Total fields: 3
+
+📋 City (hostels_city)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+      - state: CharField (NOT NULL)
+      - country: CharField (NOT NULL)
+   Total fields: 4
+
+📋 Floor (hostels_floor)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - building: ForeignKey (NOT NULL) → hostels_building (FK)
+      - number: IntegerField (NOT NULL)
+   Relationships: 1
+      - building → hostels_building
+   Total fields: 3
+
+📋 Hostel (hostels_hostel)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+      - code: CharField (NOT NULL)
+      - city: ForeignKey (NOT NULL) → hostels_city (FK)
+      - address: TextField (NOT NULL)
+      - phone: CharField (NOT NULL)
+      - is_active: BooleanField (NOT NULL)
+   Relationships: 1
+      - city → hostels_city
+   Total fields: 7
+
+📋 Room (hostels_room)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - floor: ForeignKey (NOT NULL) → hostels_floor (FK)
+      - number: CharField (NOT NULL)
+      - room_type: CharField (NOT NULL)
+      - is_ac: BooleanField (NOT NULL)
+      - base_rent: DecimalField (NOT NULL)
+   Relationships: 1
+      - floor → hostels_floor
+   Total fields: 6
+
+📋 Student Profile (hostels_studentprofile)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - user: OneToOneField (NOT NULL) → accounts_user (FK)
+      - hostel: ForeignKey (NULL) → hostels_hostel (FK)
+      - bed: OneToOneField (NULL) → hostels_bed (FK)
+      - mobile: CharField (NOT NULL)
+      - whatsapp: CharField (NOT NULL)
+      - guardian_name: CharField (NOT NULL)
+      - guardian_phone: CharField (NOT NULL)
+      - guardian_nic_number: CharField (NOT NULL)
+      - parent_name: CharField (NOT NULL)
+      - parent_phone: CharField (NOT NULL)
+      - parent_whatsapp: CharField (NOT NULL)
+      - parent_nic_number: CharField (NOT NULL)
+      - college_name: CharField (NOT NULL)
+      - nic_number: CharField (NOT NULL)
+      - nic_front_picture: FileField (NULL)
+      - nic_back_picture: FileField (NULL)
+      - profile_picture: FileField (NULL)
+      - monthly_rent: DecimalField (NULL)
+      - course: CharField (NOT NULL)
+      - year: CharField (NOT NULL)
+      - is_active: BooleanField (NOT NULL)
+      - joined_on: DateField (NOT NULL)
+      - left_on: DateField (NULL)
+      - parent_link_token: CharField (NULL)
+   Relationships: 3
+      - user → accounts_user
+      - hostel → hostels_hostel
+      - bed → hostels_bed
+   Total fields: 25
+
+📋 Student Utility Charge (hostels_studentutilitycharge)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - student: ForeignKey (NOT NULL) → hostels_studentprofile (FK)
+      - name: CharField (NOT NULL)
+      - amount: DecimalField (NOT NULL)
+      - is_active: BooleanField (NOT NULL)
+      - created_at: DateTimeField (NOT NULL)
+      - updated_at: DateTimeField (NOT NULL)
+   Relationships: 1
+      - student → hostels_studentprofile
+   Total fields: 7
+
+📋 Category (inventory_category)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+   Total fields: 2
+
+📋 Consumption (inventory_consumption)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - hostel: ForeignKey (NOT NULL) → hostels_hostel (FK)
+      - date: DateField (NOT NULL)
+      - item: ForeignKey (NOT NULL) → inventory_item (FK)
+      - quantity: DecimalField (NOT NULL)
+      - photo: FileField (NULL)
+      - remarks: TextField (NOT NULL)
+      - created_at: DateTimeField (NOT NULL)
+   Relationships: 2
+      - hostel → hostels_hostel
+      - item → inventory_item
+   Total fields: 8
+
+📋 Item (inventory_item)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - code: CharField (NOT NULL)
+      - name: CharField (NOT NULL)
+      - category: ForeignKey (NOT NULL) → inventory_category (FK)
+      - unit: ForeignKey (NOT NULL) → inventory_unit (FK)
+      - reorder_level: DecimalField (NOT NULL)
+      - is_active: BooleanField (NOT NULL)
+   Relationships: 2
+      - category → inventory_category
+      - unit → inventory_unit
+   Total fields: 7
+
+📋 Purchase (inventory_purchase)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - hostel: ForeignKey (NOT NULL) → hostels_hostel (FK)
+      - date: DateField (NOT NULL)
+      - vendor: ForeignKey (NOT NULL) → inventory_vendor (FK)
+      - invoice_no: CharField (NOT NULL)
+      - invoice_photo: FileField (NULL)
+      - items_photo: FileField (NULL)
+      - item: ForeignKey (NOT NULL) → inventory_item (FK)
+      - quantity: DecimalField (NOT NULL)
+      - price_per_unit: DecimalField (NOT NULL)
+      - status: CharField (NOT NULL)
+      - approved_by: ForeignKey (NULL) → accounts_user (FK)
+      - rejection_remarks: TextField (NOT NULL)
+      - created_at: DateTimeField (NOT NULL)
+   Relationships: 4
+      - hostel → hostels_hostel
+      - vendor → inventory_vendor
+      - item → inventory_item
+      - approved_by → accounts_user
+   Total fields: 14
+
+📋 Unit (inventory_unit)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+   Total fields: 2
+
+📋 Vendor (inventory_vendor)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - name: CharField (NOT NULL)
+      - contact_person: CharField (NOT NULL)
+      - phone: CharField (NOT NULL)
+      - whatsapp: CharField (NOT NULL)
+      - address: TextField (NOT NULL)
+   Total fields: 6
+
+📋 Employee Profile (payroll_employeeprofile)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - user: OneToOneField (NOT NULL) → accounts_user (FK)
+      - designation: CharField (NOT NULL)
+      - pay_type: CharField (NOT NULL)
+      - nic_number: CharField (NULL)
+      - nic_front_picture: FileField (NULL)
+      - nic_back_picture: FileField (NULL)
+      - profile_picture: FileField (NULL)
+      - mobile: CharField (NULL)
+      - whatsapp: CharField (NULL)
+      - base_salary: DecimalField (NOT NULL)
+      - housing_allowance: DecimalField (NOT NULL)
+      - fuel_allowance: DecimalField (NOT NULL)
+      - other_allowance: DecimalField (NOT NULL)
+      - rate_per_task: DecimalField (NOT NULL)
+      - bank_name: CharField (NOT NULL)
+      - iban: CharField (NOT NULL)
+      - joined_on: DateField (NULL)
+      - is_active: BooleanField (NOT NULL)
+   Relationships: 1
+      - user → accounts_user
+   Total fields: 19
+
+📋 Payroll Record (payroll_payrollrecord)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - month: DateField (NOT NULL)
+      - status: CharField (NOT NULL)
+      - total_net_payout: DecimalField (NOT NULL)
+      - created_at: DateTimeField (NOT NULL)
+      - authorized_by: ForeignKey (NULL) → accounts_user (FK)
+   Relationships: 1
+      - authorized_by → accounts_user
+   Total fields: 6
+
+📋 Salary Advance (payroll_salaryadvance)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - employee: ForeignKey (NOT NULL) → payroll_employeeprofile (FK)
+      - amount: DecimalField (NOT NULL)
+      - date_given: DateField (NOT NULL)
+      - is_deducted: BooleanField (NOT NULL)
+      - remarks: TextField (NOT NULL)
+   Relationships: 1
+      - employee → payroll_employeeprofile
+   Total fields: 6
+
+📋 Salary Slip (payroll_salaryslip)
+------------------------------------------------------------
+   Fields:
+      - id: BigAutoField (NOT NULL)
+      - payroll_master: ForeignKey (NOT NULL) → payroll_payrollrecord (FK)
+      - employee: ForeignKey (NOT NULL) → payroll_employeeprofile (FK)
+      - base_pay: DecimalField (NOT NULL)
+      - allowances: DecimalField (NOT NULL)
+      - task_count: IntegerField (NOT NULL)
+      - task_pay: DecimalField (NOT NULL)
+      - bonus: DecimalField (NOT NULL)
+      - deductions: DecimalField (NOT NULL)
+      - advance_deduction: DecimalField (NOT NULL)
+      - net_salary: DecimalField (NOT NULL)
+      - receipt_no: CharField (NULL)
+      - is_disbursed: BooleanField (NOT NULL)
+      - disbursed_at: DateTimeField (NULL)
+   Relationships: 2
+      - payroll_master → payroll_payrollrecord
+      - employee → payroll_employeeprofile
+   Total fields: 14
+
+📋 Sqlite Sequence (sqlite_sequence)
+------------------------------------------------------------
+   Fields:
+      - name:  (NOT NULL)
+      - seq:  (NOT NULL)
+   Total fields: 2

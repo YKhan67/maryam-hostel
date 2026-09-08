@@ -1,0 +1,16 @@
+[Unit]
+Description=Celery Flower Service
+After=network.target celeryworker.service
+
+[Service]
+User=root
+Group=www-data
+WorkingDirectory=/var/www/maryamhostel/backend
+Environment="DJANGO_SETTINGS_MODULE=backend.settings"
+Environment="PYTHONPATH=/var/www/maryamhostel/backend"
+ExecStart=/var/www/maryamhostel/backend/venv/bin/celery -A backend flower --port=5555 --address=0.0.0.0 --url_prefix=/flower
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
