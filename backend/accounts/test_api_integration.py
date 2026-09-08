@@ -1,14 +1,23 @@
-from django.test import TestCase, Client
+from django.test import TestCase
 from django.contrib.auth import get_user_model
-from hostels.models import StudentProfile
+from rest_framework.test import APIClient
+from hostels.models import City, Hostel, StudentProfile
 import json
 
 User = get_user_model()
 
 class StudentProfileAPITests(TestCase):
     def setUp(self):
-        self.client = Client()
+        self.client = APIClient()
         self.api_base = "/api"
+        self.admin = User.objects.create_user(
+            username="test-admin",
+            password="TestPass123!",
+            role="SUPER_ADMIN",
+        )
+        self.client.force_authenticate(user=self.admin)
+        city = City.objects.create(name="Test City")
+        self.hostel = Hostel.objects.create(name="Test Hostel", code="TEST-1", city=city)
         
     def test_create_student_with_profile_and_utilities(self):
         """Test creating a student with full profile and utilities via API"""
@@ -19,7 +28,7 @@ class StudentProfileAPITests(TestCase):
             "last_name": "Test",
             "email": "api@test.com",
             "role": "STUDENT",
-            "hostel": 1,
+            "hostel": self.hostel.id,
             "profile": {
                 "mobile": "0300-1234567",
                 "whatsapp": "0300-1234567",
@@ -46,8 +55,9 @@ class StudentProfileAPITests(TestCase):
         self.assertIn(response.status_code, [200, 201])
         data = response.json()
         self.assertEqual(data['username'], 'api_test_student')
-        self.assertEqual(data['profile']['mobile'], '0300-1234567')
-        self.assertEqual(len(data['profile']['utilities']), 2)
+        student = StudentProfile.objects.get(user__username='api_test_student')
+        self.assertEqual(student.mobile, '0300-1234567')
+        self.assertEqual(student.utilities.count(), 2)
         
     def test_update_student_profile(self):
         """Test updating student profile via PATCH"""
