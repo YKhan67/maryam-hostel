@@ -133,7 +133,7 @@ export default function PropertyFinancePage() {
       <div className="card" style={{ marginBottom: 20 }}>
         <h3>Investor financial access</h3>
         <form onSubmit={submitAccess} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 10, alignItems: "end" }}>
-          <label className="form-group">Investor<select className="form-input" value={accessForm.investor} onChange={(event) => setAccessForm({ ...accessForm, investor: event.target.value })} required><option value="">Select investor</option>{partners.map((user) => <option key={user.id} value={user.id}>{user.username}</option>)}</select></label>
+          <label className="form-group">Investor<select className="form-input" value={accessForm.investor} onChange={(event) => setAccessForm({ ...accessForm, investor: event.target.value })} required><option value="">Select investor</option>{partners.map((user) => <option key={user.id} value={user.id}>{`${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username}</option>)}</select></label>
           <label className="form-group">Property<select className="form-input" value={accessForm.property} onChange={(event) => setAccessForm({ ...accessForm, property: event.target.value })} required><option value="">Select property</option>{properties.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
           <button className="btn btn-primary" type="submit">Grant finance access</button>
         </form>
@@ -142,7 +142,7 @@ export default function PropertyFinancePage() {
       <div className="card" style={{ marginBottom: 20 }}>
         <h3>Investor ownership</h3>
         <form onSubmit={submitOwnership} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr auto", gap: 10, alignItems: "end" }}>
-          <label className="form-group">Investor<select className="form-input" value={ownershipForm.investor} onChange={(event) => setOwnershipForm({ ...ownershipForm, investor: event.target.value })} required><option value="">Investor</option>{partners.map((user) => <option key={user.id} value={user.id}>{user.username}</option>)}</select></label>
+          <label className="form-group">Investor<select className="form-input" value={ownershipForm.investor} onChange={(event) => setOwnershipForm({ ...ownershipForm, investor: event.target.value })} required><option value="">Investor</option>{partners.map((user) => <option key={user.id} value={user.id}>{`${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username}</option>)}</select></label>
           <label className="form-group">Property<select className="form-input" value={ownershipForm.property} onChange={(event) => setOwnershipForm({ ...ownershipForm, property: event.target.value })} required><option value="">Property</option>{properties.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
           <label className="form-group">Share %<input className="form-input" type="number" min="0" max="100" step="0.01" value={ownershipForm.ownership_percentage} onChange={(event) => setOwnershipForm({ ...ownershipForm, ownership_percentage: event.target.value })} required /></label>
           <label className="form-group">Effective from<input className="form-input" type="date" value={ownershipForm.effective_from} onChange={(event) => setOwnershipForm({ ...ownershipForm, effective_from: event.target.value })} required /></label>
