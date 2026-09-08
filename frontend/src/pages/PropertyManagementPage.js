@@ -15,6 +15,8 @@ export default function PropertyManagementPage() {
   const [students, setStudents] = useState([]);
   const [allocations, setAllocations] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState("");
+  const [studentSearch, setStudentSearch] = useState("");
+  const [studentPickerOpen, setStudentPickerOpen] = useState(false);
   const [selectedBed, setSelectedBed] = useState("");
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(true);
@@ -60,6 +62,38 @@ export default function PropertyManagementPage() {
     () => new Set(students.filter((student) => student.bed).map((student) => String(student.bed))),
     [students]
   );
+
+  function studentDisplayName(student) {
+    const firstName = student.user?.first_name?.trim() || "";
+    const lastName = student.user?.last_name?.trim() || "";
+    const fullName = `${firstName} ${lastName}`.trim();
+    return fullName || student.user?.username || `Student ${student.id}`;
+  }
+
+  const filteredStudents = useMemo(() => {
+    const query = studentSearch.trim().toLowerCase();
+    return students
+      .filter((student) => student.is_active)
+      .filter((student) => {
+        if (!query) return true;
+        const searchable = [
+          student.user?.first_name,
+          student.user?.last_name,
+          studentDisplayName(student),
+          student.user?.username,
+        ].filter(Boolean).join(" ").toLowerCase();
+        return searchable.includes(query);
+      })
+      .slice(0, 50);
+  }, [students, studentSearch]);
+
+  const selectedStudentRecord = students.find(
+    (student) => String(student.id) === String(selectedStudent)
+  );
+
+  const currentBed = selectedStudentRecord?.bed
+    ? beds.find((bed) => String(bed.id) === String(selectedStudentRecord.bed))
+    : null;
 
   async function assignBed(event) {
     event.preventDefault();
@@ -197,13 +231,47 @@ export default function PropertyManagementPage() {
       <div className="card" style={{ marginBottom: 24 }}>
         <h3>Allocate or transfer a bed</h3>
         <form onSubmit={assignBed} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: 12, alignItems: "end" }}>
-          <label className="form-group">Student
-            <select className="form-input" value={selectedStudent} onChange={(event) => setSelectedStudent(event.target.value)} required>
-              <option value="">Select student</option>
-              {students.filter((student) => student.is_active).map((student) => (
-                <option key={student.id} value={student.id}>{student.user?.username || `Student ${student.id}`}</option>
-              ))}
-            </select>
+          <label className="form-group" style={{ position: "relative" }}>Student
+            <input
+              className="form-input"
+              value={studentSearch}
+              onChange={(event) => {
+                setStudentSearch(event.target.value);
+                setSelectedStudent("");
+                setStudentPickerOpen(true);
+              }}
+              onFocus={() => setStudentPickerOpen(true)}
+              placeholder="Type student first or last name"
+              autoComplete="off"
+              required={!selectedStudent}
+            />
+            {studentPickerOpen && !selectedStudent && (
+              <div style={{ maxHeight: 220, overflowY: "auto", border: "1px solid #cbd5e1", background: "#fff", position: "absolute", zIndex: 10, width: "min(360px, 100%)", boxShadow: "0 8px 20px rgba(15, 23, 42, 0.12)" }}>
+                {filteredStudents.length === 0 && <div style={{ padding: 10, color: "#64748b" }}>No active student found.</div>}
+                {filteredStudents.map((student) => (
+                  <button
+                    type="button"
+                    key={student.id}
+                    onClick={() => {
+                      setSelectedStudent(String(student.id));
+                      setStudentSearch(studentDisplayName(student));
+                      setStudentPickerOpen(false);
+                    }}
+                    style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 10px", border: 0, borderBottom: "1px solid #e2e8f0", background: "#fff", cursor: "pointer" }}
+                  >
+                    <strong>{studentDisplayName(student)}</strong>
+                    <span style={{ display: "block", fontSize: "0.75rem", color: "#64748b" }}>{student.user?.username || `Student #${student.id}`}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {selectedStudentRecord && (
+              <div style={{ marginTop: 6, fontSize: "0.8rem", color: currentBed ? "#166534" : "#b45309" }}>
+                {currentBed
+                  ? `Current bed: ${currentBed.property_name || "Property"} / Room ${currentBed.room_number || currentBed.room} / Bed ${currentBed.label}`
+                  : "No bed assigned"}
+              </div>
+            )}
           </label>
           <label className="form-group">Bed
             <select className="form-input" value={selectedBed} onChange={(event) => setSelectedBed(event.target.value)} required>
@@ -230,7 +298,7 @@ export default function PropertyManagementPage() {
       <div className="card">
         <h3>Allocation history</h3>
         <div className="table-wrapper"><table className="table"><thead><tr><th>Student</th><th>Room</th><th>Bed</th><th>Move in</th><th>Move out</th><th>Status</th><th /></tr></thead><tbody>
-          {allocations.map((allocation) => <tr key={allocation.id}><td>{allocation.student_username || allocation.student_name}</td><td>{allocation.room_number || "-"}</td><td>{allocation.bed_label || allocation.bed}</td><td>{allocation.move_in_date}</td><td>{allocation.move_out_date || "-"}</td><td>{allocation.is_active ? "Active" : "Closed"}</td><td>{allocation.is_active && <button className="btn btn-soft" onClick={() => releaseBed(allocation.student)}>Release</button>}</td></tr>)}
+          {allocations.map((allocation) => <tr key={allocation.id}><td>{allocation.student_name || allocation.student_username || `Student #${allocation.student}`}</td><td>{allocation.room_number || "-"}</td><td>{allocation.bed_label || allocation.bed}</td><td>{allocation.move_in_date}</td><td>{allocation.move_out_date || "-"}</td><td>{allocation.is_active ? "Active" : "Closed"}</td><td>{allocation.is_active && <button className="btn btn-soft" onClick={() => releaseBed(allocation.student)}>Release</button>}</td></tr>)}
         </tbody></table></div>
       </div>
     </div>

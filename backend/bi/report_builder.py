@@ -134,18 +134,20 @@ class ReportBuilder:
         from_clause = f'"{main_table}"'
         join_graph = ReportBuilder._build_join_graph(all_tables)
         joined_tables = {main_table}
+        joined_order = [main_table]
         unreachable_tables = []
 
         for table in tables[1:]:
             if table in joined_tables:
                 continue  # already pulled in as an intermediate hop for an earlier table
-            path = ReportBuilder._find_join_path(table, joined_tables, join_graph)
+            path = ReportBuilder._find_join_path(table, joined_order, join_graph)
             if path is None:
                 unreachable_tables.append(table)
                 continue
             for step_table, step_clause in path:
                 join_clauses.append(step_clause)
                 joined_tables.add(step_table)
+                joined_order.append(step_table)
 
         if unreachable_tables:
             return ""
@@ -356,7 +358,34 @@ class ReportBuilder:
             return total
 
         if count_paths(target) != 1:
-            return None  # ambiguous - more than one shortest path, refuse to guess
+            # When the target has multiple direct relationships to already
+            # selected tables, prefer the most recently selected parent. This
+            # preserves the report builder's table order and avoids rejecting
+            # common hostel reports such as User -> StudentProfile -> Hostel,
+            # while still refusing ambiguous multi-hop paths.
+            direct_parents = [parent for parent, _ in parents.get(target, []) if parent in present_tables]
+            if not direct_parents:
+                return None
+            parent_order = {table: index for index, table in enumerate(present_tables)}
+            preferred_parent = max(direct_parents, key=lambda parent: parent_order[parent])
+            semantic_preferences = {
+                # Student fields should stay joined to their user identity,
+                # otherwise adding hostel context can multiply every user by
+                # every student in that hostel.
+                "hostels_studentprofile": ["accounts_user"],
+                # When a report already selected StudentProfile, hostel
+                # context should follow the student's hostel assignment.
+                "hostels_hostel": ["hostels_studentprofile"],
+            }
+            for preferred in semantic_preferences.get(target, []):
+                if preferred in direct_parents:
+                    preferred_parent = preferred
+                    break
+            parents[target] = [
+                (parent, clause)
+                for parent, clause in parents[target]
+                if parent == preferred_parent
+            ]
 
         path = []
         node = target

@@ -164,7 +164,7 @@ export default function FeeManagementPage() {
       setGenMessage(
         `Done. Created: ${resp.data.created ?? 0}, existing skipped: ${
           resp.data.skipped_existing ?? 0
-        }.`
+        }. Utility snapshots created: ${resp.data.utility_bills_created ?? 0}.`
       );
     } catch (err) {
       console.error("Failed to generate fees", err);

@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from django.utils import timezone
+from django.db import transaction
 from django.db.models import Sum, F, Q
 from django.http import HttpResponse
 from rest_framework.views import APIView
@@ -501,6 +502,7 @@ class LastThreeMonthsFeeKpi(APIView):
 class GenerateMonthlyFeesView(APIView):
     permission_classes = [IsAuthenticated]
     
+    @transaction.atomic
     def post(self, request):
         try:
             data = request.data or {}
@@ -584,6 +586,7 @@ class GenerateMonthlyFeesView(APIView):
             
             created_count = 0
             skipped_count = 0
+            utility_created_count = 0
             
             for student in students:
                 if student.left_on and student.left_on < month_date:
@@ -601,25 +604,37 @@ class GenerateMonthlyFeesView(APIView):
                 
                 if existing_fee:
                     skipped_count += 1
-                    continue
-                
-                rent_amount = student.monthly_rent or fee_head.default_amount or Decimal("0")
-                
-                MonthlyFee.objects.create(
+                else:
+                    rent_amount = student.monthly_rent or fee_head.default_amount or Decimal("0")
+
+                    MonthlyFee.objects.create(
+                        student=student,
+                        fee_head=fee_head,
+                        month=month_date,
+                        amount=rent_amount,
+                        amount_paid=0,
+                        is_paid=False,
+                        is_partially_paid=False,
+                        late_fee_applied=0
+                    )
+                    created_count += 1
+
+                # Keep a historical utility snapshot alongside the monthly
+                # fee. Existing snapshots are preserved so a later change to
+                # active utility charges cannot rewrite an issued bill.
+                utility_amount = Decimal(str(student.calculate_active_utility_bill()))
+                _, utility_created = StudentUtilityBill.objects.get_or_create(
                     student=student,
-                    fee_head=fee_head,
                     month=month_date,
-                    amount=rent_amount,
-                    amount_paid=0,
-                    is_paid=False,
-                    is_partially_paid=False,
-                    late_fee_applied=0
+                    defaults={"amount": utility_amount},
                 )
-                created_count += 1
+                if utility_created:
+                    utility_created_count += 1
             
             return Response({
                 "created": created_count,
                 "skipped_existing": skipped_count,
+                "utility_bills_created": utility_created_count,
                 "total_active_students": students.count(),
                 "message": f"Generated fees for {created_count} active STUDENT role users."
             }, status=200)

@@ -6,7 +6,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from accounts.models import User
-from fees.models import FeeHead, FeeRule, MonthlyFee
+from fees.models import FeeHead, FeeRule, MonthlyFee, StudentUtilityBill
 from hostels.models import City, Hostel, StudentProfile, StudentUtilityCharge
 
 
@@ -91,3 +91,33 @@ class StudentAndParentLedgerSummaryTests(TestCase):
             "total",
         ]:
             self.assertIn(key, summary)
+
+    def test_generate_monthly_fees_also_creates_utility_snapshot(self):
+        admin = User.objects.create_user(
+            username="fees-admin",
+            password="StrongPass123",
+            role="SUPER_ADMIN",
+        )
+        client = APIClient()
+        client.force_authenticate(user=admin)
+
+        response = client.post(
+            reverse("fees-generate-fees"),
+            {"year": 2026, "month": 9, "scope": "STUDENT", "student_id": self.student.id},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["created"], 1)
+        self.assertEqual(response.data["utility_bills_created"], 1)
+        utility_bill = StudentUtilityBill.objects.get(student=self.student, month=date(2026, 9, 1))
+        self.assertEqual(utility_bill.amount, Decimal("250.00"))
+
+        repeat_response = client.post(
+            reverse("fees-generate-fees"),
+            {"year": 2026, "month": 9, "scope": "STUDENT", "student_id": self.student.id},
+            format="json",
+        )
+        self.assertEqual(repeat_response.status_code, 200)
+        self.assertEqual(repeat_response.data["created"], 0)
+        self.assertEqual(repeat_response.data["utility_bills_created"], 0)

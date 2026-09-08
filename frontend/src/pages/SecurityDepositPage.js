@@ -63,25 +63,6 @@ export default function SecurityDepositPage() {
     }
   }
 
-  // Helper function to get student display name
-  const getStudentDisplayName = (student) => {
-    if (!student) return "Unknown Student";
-    
-    // Try to get full name from user
-    if (student.user) {
-      const fullName = student.user.full_name || student.user.get_full_name?.() || "";
-      if (fullName) return fullName;
-      if (student.user.username) return student.user.username;
-    }
-    
-    // Try direct fields
-    if (student.full_name) return student.full_name;
-    if (student.name) return student.name;
-    if (student.username) return student.username;
-    
-    return `Student ${student.id}`;
-  };
-
   // Filter deposits
   const filteredDeposits = deposits.filter(d => {
     if (statusFilter !== "ALL" && d.status !== statusFilter) {

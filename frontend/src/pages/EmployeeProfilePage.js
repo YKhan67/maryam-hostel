@@ -38,14 +38,6 @@ export default function EmployeeProfilePage() {
     return true;
   });
 
-  // Calculate total salary (base + allowances)
-  const calculateTotalSalary = (emp) => {
-    const base = parseFloat(emp.base_salary) || 0;
-    const housing = parseFloat(emp.housing_allowance) || 0;
-    const fuel = parseFloat(emp.fuel_allowance) || 0;
-    return base + housing + fuel;
-  };
-
   if (loading) return <p>Syncing...</p>;
 
   return (

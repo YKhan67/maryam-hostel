@@ -1,5 +1,5 @@
 // src/pages/RecipeManagementPage.js
-import React, { useEffect, useState, useContext } from "react";
+import React, { useCallback, useEffect, useState, useContext } from "react";
 import api from "../api";
 import { AuthContext } from "../AuthContext";
 import { saveAs } from "file-saver";
@@ -27,11 +27,23 @@ export default function RecipeManagementPage() {
     waste_factor: 0.015,
   });
 
-  useEffect(() => {
-    loadData();
+  const loadAllRecipes = useCallback(async (mealsList) => {
+    try {
+      const recipePromises = mealsList.map(meal =>
+        api.get(`food/meals/${meal.id}/recipes/`)
+      );
+      const recipeResponses = await Promise.all(recipePromises);
+      const allRecipes = {};
+      recipeResponses.forEach((res, index) => {
+        allRecipes[mealsList[index].id] = res.data || [];
+      });
+      setRecipes(allRecipes);
+    } catch (err) {
+      console.error("Error loading recipes:", err);
+    }
   }, []);
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [mealRes, itemRes] = await Promise.all([
@@ -47,23 +59,11 @@ export default function RecipeManagementPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [loadAllRecipes]);
 
-  async function loadAllRecipes(mealsList) {
-    try {
-      const recipePromises = mealsList.map(meal => 
-        api.get(`food/meals/${meal.id}/recipes/`)
-      );
-      const recipeResponses = await Promise.all(recipePromises);
-      const allRecipes = {};
-      recipeResponses.forEach((res, index) => {
-        allRecipes[mealsList[index].id] = res.data || [];
-      });
-      setRecipes(allRecipes);
-    } catch (err) {
-      console.error("Error loading recipes:", err);
-    }
-  }
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   async function loadRecipesForMeal(mealId) {
     try {
@@ -192,11 +192,6 @@ export default function RecipeManagementPage() {
       e.target.value = "";
     }
   }
-
-  const getMealName = (mealId) => {
-    const meal = meals.find(m => m.id === mealId);
-    return meal ? meal.name : "Unknown Meal";
-  };
 
   const getItemName = (itemId) => {
     const item = items.find(i => i.id === parseInt(itemId));

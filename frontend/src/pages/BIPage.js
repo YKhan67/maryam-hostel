@@ -19,8 +19,6 @@ export default function BIPage() {
   const [exporting, setExporting] = useState(false);
   const [activeTab, setActiveTab] = useState('chart');
 
-  const isManager = user?.role === "HOSTEL_MANAGER" || user?.role === "SUPER_ADMIN" || user?.role === "CITY_MANAGER";
-
   useEffect(() => {
     loadReportTypes();
     loadHostels();
