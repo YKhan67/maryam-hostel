@@ -1,5 +1,6 @@
 # backend/bi/views.py
 from rest_framework import viewsets, permissions, status
+from finance.models import InvestorPropertyAccess
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.http import HttpResponse
@@ -39,7 +40,11 @@ class ReportViewSet(viewsets.ViewSet):
                 {"error": "Permission denied"},
                 status=status.HTTP_403_FORBIDDEN
             )
-
+        if user.role == "PARTNER":
+            filters = dict(filters)
+            filters["property_ids"] = list(InvestorPropertyAccess.objects.filter(
+                investor=user, can_view_financials=True
+            ).values_list("property_id", flat=True))
         report_methods = {
             'REVENUE': ReportService.generate_revenue_report,
             'FEE_COLLECTION': ReportService.generate_fee_collection_report,
@@ -51,6 +56,7 @@ class ReportViewSet(viewsets.ViewSet):
             'HOSTEL_PERFORMANCE': ReportService.generate_hostel_performance_report,
             'VENDOR_ANALYSIS': ReportService.generate_vendor_analysis_report,
             'STOCK_LEVEL': ReportService.generate_stock_level_report,
+            'PROPERTY_PERFORMANCE': ReportService.generate_property_performance_report,
         }
 
         generator = report_methods.get(report_type)
@@ -82,6 +88,7 @@ class ReportViewSet(viewsets.ViewSet):
             {'id': 'HOSTEL_PERFORMANCE', 'name': 'Hostel Performance'},
             {'id': 'VENDOR_ANALYSIS', 'name': 'Vendor Analysis'},
             {'id': 'STOCK_LEVEL', 'name': 'Stock Level Report'},
+            {'id': 'PROPERTY_PERFORMANCE', 'name': 'Property Performance'},
         ]
         user = request.user
         if user.role == 'STUDENT':
@@ -153,7 +160,7 @@ class ReportViewSet(viewsets.ViewSet):
         if user.role in ['SUPER_ADMIN', 'CITY_MANAGER']:
             return True
         if user.role == 'PARTNER':
-            return report_type in ['REVENUE', 'FEE_COLLECTION', 'HOSTEL_PERFORMANCE', 'SECURITY_DEPOSIT']
+            return report_type in ['REVENUE', 'FEE_COLLECTION', 'HOSTEL_PERFORMANCE', 'SECURITY_DEPOSIT', 'PROPERTY_PERFORMANCE']
         if user.role == 'HOSTEL_MANAGER':
             return report_type in ['OCCUPANCY', 'INVENTORY', 'PAYROLL', 'MEAL_FEEDBACK', 'STOCK_LEVEL', 'VENDOR_ANALYSIS']
         if user.role == 'STAFF':

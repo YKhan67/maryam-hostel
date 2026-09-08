@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.708a1611.css",
-    "main.js": "/static/js/main.5795636b.js",
+    "main.js": "/static/js/main.15fb4779.js",
     "static/js/239.5ce464f3.chunk.js": "/static/js/239.5ce464f3.chunk.js",
     "static/js/977.c3d9b224.chunk.js": "/static/js/977.c3d9b224.chunk.js",
     "static/js/732.1410e611.chunk.js": "/static/js/732.1410e611.chunk.js",
@@ -13,13 +13,13 @@
     "static/media/hostel_hero.jpg": "/static/media/hostel_hero.39bba80449066e858d3b.jpg",
     "index.html": "/index.html",
     "main.708a1611.css.map": "/static/css/main.708a1611.css.map",
-    "main.5795636b.js.map": "/static/js/main.5795636b.js.map",
+    "main.15fb4779.js.map": "/static/js/main.15fb4779.js.map",
     "239.5ce464f3.chunk.js.map": "/static/js/239.5ce464f3.chunk.js.map",
     "977.c3d9b224.chunk.js.map": "/static/js/977.c3d9b224.chunk.js.map",
     "732.1410e611.chunk.js.map": "/static/js/732.1410e611.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.708a1611.css",
-    "static/js/main.5795636b.js"
+    "static/js/main.15fb4779.js"
   ]
 }

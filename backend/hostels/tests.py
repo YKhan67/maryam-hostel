@@ -4,8 +4,10 @@ from datetime import date
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from rest_framework.test import APIClient
 
 from .models import Bed, Building, City, Floor, Hostel, Property, Room, StudentProfile
+from .serializers import BuildingSerializer
 from .services import allocate_bed, release_bed, transfer_bed
 
 
@@ -71,3 +73,28 @@ class BedAllocationServiceTests(TestCase):
 
 		with self.assertRaises(ValidationError):
 			allocate_bed(self.student, other_bed)
+
+	def test_building_cannot_use_property_from_another_hostel(self):
+		other_hostel = Hostel.objects.create(name="Other Hostel", code="TEST-2", city=City.objects.get(name="Test City"))
+		other_property = Property.objects.create(
+			hostel=other_hostel,
+			name="Other House",
+			code="OTHER-HOUSE",
+			property_type="HOUSE",
+		)
+		serializer = BuildingSerializer(data={
+			"hostel": self.student.hostel_id,
+			"property": other_property.id,
+			"name": "Invalid Building",
+		})
+		self.assertFalse(serializer.is_valid())
+		self.assertIn("property", serializer.errors)
+
+	def test_bulk_bed_creation_generates_labels(self):
+		admin = get_user_model().objects.create_user(username="setup-admin", role="SUPER_ADMIN")
+		client = APIClient()
+		client.force_authenticate(user=admin)
+		room = self.bed_a.room
+		response = client.post(f"/api/rooms/{room.id}/bulk-beds/", {"count": 3, "start_label": "C"}, format="json")
+		self.assertEqual(response.status_code, 201)
+		self.assertEqual(list(room.beds.order_by("label").values_list("label", flat=True)), ["A", "B", "C", "D", "E"])

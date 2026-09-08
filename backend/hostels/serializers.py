@@ -30,24 +30,49 @@ class PropertySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class BuildingSerializer(serializers.ModelSerializer):
+    hostel_name = serializers.CharField(source="hostel.name", read_only=True)
+    property_name = serializers.CharField(source="property.name", read_only=True)
+
     class Meta:
         model = Building
-        fields = "__all__"
+        fields = ["id", "hostel", "hostel_name", "property", "property_name", "name"]
+
+    def validate(self, attrs):
+        hostel = attrs.get("hostel", getattr(self.instance, "hostel", None))
+        property_obj = attrs.get("property", getattr(self.instance, "property", None))
+        if property_obj and hostel and property_obj.hostel_id != hostel.id:
+            raise serializers.ValidationError({"property": "Property must belong to the selected hostel."})
+        return attrs
 
 class FloorSerializer(serializers.ModelSerializer):
+    building_name = serializers.CharField(source="building.name", read_only=True)
+    property_name = serializers.CharField(source="building.property.name", read_only=True)
+
     class Meta:
         model = Floor
-        fields = "__all__"
+        fields = ["id", "building", "building_name", "property_name", "number"]
 
 class RoomSerializer(serializers.ModelSerializer):
+    building_name = serializers.CharField(source="floor.building.name", read_only=True)
+    property_name = serializers.CharField(source="floor.building.property.name", read_only=True)
+
     class Meta:
         model = Room
-        fields = "__all__"
+        fields = ["id", "floor", "building_name", "property_name", "number", "room_type", "is_ac", "base_rent"]
 
 class BedSerializer(serializers.ModelSerializer):
+    room_number = serializers.CharField(source="room.number", read_only=True)
+    floor_number = serializers.IntegerField(source="room.floor.number", read_only=True)
+    building_name = serializers.CharField(source="room.floor.building.name", read_only=True)
+    property_name = serializers.CharField(source="room.floor.building.property.name", read_only=True)
+    student_id = serializers.IntegerField(source="student.id", read_only=True, allow_null=True)
+
     class Meta:
         model = Bed
-        fields = "__all__"
+        fields = [
+            "id", "room", "room_number", "floor_number", "building_name", "property_name",
+            "label", "is_occupied", "student_id",
+        ]
         read_only_fields = ["is_occupied"]
 
 class BedAllocationSerializer(serializers.ModelSerializer):
@@ -77,6 +102,10 @@ class BedReleaseActionSerializer(serializers.Serializer):
     move_out_date = serializers.DateField(required=False)
     reason = serializers.CharField(required=False, allow_blank=True)
     notes = serializers.CharField(required=False, allow_blank=True)
+
+class BulkBedSerializer(serializers.Serializer):
+    count = serializers.IntegerField(min_value=1, max_value=100)
+    start_label = serializers.CharField(required=False, default="A", max_length=10)
 
 class StudentUtilityChargeSerializer(serializers.ModelSerializer):
     class Meta:

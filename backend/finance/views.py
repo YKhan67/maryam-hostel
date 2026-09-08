@@ -5,17 +5,20 @@ from django.db.models import Sum
 from decimal import Decimal
 from datetime import date
 import logging
+from hostels.models import Property
 
 # Internal Imports
 from .models import (
     AssetCategory, Asset, PartnerCapital, Liability, PropertyRentalContract,
     PropertyRentAccrual, InvestorPropertyAccess, InvestorPropertyOwnership,
+    PropertySharedCost,
 )
 from .serializers import (
     AssetCategorySerializer, AssetSerializer, 
     PartnerCapitalSerializer, LiabilitySerializer, PropertyRentalContractSerializer,
     PropertyRentAccrualSerializer, InvestorPropertyAccessSerializer,
     InvestorPropertyOwnershipSerializer,
+    PropertySharedCostSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -24,6 +27,24 @@ class IsHostelManagerOrAbove(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated and \
                request.user.role in ["SUPER_ADMIN", "CITY_MANAGER", "HOSTEL_MANAGER", "PARTNER", "STAFF"]
+
+class PropertyFinancePermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        if request.method in permissions.SAFE_METHODS:
+            return request.user.role in ["SUPER_ADMIN", "CITY_MANAGER", "HOSTEL_MANAGER", "PARTNER"]
+        return request.user.role in ["SUPER_ADMIN", "CITY_MANAGER"]
+
+
+def accessible_property_ids(user):
+    if user.role in ["SUPER_ADMIN", "CITY_MANAGER"]:
+        return None
+    if user.role == "HOSTEL_MANAGER" and user.hostel_id:
+        return Property.objects.filter(hostel_id=user.hostel_id).values_list("id", flat=True)
+    return InvestorPropertyAccess.objects.filter(
+        investor=user, can_view_financials=True
+    ).values_list("property_id", flat=True)
 
 class AssetViewSet(viewsets.ModelViewSet):
     """
@@ -118,19 +139,53 @@ class LiabilityViewSet(viewsets.ModelViewSet):
 class PropertyRentalContractViewSet(viewsets.ModelViewSet):
     queryset = PropertyRentalContract.objects.select_related("property__hostel").all()
     serializer_class = PropertyRentalContractSerializer
-    permission_classes = [IsHostelManagerOrAbove]
+    permission_classes = [PropertyFinancePermission]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        property_ids = accessible_property_ids(self.request.user)
+        return qs if property_ids is None else qs.filter(property_id__in=property_ids)
 
 class PropertyRentAccrualViewSet(viewsets.ModelViewSet):
     queryset = PropertyRentAccrual.objects.select_related("property", "contract").all()
     serializer_class = PropertyRentAccrualSerializer
-    permission_classes = [IsHostelManagerOrAbove]
+    permission_classes = [PropertyFinancePermission]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        property_ids = accessible_property_ids(self.request.user)
+        return qs if property_ids is None else qs.filter(property_id__in=property_ids)
 
 class InvestorPropertyAccessViewSet(viewsets.ModelViewSet):
     queryset = InvestorPropertyAccess.objects.select_related("investor", "property").all()
     serializer_class = InvestorPropertyAccessSerializer
-    permission_classes = [IsHostelManagerOrAbove]
+    permission_classes = [PropertyFinancePermission]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.user.role == "PARTNER":
+            return qs.filter(investor=self.request.user, can_view_financials=True)
+        return qs
 
 class InvestorPropertyOwnershipViewSet(viewsets.ModelViewSet):
     queryset = InvestorPropertyOwnership.objects.select_related("investor", "property").all()
     serializer_class = InvestorPropertyOwnershipSerializer
-    permission_classes = [IsHostelManagerOrAbove]
+    permission_classes = [PropertyFinancePermission]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.user.role == "PARTNER":
+            return qs.filter(investor=self.request.user)
+        return qs
+
+class PropertySharedCostViewSet(viewsets.ModelViewSet):
+    queryset = PropertySharedCost.objects.select_related("hostel", "property").all()
+    serializer_class = PropertySharedCostSerializer
+    permission_classes = [PropertyFinancePermission]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        property_ids = accessible_property_ids(self.request.user)
+        if property_ids is None:
+            return qs
+        return qs.filter(property_id__in=property_ids)

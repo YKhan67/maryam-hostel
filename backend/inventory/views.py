@@ -34,7 +34,10 @@ from .models import Category, Unit, Item, Vendor, Purchase, Consumption
 from hostels.models import Hostel, Property, StudentProfile
 from fees.models import Receipt
 from payroll.models import SalarySlip
-from finance.models import Asset, PropertyRentAccrual, InvestorPropertyAccess, InvestorPropertyOwnership
+from finance.models import (
+    Asset, PropertyRentAccrual, InvestorPropertyAccess, InvestorPropertyOwnership,
+    PropertySharedCost,
+)
 
 from .serializers import (
     CategorySerializer, UnitSerializer, ItemSerializer,
@@ -73,6 +76,13 @@ class BranchProfitLossView(APIView):
             h_id = request.query_params.get("hostel_id")
             hostels = Hostel.objects.filter(id=h_id) if h_id else Hostel.objects.all()
 
+        def apply_filters(qs, date_field):
+            if period == "YTD":
+                return qs.filter(**{f"{date_field}__year": year, f"{date_field}__month__lte": today.month})
+            if period == "SPECIFIC":
+                return qs.filter(**{f"{date_field}__year": year, f"{date_field}__month": month})
+            return qs.filter(**{f"{date_field}__year": today.year, f"{date_field}__month": today.month})
+
         partner_properties = []
         if user.role == "PARTNER":
             partner_properties = list(Property.objects.filter(
@@ -92,10 +102,16 @@ class BranchProfitLossView(APIView):
                 rent = float(apply_filters(
                     PropertyRentAccrual.objects.filter(property=property_obj), "month"
                 ).aggregate(s=Sum("amount"))["s"] or 0)
-                asset_cost = float(apply_filters(
-                    Asset.objects.filter(property=property_obj), "purchase_date"
-                ).aggregate(s=Sum("purchase_price"))["s"] or 0)
-                net_profit = revenue - rent - asset_cost
+                inventory_cost = float(apply_filters(
+                    Purchase.objects.filter(property=property_obj, status="APPROVED"), "date"
+                ).annotate(c=F("quantity") * F("price_per_unit")).aggregate(s=Sum("c"))["s"] or 0)
+                payroll_cost = float(apply_filters(
+                    SalarySlip.objects.filter(employee__property=property_obj, is_disbursed=True), "disbursed_at__date"
+                ).aggregate(s=Sum("net_salary"))["s"] or 0)
+                shared_cost = float(apply_filters(
+                    PropertySharedCost.objects.filter(property=property_obj), "date"
+                ).aggregate(s=Sum("amount"))["s"] or 0)
+                net_profit = revenue - rent - inventory_cost - payroll_cost - shared_cost
                 ownership = InvestorPropertyOwnership.objects.filter(
                     investor=user, property=property_obj, effective_from__lte=today,
                 ).filter(
@@ -107,16 +123,18 @@ class BranchProfitLossView(APIView):
                     "property_name": property_obj.name,
                     "hostel_name": property_obj.hostel.name,
                     "income": revenue,
-                    "groceries": asset_cost,
-                    "payroll_burn": 0.0,
+                    "groceries": inventory_cost,
+                    "payroll_burn": payroll_cost,
                     "accommodation_rent": rent,
+                    "shared_cost": shared_cost,
                     "net_profit": net_profit,
                     "ownership_percentage": percentage,
                     "investor_profit": net_profit * percentage / 100,
                     "profit_margin": round(net_profit / revenue * 100, 1) if revenue else 0,
                 })
                 total_revenue += revenue
-                total_logistics += asset_cost
+                total_logistics += inventory_cost
+                total_payroll += payroll_cost
                 total_rent += rent
             return Response({
                 "version": "property-1.0",
@@ -126,17 +144,13 @@ class BranchProfitLossView(APIView):
                     "total_logistics": total_logistics,
                     "total_payroll": total_payroll,
                     "total_accommodation_rent": total_rent,
-                    "net_margin": total_revenue - total_logistics - total_rent,
+                    "total_shared_cost": sum(row["shared_cost"] for row in matrix),
+                    "net_margin": total_revenue - total_logistics - total_payroll - total_rent - sum(row["shared_cost"] for row in matrix),
                     "investor_profit": sum(row["investor_profit"] for row in matrix),
                     "student_count": 0,
                 },
             })
         
-        def apply_filters(qs, date_field):
-            if period == "YTD": return qs.filter(**{f"{date_field}__year": year, f"{date_field}__month__lte": today.month})
-            elif period == "SPECIFIC": return qs.filter(**{f"{date_field}__year": year, f"{date_field}__month": month})
-            else: return qs.filter(**{f"{date_field}__year": today.year, f"{date_field}__month": today.month})
-
         matrix = []
         t_rev, t_log, t_pay, t_rent, t_stu = 0.0, 0.0, 0.0, 0.0, 0
 
@@ -147,23 +161,23 @@ class BranchProfitLossView(APIView):
             p_qs = apply_filters(Purchase.objects.filter(hostel=h, status='APPROVED'), "date")
             logi_val = float(p_qs.annotate(c=F('quantity')*F('price_per_unit')).aggregate(s=Sum('c'))['s'] or 0)
 
-            a_qs = apply_filters(Asset.objects.filter(hostel=h), "purchase_date")
-            asset_val = float(a_qs.aggregate(s=Sum('purchase_price'))['s'] or 0)
-            
             py_qs = apply_filters(SalarySlip.objects.filter(employee__user__hostel=h, is_disbursed=True), "disbursed_at__date")
             payr_val = float(py_qs.aggregate(s=Sum('net_salary'))['s'] or 0)
 
             rent_qs = apply_filters(PropertyRentAccrual.objects.filter(property__hostel=h), "month")
             rent_val = float(rent_qs.aggregate(s=Sum('amount'))['s'] or 0)
+            shared_qs = apply_filters(PropertySharedCost.objects.filter(hostel=h), "date")
+            shared_val = float(shared_qs.aggregate(s=Sum('amount'))['s'] or 0)
             
             s_count = StudentProfile.objects.filter(hostel=h, is_active=True).count()
-            t_rev += rev_val; t_log += (logi_val + asset_val); t_pay += payr_val; t_rent += rent_val; t_stu += s_count
+            t_rev += rev_val; t_log += logi_val; t_pay += payr_val; t_rent += rent_val; t_stu += s_count
 
             matrix.append({
-                "hostel_id": h.id, "hostel_name": h.name, "income": rev_val, "groceries": logi_val + asset_val,
+                "hostel_id": h.id, "hostel_name": h.name, "income": rev_val, "groceries": logi_val,
                 "payroll_burn": payr_val, "accommodation_rent": rent_val,
-                "net_profit": rev_val - (logi_val + asset_val + payr_val + rent_val),
-                "profit_margin": round(((rev_val - (logi_val + asset_val + payr_val + rent_val)) / rev_val * 100), 1) if rev_val > 0 else 0
+                "shared_cost": shared_val,
+                "net_profit": rev_val - (logi_val + payr_val + rent_val + shared_val),
+                "profit_margin": round(((rev_val - (logi_val + payr_val + rent_val + shared_val)) / rev_val * 100), 1) if rev_val > 0 else 0
             })
 
         students_den = t_stu if t_stu > 0 else 1
@@ -173,7 +187,8 @@ class BranchProfitLossView(APIView):
             "summary": {
                 "total_revenue": t_rev, "total_logistics": t_log, "total_payroll": t_pay,
                 "total_accommodation_rent": t_rent,
-                "net_margin": t_rev - (t_log + t_pay + t_rent),
+                "total_shared_cost": sum(row["shared_cost"] for row in matrix),
+                "net_margin": t_rev - (t_log + t_pay + t_rent + sum(row["shared_cost"] for row in matrix)),
                 "avg_revenue": t_rev / students_den, "avg_cost": (t_log + t_pay + t_rent) / students_den,
                 "student_count": t_stu
             }

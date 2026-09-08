@@ -85,6 +85,9 @@ export default function AppShell({ children, subtitle }) {
                     <NavLink to="/custom-reports" className={navClass}>
                       🔧 Custom Reports
                     </NavLink>
+                    <NavLink to="/property-finance" className={navClass}>
+                      🧾 Property Finance
+                    </NavLink>
                   </>
                 )}
 

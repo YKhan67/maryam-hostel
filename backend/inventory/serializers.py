@@ -34,12 +34,19 @@ class PurchaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Purchase
         fields = [
-            "id", "hostel", "hostel_name", "date", "vendor", "vendor_name", 
+            "id", "hostel", "hostel_name", "property", "date", "vendor", "vendor_name", 
             "invoice_no", "invoice_photo", "items_photo", "item", "item_name", 
             "quantity", "price_per_unit", "total_cost", "status", 
             "approved_by", "rejection_remarks", "created_at",
         ]
         read_only_fields = ["id", "total_cost", "status", "approved_by", "created_at"]
+
+    def validate(self, attrs):
+        hostel = attrs.get("hostel", getattr(self.instance, "hostel", None))
+        property_obj = attrs.get("property", getattr(self.instance, "property", None))
+        if property_obj and hostel and property_obj.hostel_id != hostel.id:
+            raise serializers.ValidationError({"property": "Property must belong to the selected hostel."})
+        return attrs
 
 class ConsumptionSerializer(serializers.ModelSerializer):
     item_name = serializers.CharField(source="item.name", read_only=True)
@@ -47,5 +54,12 @@ class ConsumptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Consumption
-        fields = ["id", "hostel", "hostel_name", "date", "item", "item_name", "quantity", "photo", "remarks", "created_at"]
+        fields = ["id", "hostel", "hostel_name", "property", "date", "item", "item_name", "quantity", "photo", "remarks", "created_at"]
         read_only_fields = ["id", "created_at"]
+
+    def validate(self, attrs):
+        hostel = attrs.get("hostel", getattr(self.instance, "hostel", None))
+        property_obj = attrs.get("property", getattr(self.instance, "property", None))
+        if property_obj and hostel and property_obj.hostel_id != hostel.id:
+            raise serializers.ValidationError({"property": "Property must belong to the selected hostel."})
+        return attrs

@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import (
     AssetCategory, Asset, PartnerCapital, Liability, PropertyRentalContract,
     PropertyRentAccrual, InvestorPropertyAccess, InvestorPropertyOwnership,
+    PropertySharedCost,
 )
 
 class AssetCategorySerializer(serializers.ModelSerializer):
@@ -37,6 +38,13 @@ class PropertyRentalContractSerializer(serializers.ModelSerializer):
         model = PropertyRentalContract
         fields = '__all__'
 
+    def validate(self, attrs):
+        start_date = attrs.get("start_date", getattr(self.instance, "start_date", None))
+        end_date = attrs.get("end_date", getattr(self.instance, "end_date", None))
+        if end_date and start_date and end_date < start_date:
+            raise serializers.ValidationError({"end_date": "Contract end date must be on or after the start date."})
+        return attrs
+
 class PropertyRentAccrualSerializer(serializers.ModelSerializer):
     outstanding_amount = serializers.DecimalField(read_only=True, max_digits=15, decimal_places=2)
 
@@ -44,12 +52,45 @@ class PropertyRentAccrualSerializer(serializers.ModelSerializer):
         model = PropertyRentAccrual
         fields = '__all__'
 
+    def validate(self, attrs):
+        property_obj = attrs.get("property", getattr(self.instance, "property", None))
+        contract = attrs.get("contract", getattr(self.instance, "contract", None))
+        if property_obj and contract and contract.property_id != property_obj.id:
+            raise serializers.ValidationError({"contract": "Contract must belong to the selected property."})
+        return attrs
+
 class InvestorPropertyAccessSerializer(serializers.ModelSerializer):
     class Meta:
         model = InvestorPropertyAccess
         fields = '__all__'
 
+    def validate_investor(self, investor):
+        if investor.role != "PARTNER":
+            raise serializers.ValidationError("Investor must have the PARTNER role.")
+        return investor
+
 class InvestorPropertyOwnershipSerializer(serializers.ModelSerializer):
     class Meta:
         model = InvestorPropertyOwnership
         fields = '__all__'
+
+    def validate(self, attrs):
+        investor = attrs.get("investor", getattr(self.instance, "investor", None))
+        percentage = attrs.get("ownership_percentage", getattr(self.instance, "ownership_percentage", None))
+        if investor and investor.role != "PARTNER":
+            raise serializers.ValidationError({"investor": "Investor must have the PARTNER role."})
+        if percentage is not None and not 0 <= percentage <= 100:
+            raise serializers.ValidationError({"ownership_percentage": "Ownership must be between 0 and 100."})
+        return attrs
+
+class PropertySharedCostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PropertySharedCost
+        fields = "__all__"
+
+    def validate(self, attrs):
+        hostel = attrs.get("hostel", getattr(self.instance, "hostel", None))
+        property_obj = attrs.get("property", getattr(self.instance, "property", None))
+        if property_obj and hostel and property_obj.hostel_id != hostel.id:
+            raise serializers.ValidationError({"property": "Property must belong to the selected hostel."})
+        return attrs

@@ -5,6 +5,7 @@ from .views import (
     PartnerCapitalViewSet, LiabilityViewSet,
     BalanceSheetView, PropertyRentalContractViewSet, PropertyRentAccrualViewSet,
     InvestorPropertyAccessViewSet, InvestorPropertyOwnershipViewSet,
+    PropertySharedCostViewSet,
 )
 
 router = DefaultRouter()
@@ -16,6 +17,7 @@ router.register(r'rental-contracts', PropertyRentalContractViewSet, basename='re
 router.register(r'rent-accruals', PropertyRentAccrualViewSet, basename='rent-accrual')
 router.register(r'investor-property-access', InvestorPropertyAccessViewSet, basename='investor-property-access')
 router.register(r'investor-property-ownership', InvestorPropertyOwnershipViewSet, basename='investor-property-ownership')
+router.register(r'shared-costs', PropertySharedCostViewSet, basename='shared-cost')
 
 urlpatterns = [
     path('balance-sheet/', BalanceSheetView.as_view(), name='balance-sheet'),

@@ -109,6 +109,24 @@ class PropertyRentalContract(models.Model):
         return f"{self.property} - {self.monthly_rent}"
 
 
+class PropertySharedCost(models.Model):
+    hostel = models.ForeignKey(Hostel, on_delete=models.PROTECT, related_name="shared_costs")
+    property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="shared_costs", null=True, blank=True)
+    date = models.DateField()
+    category = models.CharField(max_length=100)
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-date", "-id"]
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        super().clean()
+        if self.property_id and self.property.hostel_id != self.hostel_id:
+            raise ValidationError({"property": "Property must belong to the selected hostel."})
+
+
 class PropertyRentAccrual(models.Model):
     property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="rent_accruals")
     contract = models.ForeignKey(PropertyRentalContract, on_delete=models.PROTECT, related_name="accruals")

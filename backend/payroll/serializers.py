@@ -14,12 +14,17 @@ class EmployeeProfileSerializer(serializers.ModelSerializer):
             "nic_number", "nic_front_picture", "nic_back_picture", "profile_picture",
             "base_salary", "housing_allowance", "fuel_allowance", "other_allowance",
             "rate_per_task", "bank_name", "iban", "joined_on", "hostel_name", "is_active"
+            , "property"
         ]
 
     def validate(self, attrs):
         nic_number = attrs.get("nic_number", getattr(self.instance, "nic_number", None))
         if nic_number is None or not str(nic_number).strip():
             raise serializers.ValidationError({"nic_number": "NIC number is required."})
+        property_obj = attrs.get("property", getattr(self.instance, "property", None))
+        user = attrs.get("user", getattr(self.instance, "user", None))
+        if property_obj and user and user.hostel_id != property_obj.hostel_id:
+            raise serializers.ValidationError({"property": "Property must belong to the employee's hostel."})
         return attrs
 
 class SalaryAdvanceSerializer(serializers.ModelSerializer):

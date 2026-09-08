@@ -1,5 +1,7 @@
+import builtins
+
 from django.db import models
-from hostels.models import Hostel
+from hostels.models import Hostel, Property
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -45,6 +47,7 @@ class Purchase(models.Model):
     ]
 
     hostel = models.ForeignKey(Hostel, on_delete=models.PROTECT, related_name="purchases")
+    property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="purchases", null=True, blank=True)
     date = models.DateField()
     vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, related_name="purchases")
     invoice_no = models.CharField(max_length=100, blank=True)
@@ -70,7 +73,7 @@ class Purchase(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    @property
+    @builtins.property
     def total_cost(self):
         return self.quantity * self.price_per_unit
 
@@ -82,6 +85,7 @@ class Consumption(models.Model):
     Tracks daily usage of items from the inventory.
     """
     hostel = models.ForeignKey(Hostel, on_delete=models.PROTECT, related_name="consumptions")
+    property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="consumptions", null=True, blank=True)
     date = models.DateField()
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name="consumptions")
     quantity = models.DecimalField(max_digits=12, decimal_places=3)

@@ -170,7 +170,7 @@ export default function BIPage() {
     if (!data) return null;
 
     // Simple chart rendering using CSS (can be replaced with Chart.js)
-    const chartData = data.monthly_data || data.hostel_data || data.top_items || data.vendor_data;
+    const chartData = data.monthly_data || data.hostel_data || data.property_data || data.top_items || data.vendor_data;
 
     if (!chartData || chartData.length === 0) return null;
 
@@ -184,8 +184,8 @@ export default function BIPage() {
         <h4 style={{ marginBottom: '16px' }}>Chart View</h4>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {chartData.slice(0, 10).map((item, idx) => {
-            const label = item.month || item.hostel_name || item.name || item.item__name || 'Item';
-            const value = item.revenue || item.collected || item.total_cost || item.avg_rating || 0;
+            const label = item.month || item.hostel_name || item.property_name || item.name || item.item__name || 'Item';
+            const value = item.revenue || item.collected || item.total_cost || item.net_profit || item.avg_rating || 0;
             const percentage = maxValue > 0 ? (value / maxValue * 100) : 0;
 
             return (
@@ -342,7 +342,7 @@ export default function BIPage() {
           {activeTab === 'chart' && (
             <>
               {renderChart(reportData)}
-              {!reportData.monthly_data && !reportData.hostel_data && !reportData.top_items && !reportData.vendor_data && (
+              {!reportData.monthly_data && !reportData.hostel_data && !reportData.property_data && !reportData.top_items && !reportData.vendor_data && (
                 <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
                   <p style={{ color: 'var(--text-muted)' }}>No chart data available for this report.</p>
                 </div>
@@ -355,6 +355,7 @@ export default function BIPage() {
             <>
               {reportData.monthly_data && renderTableData(reportData.monthly_data, 'Monthly Data')}
               {reportData.hostel_data && renderTableData(reportData.hostel_data, 'Hostel Data')}
+              {reportData.property_data && renderTableData(reportData.property_data, 'Property Performance')}
               {reportData.top_items && renderTableData(reportData.top_items, 'Top Items')}
               {reportData.vendor_data && renderTableData(reportData.vendor_data, 'Vendor Data')}
               {reportData.status_breakdown && renderTableData(reportData.status_breakdown, 'Status Breakdown')}
@@ -362,7 +363,7 @@ export default function BIPage() {
                 Object.entries(reportData.rating_distribution).map(([key, value]) => ({ rating: key, count: value })),
                 'Rating Distribution'
               )}
-              {!reportData.monthly_data && !reportData.hostel_data && !reportData.top_items && !reportData.vendor_data && !reportData.status_breakdown && (
+              {!reportData.monthly_data && !reportData.hostel_data && !reportData.property_data && !reportData.top_items && !reportData.vendor_data && !reportData.status_breakdown && (
                 <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
                   <p style={{ color: 'var(--text-muted)' }}>No table data available for this report.</p>
                 </div>

@@ -14,9 +14,20 @@ from .models import City, Hostel, Property, Building, Floor, Room, Bed, BedAlloc
 from .serializers import (
     CitySerializer, HostelSerializer, PropertySerializer, BuildingSerializer,
     FloorSerializer, RoomSerializer, BedSerializer, BedAllocationSerializer,
-    BedAllocationActionSerializer, BedReleaseActionSerializer, StudentProfileSerializer,
+    BedAllocationActionSerializer, BedReleaseActionSerializer, BulkBedSerializer,
+    StudentProfileSerializer,
 )
 from .services import allocate_bed, release_bed, transfer_bed
+
+
+def _bed_label(start_label, offset):
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    start = start_label.strip().upper() or "A"
+    if len(start) == 1 and start in alphabet:
+        index = alphabet.index(start) + offset
+        if index < len(alphabet):
+            return alphabet[index]
+    return f"{start}-{offset + 1}"
 
 class IsSuperAdminOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -53,6 +64,24 @@ class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
     permission_classes = [IsSuperAdminOrReadOnly]
+
+    @action(detail=True, methods=["post"], url_path="bulk-beds")
+    def bulk_beds(self, request, pk=None):
+        room = self.get_object()
+        serializer = BulkBedSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        count = serializer.validated_data["count"]
+        start_label = serializer.validated_data["start_label"]
+        existing_labels = set(room.beds.values_list("label", flat=True))
+        labels = []
+        for offset in range(count):
+            label = _bed_label(start_label, offset)
+            if label in existing_labels:
+                return Response({"detail": f"Bed label '{label}' already exists in this room."}, status=status.HTTP_400_BAD_REQUEST)
+            labels.append(label)
+        beds = [Bed(room=room, label=label) for label in labels]
+        Bed.objects.bulk_create(beds)
+        return Response(BedSerializer(beds, many=True).data, status=status.HTTP_201_CREATED)
 
 class BedViewSet(viewsets.ModelViewSet):
     queryset = Bed.objects.all()

@@ -2,6 +2,7 @@
 
 from django.db import models
 from django.conf import settings
+from hostels.models import Property
 
 User = settings.AUTH_USER_MODEL
 
@@ -15,6 +16,7 @@ class EmployeeProfile(models.Model):
     ]   
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="employee_profile")
+    property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="employees", null=True, blank=True)
     designation = models.CharField(max_length=100)
     pay_type = models.CharField(max_length=20, choices=PAY_TYPE_CHOICES, default='MONTHLY')
 

@@ -47,6 +47,7 @@ import StaffTasksPage from "./pages/StaffTasksPage";
 import BIPage from "./pages/BIPage";
 import CustomReportBuilderPage from "./pages/CustomReportBuilderPage";
 import PropertyManagementPage from "./pages/PropertyManagementPage";
+import PropertyFinancePage from "./pages/PropertyFinancePage";
 
 function AppRoutes() {
   // Access Tiers
@@ -67,6 +68,7 @@ function AppRoutes() {
         <Route path="/change-password" element={<ProtectedRoute allowedRoles={ALL_USERS}><ChangePasswordPage /></ProtectedRoute>} />
         <Route path="/management" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><ManagementDashboard /></ProtectedRoute>} />
         <Route path="/property-operations" element={<ProtectedRoute allowedRoles={BRANCH_MGMT}><PropertyManagementPage /></ProtectedRoute>} />
+        <Route path="/property-finance" element={<ProtectedRoute allowedRoles={["SUPER_ADMIN", "CITY_MANAGER"]}><PropertyFinancePage /></ProtectedRoute>} />
         <Route path="/staff-tasks" element={<ProtectedRoute allowedRoles={STAFF_LEVEL}><StaffTasksPage /></ProtectedRoute>} />
 
         {/* Meal Menu Routes */}
