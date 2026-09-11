@@ -15,7 +15,7 @@ SECRET_KEY = 'django-insecure-default-key-change-me'
 
 #Gemini API key
 # GEMINI_API_KEY = os.environ.get("api-key", "")
-GEMINI_API_KEY = "AIzaSyAOAaDr8_9Xu2-gPIMOEMlniv1yUxL5oS4"
+GEMINI_API_KEY = ""
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

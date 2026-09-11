@@ -1,6 +1,7 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.db import transaction
 from django.db.models import Sum
 from decimal import Decimal
 from datetime import date
@@ -11,14 +12,14 @@ from hostels.models import Property
 from .models import (
     AssetCategory, Asset, PartnerCapital, Liability, PropertyRentalContract,
     PropertyRentAccrual, InvestorPropertyAccess, InvestorPropertyOwnership,
-    PropertySharedCost,
+    PropertySharedCost, PropertyRentPayment,
 )
 from .serializers import (
     AssetCategorySerializer, AssetSerializer, 
     PartnerCapitalSerializer, LiabilitySerializer, PropertyRentalContractSerializer,
     PropertyRentAccrualSerializer, InvestorPropertyAccessSerializer,
     InvestorPropertyOwnershipSerializer,
-    PropertySharedCostSerializer,
+    PropertySharedCostSerializer, PropertyRentPaymentSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -112,7 +113,10 @@ class BalanceSheetView(APIView):
             from fees.models import SecurityDeposit
             sec_liab = SecurityDeposit.objects.filter(student__hostel__in=scope_hostels, status='HELD').aggregate(s=Sum('amount'))['s'] or Decimal('0')
             other_liab = Liability.objects.filter(hostel__in=scope_hostels, is_settled=False).aggregate(s=Sum('remaining_amount'))['s'] or Decimal('0')
-            rent_payable = PropertyRentAccrual.objects.filter(property__hostel__in=scope_hostels)
+            rent_payable = PropertyRentAccrual.objects.filter(
+                property__hostel__in=scope_hostels,
+                property__is_active=True,
+            )
             if scope_properties is not None:
                 rent_payable = rent_payable.filter(property_id__in=scope_properties)
             rent_payable = sum((accrual.outstanding_amount for accrual in rent_payable), Decimal('0'))
@@ -155,6 +159,76 @@ class PropertyRentAccrualViewSet(viewsets.ModelViewSet):
         qs = super().get_queryset()
         property_ids = accessible_property_ids(self.request.user)
         return qs if property_ids is None else qs.filter(property_id__in=property_ids)
+
+
+class PropertyRentPaymentViewSet(viewsets.ModelViewSet):
+    queryset = PropertyRentPayment.objects.select_related(
+        "accrual__property", "accrual__contract", "created_by"
+    ).all()
+    serializer_class = PropertyRentPaymentSerializer
+    permission_classes = [PropertyFinancePermission]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        property_ids = accessible_property_ids(self.request.user)
+        return qs if property_ids is None else qs.filter(accrual__property_id__in=property_ids)
+
+    @transaction.atomic
+    def perform_create(self, serializer):
+        accrual = PropertyRentAccrual.objects.select_for_update().get(
+            pk=serializer.validated_data["accrual"].pk
+        )
+        payment_amount = serializer.validated_data["amount"]
+        outstanding = accrual.amount - accrual.paid_amount
+        if payment_amount > outstanding:
+            raise serializers.ValidationError({
+                "amount": f"Payment cannot exceed outstanding rent of {outstanding}."
+            })
+        accrual.paid_amount += payment_amount
+        accrual.paid_on = serializer.validated_data["paid_on"]
+        accrual.save(update_fields=["paid_amount", "paid_on"])
+        serializer.save(created_by=self.request.user)
+
+    def refresh_paid_on(self, accrual):
+        latest_payment = accrual.payments.order_by("-paid_on", "-id").first()
+        accrual.paid_on = latest_payment.paid_on if latest_payment else None
+        accrual.save(update_fields=["paid_on"])
+
+    @transaction.atomic
+    def perform_update(self, serializer):
+        payment = PropertyRentPayment.objects.select_for_update().get(pk=serializer.instance.pk)
+        old_accrual = PropertyRentAccrual.objects.select_for_update().get(pk=payment.accrual_id)
+        new_accrual = PropertyRentAccrual.objects.select_for_update().get(
+            pk=serializer.validated_data.get("accrual", payment.accrual).pk
+        )
+        new_amount = serializer.validated_data.get("amount", payment.amount)
+
+        old_accrual.paid_amount -= payment.amount
+        if old_accrual.paid_amount < 0:
+            old_accrual.paid_amount = 0
+        old_accrual.save(update_fields=["paid_amount"])
+
+        if new_amount > new_accrual.amount - new_accrual.paid_amount:
+            raise serializers.ValidationError({
+                "amount": f"Payment cannot exceed outstanding rent of {new_accrual.amount - new_accrual.paid_amount}."
+            })
+        new_accrual.paid_amount += new_amount
+        new_accrual.paid_on = serializer.validated_data.get("paid_on", payment.paid_on)
+        new_accrual.save(update_fields=["paid_amount", "paid_on"])
+        serializer.save()
+        if old_accrual.pk != new_accrual.pk:
+            self.refresh_paid_on(old_accrual)
+        self.refresh_paid_on(new_accrual)
+
+    @transaction.atomic
+    def perform_destroy(self, instance):
+        accrual = PropertyRentAccrual.objects.select_for_update().get(pk=instance.accrual_id)
+        accrual.paid_amount -= instance.amount
+        if accrual.paid_amount < 0:
+            accrual.paid_amount = 0
+        accrual.save(update_fields=["paid_amount"])
+        instance.delete()
+        self.refresh_paid_on(accrual)
 
 class InvestorPropertyAccessViewSet(viewsets.ModelViewSet):
     queryset = InvestorPropertyAccess.objects.select_related("investor", "property").all()

@@ -83,7 +83,7 @@ export default function FeeKpiPage() {
       }
 
       try {
-        const resp = await api.get("/fees/dashboard/current-month/", {
+        const resp = await api.get("fees/dashboard/current-month/", {
           params,
         });
         if (isMounted) setSummaryData(resp.data);

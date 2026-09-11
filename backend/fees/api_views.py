@@ -16,9 +16,31 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 
-from fees.models import MonthlyFee, SecurityDeposit, Receipt, FeeHead, StudentUtilityBill
+from fees.models import (
+    MonthlyFee,
+    SecurityDeposit,
+    Receipt,
+    PaymentProof,
+    FeeHead,
+    StudentUtilityBill,
+)
 from fees.utils import compute_late_fee_for_record
 from hostels.models import StudentProfile
+from accounts.models import ModulePermission
+
+
+def _can_delete_fees(user):
+    if user.role == "SUPER_ADMIN":
+        return True
+
+    permission = ModulePermission.objects.filter(
+        user=user, module_name="FEES"
+    ).first()
+    if permission is None:
+        permission = ModulePermission.objects.filter(
+            role=user.role, user__isnull=True, module_name="FEES"
+        ).first()
+    return bool(permission and permission.can_delete)
 
 
 class CurrentMonthFeeDashboard(APIView):
@@ -94,7 +116,7 @@ class CurrentMonthFeeDashboard(APIView):
         paid_in_range = MonthlyFee.objects.filter(is_paid=True, month__gte=f_date, month__lte=t_date)
         if hostel_scoped:
             paid_in_range = paid_in_range.filter(student__hostel=request.user.hostel)
-        fine_collected = float(paid_in_range.aggregate(s=Sum('late_fee_applied'))['s'] or 0)
+        fine_collected = float(paid_in_range.filter(fine_paid=True).aggregate(s=Sum('late_fee_applied'))['s'] or 0)
 
         fine_outstanding = 0.0
         for f in unpaid.select_related('fee_head'):
@@ -106,7 +128,9 @@ class CurrentMonthFeeDashboard(APIView):
         paid_on_time_students = paid_in_range.filter(
             late_fee_applied=0, fine_was_waived=False
         ).values('student_id').distinct().count()
-        paid_late_students = paid_in_range.filter(late_fee_applied__gt=0).values('student_id').distinct().count()
+        paid_late_students = paid_in_range.filter(
+            late_fee_applied__gt=0, fine_paid=True
+        ).values('student_id').distinct().count()
 
         waived_qs = MonthlyFee.objects.filter(month__gte=f_date, month__lte=t_date, fine_was_waived=True)
         if hostel_scoped:
@@ -217,16 +241,20 @@ def _build_fee_breakdown_rows(request):
                 fine += f_fine
                 amount_paid += f.amount_paid
                 due_dates.append(f.get_due_date())
-                if not f.is_paid:
+                if not f.is_paid or (f_fine > 0 and not f.fine_paid):
                     all_fees_paid = False
 
             utility_record = utility_by_student_month.get((student_id, month))
             utility_amount = utility_record.amount if utility_record else Decimal("0")
-            utility_paid = utility_record.is_paid if utility_record else True  # no record -> nothing owed for it
+            utility_paid_amount = utility_record.amount_paid if utility_record else Decimal("0")
+            utility_paid = utility_record is None or utility_paid_amount >= utility_amount
 
-            total_due = float(amount + fine + utility_amount)
-            total_paid = float(amount_paid) + (float(utility_amount) if utility_paid else 0)
-            outstanding = round(total_due - total_paid, 2)
+            total_due = amount + fine + utility_amount
+            total_paid = amount_paid + utility_paid_amount
+            total_paid += sum(
+                f.late_fee_applied for f in fee_rows if f.is_paid and f.fine_paid
+            )
+            outstanding = max(round(float(total_due - total_paid), 2), 0)
 
             rows.append({
                 "student_id": student_id,
@@ -238,7 +266,7 @@ def _build_fee_breakdown_rows(request):
                 "amount_due": outstanding,
                 "utility_bill": float(utility_amount),
                 "fine": float(fine),
-                "amount_paid": round(total_paid, 2),
+                "amount_paid": round(float(total_paid), 2),
                 "status": "PAID" if (all_fees_paid and utility_paid) else "OUTSTANDING",
             })
 
@@ -452,11 +480,11 @@ class StudentLedgerView(APIView):
 
             entry_total = float(f.amount) + float(fine) + entry_utility
             if f.is_paid:
-                status = "PAID"
-                # Utility bill is collected together with the fee (see StudentUtilityBill
-                # docstring), so it's counted as paid whenever the fee itself is paid.
-                total_paid_acc += float(f.amount + f.late_fee_applied) + entry_utility
-            else: 
+                status = "PAID" if f.fine_paid or not fine else "FINE_PENDING"
+                total_paid_acc += float(f.amount) + entry_utility
+                if f.fine_paid:
+                    total_paid_acc += float(f.late_fee_applied)
+            else:
                 status = "OUTSTANDING"
                 total_out_acc += float(f.amount + fine) + entry_utility
                 if f.payment_proofs.filter(status='PENDING').exists(): status = "PENDING_VERIFICATION"
@@ -495,8 +523,52 @@ class StudentLedgerView(APIView):
 
 
 class LastThreeMonthsFeeKpi(APIView):
+    """Three-month fee KPI summary used by the Fee KPI page."""
     permission_classes = [IsAuthenticated]
-    def get(self, request): return Response([])
+
+    def get(self, request):
+        today = timezone.localdate()
+        current_month = today.replace(day=1)
+        start_month = (today.year * 12 + (today.month - 1) - 2)
+        start_year, start_month_num = divmod(start_month, 12)
+        start_date = date(start_year, start_month_num + 1, 1)
+
+        hostel_scoped = request.user.role in ["HOSTEL_MANAGER", "PARTNER"] and request.user.hostel
+
+        fee_qs = MonthlyFee.objects.filter(month__gte=start_date, month__lte=current_month)
+        if hostel_scoped:
+            fee_qs = fee_qs.filter(student__hostel=request.user.hostel)
+
+        month_rows = []
+        current = start_date
+        while current <= current_month:
+            month_qs = fee_qs.filter(month=current)
+            total_billed = float(month_qs.aggregate(s=Sum('amount'))['s'] or 0)
+            total_collected = float(month_qs.filter(is_paid=True).aggregate(s=Sum('amount'))['s'] or 0)
+            total_outstanding = max(total_billed - total_collected, 0.0)
+
+            fine_collected = float(month_qs.filter(is_paid=True, fine_paid=True).aggregate(s=Sum('late_fee_applied'))['s'] or 0)
+            fine_outstanding = 0.0
+            for fee in month_qs.filter(is_paid=False).select_related('fee_head'):
+                fine_outstanding += float(compute_late_fee_for_record(fee, on_date=today))
+
+            month_rows.append({
+                "year": current.year,
+                "month": current.month,
+                "label": current.strftime("%b %Y"),
+                "total_billed": total_billed,
+                "total_collected": total_collected,
+                "total_outstanding": total_outstanding,
+                "fine_collected": fine_collected,
+                "fine_outstanding": fine_outstanding,
+                "total_fine": fine_collected + fine_outstanding,
+            })
+            if current.month == 12:
+                current = date(current.year + 1, 1, 1)
+            else:
+                current = date(current.year, current.month + 1, 1)
+
+        return Response(month_rows)
 
 
 class GenerateMonthlyFeesView(APIView):
@@ -647,6 +719,81 @@ class GenerateMonthlyFeesView(APIView):
             }, status=500)
 
 
+class DeleteFeeRecordsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def post(self, request):
+        if not _can_delete_fees(request.user):
+            return Response(
+                {"detail": "You do not have permission to delete fee records."},
+                status=403,
+            )
+
+        data = request.data or {}
+        scope = data.get("scope", "ALL")
+        student_id = data.get("student_id")
+
+        try:
+            from_year = int(data["from_year"])
+            from_month = int(data["from_month"])
+            to_year = int(data["to_year"])
+            to_month = int(data["to_month"])
+            from_date = date(from_year, from_month, 1)
+            to_date = date(to_year, to_month, 1)
+        except (KeyError, TypeError, ValueError):
+            return Response(
+                {"detail": "Valid from and to month/year values are required."},
+                status=400,
+            )
+
+        if from_date > to_date:
+            return Response(
+                {"detail": "'From' must be before or equal to 'To'."},
+                status=400,
+            )
+        if scope not in ["ALL", "STUDENT"]:
+            return Response({"detail": "Invalid student scope."}, status=400)
+        if scope == "STUDENT" and not student_id:
+            return Response(
+                {"detail": "student_id is required for a specific student."},
+                status=400,
+            )
+
+        fees = MonthlyFee.objects.filter(month__gte=from_date, month__lte=to_date)
+        utility_bills = StudentUtilityBill.objects.filter(
+            month__gte=from_date, month__lte=to_date
+        )
+
+        if scope == "STUDENT":
+            if not StudentProfile.objects.filter(id=student_id).exists():
+                return Response({"detail": "Student not found."}, status=404)
+            fees = fees.filter(student_id=student_id)
+            utility_bills = utility_bills.filter(student_id=student_id)
+
+        user = request.user
+        if user.role in ["HOSTEL_MANAGER", "PARTNER", "STAFF"] and user.hostel:
+            fees = fees.filter(student__hostel=user.hostel)
+            utility_bills = utility_bills.filter(student__hostel=user.hostel)
+
+        fee_ids = list(fees.values_list("id", flat=True))
+        deleted_fee_count = len(fee_ids)
+        deleted_receipt_count = Receipt.objects.filter(fee_id__in=fee_ids).count()
+        deleted_proof_count = PaymentProof.objects.filter(fee_id__in=fee_ids).count()
+        deleted_utility_count = utility_bills.count()
+
+        fees.delete()
+        utility_bills.delete()
+
+        return Response({
+            "deleted": deleted_fee_count,
+            "utility_bills_deleted": deleted_utility_count,
+            "receipts_deleted": deleted_receipt_count,
+            "payment_proofs_deleted": deleted_proof_count,
+            "message": f"Deleted {deleted_fee_count} fee record(s).",
+        }, status=200)
+
+
 class MarkFeesPaidView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -658,6 +805,7 @@ class MarkFeesPaidView(APIView):
             student_id = data.get("student_id")
             amount_str = data.get("amount", "0")
             amount = Decimal(str(amount_str)) if amount_str else Decimal("0")
+            exclude_fine = data.get("exclude_fine", False) is True
             
             fees = MonthlyFee.objects.all()
             
@@ -680,35 +828,45 @@ class MarkFeesPaidView(APIView):
 
                 # Fold in that month's utility bill (collected together with the fee,
                 # no separate proof needed for it - see StudentUtilityBill docstring).
-                utility_bill = StudentUtilityBill.objects.filter(student=fee.student, month=fee.month).first()
-                utility_amount = utility_bill.amount if (utility_bill and not utility_bill.is_paid) else Decimal("0")
-                total_due = fee.amount + fine + utility_amount
-                
-                if amount > 0:
-                    fee.amount_paid += amount
-                    if fee.amount_paid >= total_due:
-                        fee.is_paid = True
-                        fee.is_partially_paid = False
-                    else:
-                        fee.is_paid = False
-                        fee.is_partially_paid = True
-                else:
-                    fee.amount_paid = total_due
-                    fee.is_paid = True
-                    fee.is_partially_paid = False
-                
-                fee.late_fee_applied = fine
-                fee.save()
+                utility_bill = StudentUtilityBill.objects.filter(
+                    student=fee.student, month=fee.month
+                ).first()
+                utility_remaining = (
+                    max(utility_bill.amount - utility_bill.amount_paid, Decimal("0"))
+                    if utility_bill else Decimal("0")
+                )
+                fee_remaining = max(fee.amount - fee.amount_paid, Decimal("0"))
+                fine_remaining = max(fine, Decimal("0")) if not exclude_fine else Decimal("0")
+                payment_due = fee_remaining + utility_remaining + fine_remaining
 
-                if fee.is_paid and utility_bill and not utility_bill.is_paid:
-                    utility_bill.amount_paid = utility_bill.amount
-                    utility_bill.is_paid = True
+                payment_received = payment_due if amount <= 0 else amount
+                base_payment = min(payment_received, fee_remaining)
+                fee.amount_paid += base_payment
+                payment_received -= base_payment
+
+                utility_payment = min(payment_received, utility_remaining)
+                if utility_bill and utility_payment:
+                    utility_bill.amount_paid += utility_payment
+                    utility_bill.is_paid = utility_bill.amount_paid >= utility_bill.amount
                     utility_bill.save(update_fields=["amount_paid", "is_paid"])
+                payment_received -= utility_payment
+
+                fine_payment = min(payment_received, fine_remaining)
+                fee.is_paid = fee.amount_paid >= fee.amount
+                fee.is_partially_paid = fee.amount_paid > 0 and not fee.is_paid
+                fee.late_fee_applied = fine
+                fee.fine_paid = not exclude_fine and (
+                    fine_remaining == 0 or fine_payment >= fine_remaining
+                )
+                fee.save()
                 
                 if amount > 0:
                     Receipt.objects.create(fee=fee, amount=amount)
                 elif fee.is_paid:
-                    Receipt.objects.create(fee=fee, amount=total_due)
+                    Receipt.objects.create(
+                        fee=fee,
+                        amount=fee.amount + utility_payment + fine_payment,
+                    )
                 
                 updated_count += 1
             
@@ -886,8 +1044,10 @@ class ParentSecureLedgerView(APIView):
                     summary_utility_bill = entry_utility
 
                 if f.is_paid:
-                    paid_sum += float(f.amount + f.late_fee_applied) + entry_utility
-                    status = "PAID"
+                    paid_sum += float(f.amount) + entry_utility
+                    if f.fine_paid:
+                        paid_sum += float(f.late_fee_applied)
+                    status = "PAID" if f.fine_paid or not fine else "FINE_PENDING"
                 else:
                     outstanding_sum += float(f.amount + fine) + entry_utility
                     status = "OUTSTANDING"

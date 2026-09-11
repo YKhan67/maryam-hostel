@@ -58,6 +58,7 @@ class Building(models.Model):
         blank=True,
     )
     name = models.CharField(max_length=100)  # e.g. Block A, Main, etc.
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         unique_together = ("hostel", "name")
@@ -68,6 +69,7 @@ class Building(models.Model):
 class Floor(models.Model):
     building = models.ForeignKey(Building, on_delete=models.CASCADE, related_name="floors")
     number = models.IntegerField()  # e.g. 0 = Ground, 1 = First, etc.
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         unique_together = ("building", "number")
@@ -87,6 +89,7 @@ class Room(models.Model):
     room_type = models.CharField(max_length=20, choices=RoomType.choices, default=RoomType.TRIPLE)
     is_ac = models.BooleanField(default=False)
     base_rent = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         unique_together = ("floor", "number")
@@ -98,6 +101,7 @@ class Bed(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="beds")
     label = models.CharField(max_length=10)  # e.g. A, B, C
     is_occupied = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         unique_together = ("room", "label")

@@ -66,6 +66,27 @@ export default function StudentDashboard() {
     }
   }
 
+  async function handleReceiptClick(receiptId) {
+    const receiptWindow = window.open("about:blank", "_blank");
+
+    try {
+      const response = await api.get(`fees/receipt/${receiptId}/`, { responseType: "blob" });
+      const receiptUrl = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
+
+      if (receiptWindow) {
+        receiptWindow.location.href = receiptUrl;
+        setTimeout(() => window.URL.revokeObjectURL(receiptUrl), 60000);
+      } else {
+        window.URL.revokeObjectURL(receiptUrl);
+        setMessage("Please allow pop-ups to open the receipt.");
+      }
+    } catch (err) {
+      receiptWindow?.close();
+      console.error("Error generating receipt:", err);
+      setMessage("Unable to open the receipt. Please try again.");
+    }
+  }
+
   async function handleFileChange(e, feeId) {
     const file = e.target.files[0];
     if (!file) return;
@@ -434,7 +455,7 @@ export default function StudentDashboard() {
                           {entry.receipts.map(r => (
                             <button
                               key={r.id}
-                              onClick={() => window.open(`${api.defaults.baseURL}fees/receipt/${r.id}/`, "_blank")}
+                              onClick={() => handleReceiptClick(r.id)}
                               className="badge badge-success"
                               style={{ border: 'none', cursor: 'pointer', fontSize: '0.6rem' }}
                             >

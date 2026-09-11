@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from .models import Bed, Building, City, Floor, Hostel, Property, Room, StudentProfile
+from .models import Bed, BedAllocation, Building, City, Floor, Hostel, Property, Room, StudentProfile
 from .serializers import BuildingSerializer
 from .services import allocate_bed, release_bed, transfer_bed
 
@@ -98,3 +98,30 @@ class BedAllocationServiceTests(TestCase):
 		response = client.post(f"/api/rooms/{room.id}/bulk-beds/", {"count": 3, "start_label": "C"}, format="json")
 		self.assertEqual(response.status_code, 201)
 		self.assertEqual(list(room.beds.order_by("label").values_list("label", flat=True)), ["A", "B", "C", "D", "E"])
+
+	def test_assigned_bed_cannot_be_deactivated(self):
+		admin = get_user_model().objects.create_user(username="maintenance-admin", role="SUPER_ADMIN")
+		client = APIClient()
+		client.force_authenticate(user=admin)
+		allocate_bed(self.student, self.bed_a, move_in_date=date(2026, 1, 2))
+
+		response = client.post(f"/api/beds/{self.bed_a.id}/toggle-active/")
+
+		self.assertEqual(response.status_code, 400)
+		self.bed_a.refresh_from_db()
+		self.assertTrue(self.bed_a.is_active)
+
+	def test_empty_bed_can_toggle_inactive_and_active(self):
+		admin = get_user_model().objects.create_user(username="maintenance-admin-2", role="SUPER_ADMIN")
+		client = APIClient()
+		client.force_authenticate(user=admin)
+
+		deactivate = client.post(f"/api/beds/{self.bed_b.id}/toggle-active/")
+		self.assertEqual(deactivate.status_code, 200)
+		self.bed_b.refresh_from_db()
+		self.assertFalse(self.bed_b.is_active)
+
+		activate = client.post(f"/api/beds/{self.bed_b.id}/toggle-active/")
+		self.assertEqual(activate.status_code, 200)
+		self.bed_b.refresh_from_db()
+		self.assertTrue(self.bed_b.is_active)

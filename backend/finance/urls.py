@@ -5,7 +5,7 @@ from .views import (
     PartnerCapitalViewSet, LiabilityViewSet,
     BalanceSheetView, PropertyRentalContractViewSet, PropertyRentAccrualViewSet,
     InvestorPropertyAccessViewSet, InvestorPropertyOwnershipViewSet,
-    PropertySharedCostViewSet,
+    PropertySharedCostViewSet, PropertyRentPaymentViewSet,
 )
 
 router = DefaultRouter()
@@ -15,6 +15,7 @@ router.register(r'capital', PartnerCapitalViewSet, basename='capital')
 router.register(r'liabilities', LiabilityViewSet, basename='liability')
 router.register(r'rental-contracts', PropertyRentalContractViewSet, basename='rental-contract')
 router.register(r'rent-accruals', PropertyRentAccrualViewSet, basename='rent-accrual')
+router.register(r'rent-payments', PropertyRentPaymentViewSet, basename='rent-payment')
 router.register(r'investor-property-access', InvestorPropertyAccessViewSet, basename='investor-property-access')
 router.register(r'investor-property-ownership', InvestorPropertyOwnershipViewSet, basename='investor-property-ownership')
 router.register(r'shared-costs', PropertySharedCostViewSet, basename='shared-cost')

@@ -11,6 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from .models import City, Hostel, Property, Building, Floor, Room, Bed, BedAllocation, StudentProfile
+from django.db import transaction
+from django.core.exceptions import ValidationError
 from .serializers import (
     CitySerializer, HostelSerializer, PropertySerializer, BuildingSerializer,
     FloorSerializer, RoomSerializer, BedSerializer, BedAllocationSerializer,
@@ -45,25 +47,89 @@ class HostelViewSet(viewsets.ModelViewSet):
     serializer_class = HostelSerializer
     permission_classes = [IsSuperAdminOrReadOnly]
 
-class PropertyViewSet(viewsets.ModelViewSet):
+class MaintenanceToggleMixin:
+    parent_for_activation = None
+
+    def destroy(self, request, *args, **kwargs):
+        return Response(
+            {"detail": "Structural records cannot be deleted. Use activate/deactivate to preserve history."},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+    def _activation_parent(self, instance):
+        return None
+
+    def _check_deactivation(self, instance):
+        if isinstance(instance, Bed):
+            if StudentProfile.objects.filter(bed=instance).exists():
+                raise ValidationError("A bed assigned to a student cannot be deactivated. Transfer or release the student first.")
+            if BedAllocation.objects.filter(bed=instance, is_active=True).exists():
+                raise ValidationError("A bed with an active allocation cannot be deactivated.")
+        elif isinstance(instance, Room) and instance.beds.filter(is_active=True).exists():
+            raise ValidationError("Deactivate all active beds in this room first.")
+        elif isinstance(instance, Floor) and instance.rooms.filter(is_active=True).exists():
+            raise ValidationError("Deactivate all active rooms on this floor first.")
+        elif isinstance(instance, Building) and instance.floors.filter(is_active=True).exists():
+            raise ValidationError("Deactivate all active floors in this building first.")
+        elif isinstance(instance, Property) and instance.buildings.filter(is_active=True).exists():
+            raise ValidationError("Deactivate all active buildings in this property first.")
+
+    @action(detail=True, methods=["post"], url_path="toggle-active")
+    @transaction.atomic
+    def toggle_active(self, request, pk=None):
+        instance = self.get_object()
+        activating = not instance.is_active
+        parent = self._activation_parent(instance)
+        if activating and parent is not None and not parent.is_active:
+            return Response(
+                {"detail": "Activate the parent structure first."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not activating:
+            try:
+                self._check_deactivation(instance)
+            except ValidationError as exc:
+                return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        instance.is_active = activating
+        instance.save(update_fields=["is_active"])
+        return Response({
+            "id": instance.id,
+            "is_active": instance.is_active,
+            "message": "Activated successfully." if activating else "Deactivated successfully.",
+        })
+
+
+class PropertyViewSet(MaintenanceToggleMixin, viewsets.ModelViewSet):
     queryset = Property.objects.select_related("hostel").all().order_by("hostel__code", "name")
     serializer_class = PropertySerializer
     permission_classes = [IsSuperAdminOrReadOnly]
 
-class BuildingViewSet(viewsets.ModelViewSet):
+    def _activation_parent(self, instance):
+        return instance.hostel
+
+class BuildingViewSet(MaintenanceToggleMixin, viewsets.ModelViewSet):
     queryset = Building.objects.all()
     serializer_class = BuildingSerializer
     permission_classes = [IsSuperAdminOrReadOnly]
 
-class FloorViewSet(viewsets.ModelViewSet):
+    def _activation_parent(self, instance):
+        return instance.property or instance.hostel
+
+class FloorViewSet(MaintenanceToggleMixin, viewsets.ModelViewSet):
     queryset = Floor.objects.all()
     serializer_class = FloorSerializer
     permission_classes = [IsSuperAdminOrReadOnly]
 
-class RoomViewSet(viewsets.ModelViewSet):
+    def _activation_parent(self, instance):
+        return instance.building
+
+class RoomViewSet(MaintenanceToggleMixin, viewsets.ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
     permission_classes = [IsSuperAdminOrReadOnly]
+
+    def _activation_parent(self, instance):
+        return instance.floor
 
     @action(detail=True, methods=["post"], url_path="bulk-beds")
     def bulk_beds(self, request, pk=None):
@@ -83,10 +149,13 @@ class RoomViewSet(viewsets.ModelViewSet):
         Bed.objects.bulk_create(beds)
         return Response(BedSerializer(beds, many=True).data, status=status.HTTP_201_CREATED)
 
-class BedViewSet(viewsets.ModelViewSet):
+class BedViewSet(MaintenanceToggleMixin, viewsets.ModelViewSet):
     queryset = Bed.objects.all()
     serializer_class = BedSerializer
     permission_classes = [IsSuperAdminOrReadOnly]
+
+    def _activation_parent(self, instance):
+        return instance.room
 
 class BedAllocationViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = BedAllocation.objects.select_related(

@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from hostels.models import City, Hostel, Property
-from finance.models import InvestorPropertyOwnership, PropertyRentalContract
+from finance.models import InvestorPropertyOwnership, PropertyRentalContract, PropertyRentAccrual, PropertyRentPayment
 from finance.serializers import InvestorPropertyAccessSerializer, InvestorPropertyOwnershipSerializer, PropertyRentAccrualSerializer
 
 
@@ -64,3 +64,38 @@ class PropertyFinanceValidationTests(TestCase):
         with self.assertRaises(ValidationError):
             candidate = InvestorPropertyOwnership(**serializer.validated_data)
             candidate.full_clean()
+
+    def test_rent_payment_updates_accrual_and_preserves_payment_history(self):
+        accrual = PropertyRentAccrual.objects.create(
+            property=self.property,
+            contract=PropertyRentalContract.objects.create(
+                property=self.property,
+                landlord_name="Landlord",
+                start_date=date(2026, 1, 1),
+                monthly_rent=Decimal("1000"),
+            ),
+            month=date(2026, 1, 1),
+            amount=Decimal("1000"),
+        )
+        first = PropertyRentPayment.objects.create(
+            accrual=accrual,
+            amount=Decimal("400"),
+            paid_on=date(2026, 1, 10),
+            created_by=self.partner,
+        )
+        accrual.paid_amount += first.amount
+        accrual.paid_on = first.paid_on
+        accrual.save(update_fields=["paid_amount", "paid_on"])
+        second = PropertyRentPayment.objects.create(
+            accrual=accrual,
+            amount=Decimal("600"),
+            paid_on=date(2026, 1, 20),
+            created_by=self.partner,
+        )
+        accrual.paid_amount += second.amount
+        accrual.paid_on = second.paid_on
+        accrual.save(update_fields=["paid_amount", "paid_on"])
+
+        accrual.refresh_from_db()
+        self.assertEqual(accrual.paid_amount, Decimal("1000"))
+        self.assertEqual(accrual.payments.count(), 2)

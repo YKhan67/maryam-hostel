@@ -46,6 +46,9 @@ class MonthlyFee(models.Model):
     is_paid = models.BooleanField(default=False)
     is_partially_paid = models.BooleanField(default=False)
     late_fee_applied = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    # Allows the base fee and utility bill to be received while a fine remains
+    # outstanding.
+    fine_paid = models.BooleanField(default=True)
     # Set by WaiveFineView. Needed because zeroing/reducing late_fee_applied
     # alone leaves no record that a waiver happened - a genuinely-waived fee
     # becomes indistinguishable from one that never had a fine, which makes
@@ -157,9 +160,10 @@ class PaymentProof(models.Model):
                 utility_bill.is_paid = True
                 utility_bill.save(update_fields=["amount_paid", "is_paid"])
 
-            fee.amount_paid = total_payable
+            fee.amount_paid = fee.amount
             fee.is_paid = True
             fee.is_partially_paid = False
+            fee.fine_paid = True
             fee.save()
             
             # This closes the dashboard gap

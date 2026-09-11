@@ -147,6 +147,27 @@ class PropertyRentAccrual(models.Model):
         return self.amount - self.paid_amount
 
 
+class PropertyRentPayment(models.Model):
+    accrual = models.ForeignKey(PropertyRentAccrual, on_delete=models.PROTECT, related_name="payments")
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    paid_on = models.DateField()
+    notes = models.TextField(blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="property_rent_payments",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-paid_on", "-created_at"]
+
+    def __str__(self):
+        return f"{self.accrual.property} - {self.amount} - {self.paid_on}"
+
+
 class InvestorPropertyAccess(models.Model):
     investor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="property_access")
     property = models.ForeignKey(Property, on_delete=models.PROTECT, related_name="investor_access")

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import (
     AssetCategory, Asset, PartnerCapital, Liability, PropertyRentalContract,
     PropertyRentAccrual, InvestorPropertyAccess, InvestorPropertyOwnership,
-    PropertySharedCost,
+    PropertySharedCost, PropertyRentPayment,
 )
 
 class AssetCategorySerializer(serializers.ModelSerializer):
@@ -58,6 +58,25 @@ class PropertyRentAccrualSerializer(serializers.ModelSerializer):
         if property_obj and contract and contract.property_id != property_obj.id:
             raise serializers.ValidationError({"contract": "Contract must belong to the selected property."})
         return attrs
+
+
+class PropertyRentPaymentSerializer(serializers.ModelSerializer):
+    property_name = serializers.CharField(source="accrual.property.name", read_only=True)
+    month = serializers.DateField(source="accrual.month", read_only=True)
+    outstanding_after = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PropertyRentPayment
+        fields = "__all__"
+        read_only_fields = ["created_by", "created_at", "property_name", "month", "outstanding_after"]
+
+    def get_outstanding_after(self, obj):
+        return obj.accrual.amount - obj.accrual.paid_amount
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Payment amount must be greater than zero.")
+        return value
 
 class InvestorPropertyAccessSerializer(serializers.ModelSerializer):
     class Meta:

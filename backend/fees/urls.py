@@ -7,6 +7,7 @@ from .api_views import (
     LastThreeMonthsFeeKpi,
     HostelIncomeSummary,
     GenerateMonthlyFeesView,
+    DeleteFeeRecordsView,
     MarkFeesPaidView,
     SendWhatsappPendingFeesView,
     WaiveFineView,
@@ -97,6 +98,11 @@ urlpatterns = [
         "actions/generate-fees/",
         GenerateMonthlyFeesView.as_view(),
         name="fees-generate-fees",
+    ),
+    path(
+        "actions/delete-fees/",
+        DeleteFeeRecordsView.as_view(),
+        name="fees-delete-fees",
     ),
     path(
         "actions/mark-paid/",

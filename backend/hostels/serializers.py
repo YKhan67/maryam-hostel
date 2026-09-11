@@ -35,7 +35,7 @@ class BuildingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Building
-        fields = ["id", "hostel", "hostel_name", "property", "property_name", "name"]
+        fields = ["id", "hostel", "hostel_name", "property", "property_name", "name", "is_active"]
 
     def validate(self, attrs):
         hostel = attrs.get("hostel", getattr(self.instance, "hostel", None))
@@ -50,7 +50,13 @@ class FloorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Floor
-        fields = ["id", "building", "building_name", "property_name", "number"]
+        fields = ["id", "building", "building_name", "property_name", "number", "is_active"]
+
+    def validate(self, attrs):
+        building = attrs.get("building", getattr(self.instance, "building", None))
+        if building and not building.hostel_id:
+            raise serializers.ValidationError({"building": "Building must belong to a hostel."})
+        return attrs
 
 class RoomSerializer(serializers.ModelSerializer):
     building_name = serializers.CharField(source="floor.building.name", read_only=True)
@@ -58,7 +64,13 @@ class RoomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Room
-        fields = ["id", "floor", "building_name", "property_name", "number", "room_type", "is_ac", "base_rent"]
+        fields = ["id", "floor", "building_name", "property_name", "number", "room_type", "is_ac", "base_rent", "is_active"]
+
+    def validate(self, attrs):
+        floor = attrs.get("floor", getattr(self.instance, "floor", None))
+        if floor and not floor.building_id:
+            raise serializers.ValidationError({"floor": "Floor must belong to a building."})
+        return attrs
 
 class BedSerializer(serializers.ModelSerializer):
     room_number = serializers.CharField(source="room.number", read_only=True)
@@ -71,8 +83,11 @@ class BedSerializer(serializers.ModelSerializer):
         model = Bed
         fields = [
             "id", "room", "room_number", "floor_number", "building_name", "property_name",
-            "label", "is_occupied", "student_id",
+            "label", "is_occupied", "is_active", "student_id",
         ]
+
+    def validate_room(self, value):
+        return value
         read_only_fields = ["is_occupied"]
 
 class BedAllocationSerializer(serializers.ModelSerializer):

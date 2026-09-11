@@ -36,9 +36,15 @@ function getStudentLabel(s) {
   return `Student ${s.id}`;
 }
 
+function getStudentLoginId(s) {
+  return s?.user?.username || s?.username || `Profile ${s?.id ?? "unknown"}`;
+}
+
 export default function FeeManagementPage() {
   const { check } = usePermissions();
-  const isReadOnly = !check("FEES", "add") && !check("FEES", "edit");
+  const canDeleteFees = check("FEES", "delete");
+  const isReadOnly =
+    !check("FEES", "add") && !check("FEES", "edit") && !canDeleteFees;
 
   const [students, setStudents] = useState([]);
   const [loadingStudents, setLoadingStudents] = useState(true);
@@ -61,6 +67,7 @@ export default function FeeManagementPage() {
   const [markMonth, setMarkMonth] = useState(currentMonth);
   const [markAllMonths, setMarkAllMonths] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
+  const [excludeFine, setExcludeFine] = useState(false);
   const [markLoading, setMarkLoading] = useState(false);
   const [markMessage, setMarkMessage] = useState("");
 
@@ -83,6 +90,16 @@ export default function FeeManagementPage() {
   const [wvAmount, setWvAmount] = useState("");
   const [wvLoading, setWvLoading] = useState(false);
   const [wvMessage, setWvMessage] = useState("");
+
+  // 5) Delete fee records
+  const [deleteScope, setDeleteScope] = useState("ALL");
+  const [deleteStudentId, setDeleteStudentId] = useState("");
+  const [deleteFromYear, setDeleteFromYear] = useState(currentYear);
+  const [deleteFromMonth, setDeleteFromMonth] = useState(currentMonth);
+  const [deleteToYear, setDeleteToYear] = useState(currentYear);
+  const [deleteToMonth, setDeleteToMonth] = useState(currentMonth);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteMessage, setDeleteMessage] = useState("");
 
   // Load students
   useEffect(() => {
@@ -136,10 +153,20 @@ export default function FeeManagementPage() {
     { value: 12, label: "December" },
   ];
 
-  const studentOptions = students.map((s) => ({
-    value: s.id,
-    label: getStudentLabel(s),
-  }));
+  const studentOptions = students
+    .map((s) => {
+      const label = getStudentLabel(s);
+      const loginId = getStudentLoginId(s);
+      return {
+        value: s.id,
+        label,
+        loginId,
+        dropdownLabel: `${label} (Login ID: ${loginId})`,
+      };
+    })
+    .sort((a, b) =>
+      a.label.localeCompare(b.label, undefined, { sensitivity: "base" })
+    );
 
   // ─────────────────────────────────
   // 1) Generate fees - FIXED URL
@@ -189,6 +216,7 @@ export default function FeeManagementPage() {
         scope: markScope,
         all_months: markAllMonths,
         amount: paymentAmount || 0,
+        exclude_fine: excludeFine,
       };
 
       if (!markAllMonths) {
@@ -301,6 +329,64 @@ export default function FeeManagementPage() {
       );
     } finally {
       setWvLoading(false);
+    }
+  };
+
+  const handleDeleteFees = async (e) => {
+    e.preventDefault();
+    setDeleteMessage("");
+
+    if (deleteScope === "STUDENT" && !deleteStudentId) {
+      setDeleteMessage("Select a student before deleting fee records.");
+      return;
+    }
+
+    const fromMonthLabel = monthOptions.find(
+      (month) => month.value === deleteFromMonth
+    )?.label;
+    const toMonthLabel = monthOptions.find(
+      (month) => month.value === deleteToMonth
+    )?.label;
+    const studentLabel =
+      deleteScope === "STUDENT"
+        ? studentOptions.find(
+            (student) => String(student.value) === String(deleteStudentId)
+          )?.label
+        : "all students";
+
+    const confirmed = window.confirm(
+      `Delete fee records for ${studentLabel} from ${fromMonthLabel} ${deleteFromYear} through ${toMonthLabel} ${deleteToYear}? Paid and unpaid fees, receipts, payment proofs, and utility snapshots in this range will be permanently deleted.`
+    );
+    if (!confirmed) return;
+
+    setDeleteLoading(true);
+    try {
+      const payload = {
+        scope: deleteScope,
+        from_year: Number(deleteFromYear),
+        from_month: Number(deleteFromMonth),
+        to_year: Number(deleteToYear),
+        to_month: Number(deleteToMonth),
+      };
+      if (deleteScope === "STUDENT") {
+        payload.student_id = Number(deleteStudentId);
+      }
+
+      const response = await api.post("fees/actions/delete-fees/", payload);
+      setDeleteMessage(
+        `Deleted ${response.data.deleted ?? 0} fee record(s) and ${
+          response.data.utility_bills_deleted ?? 0
+        } utility snapshot(s).`
+      );
+    } catch (err) {
+      console.error("Failed to delete fee records", err);
+      setDeleteMessage(
+        err.response?.data?.detail ||
+          err.message ||
+          "Failed to delete fee records."
+      );
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -497,6 +583,18 @@ export default function FeeManagementPage() {
                     style={{ marginRight: 6 }}
                   />
                   Apply to <strong>all months</strong> (ignore selected month/year)
+                </label>
+              </div>
+
+              <div style={{ marginTop: 8 }}>
+                <label style={{ fontSize: "0.85rem" }}>
+                  <input
+                    type="checkbox"
+                    checked={excludeFine}
+                    onChange={(e) => setExcludeFine(e.target.checked)}
+                    style={{ marginRight: 6 }}
+                  />
+                  Exclude fine (keep fine pending)
                 </label>
               </div>
 
@@ -757,6 +855,119 @@ export default function FeeManagementPage() {
 
               {wvMessage && (
                 <p style={{ marginTop: 8, fontSize: "0.85rem" }}>{wvMessage}</p>
+              )}
+            </form>
+          </div>
+        )}
+
+        {canDeleteFees && (
+          <div className="card">
+            <div className="card-title">5. Delete Fee Records</div>
+            <div className="card-subtext">
+              Permanently delete paid or unpaid fee records and their utility
+              snapshots for an inclusive month/year range.
+            </div>
+
+            <form onSubmit={handleDeleteFees} style={{ marginTop: 12 }}>
+              <div className="filters-row">
+                <div className="filter-group">
+                  <label className="filter-label">Apply to</label>
+                  <select
+                    className="filter-select"
+                    value={deleteScope}
+                    onChange={(e) => setDeleteScope(e.target.value)}
+                  >
+                    <option value="ALL">All students</option>
+                    <option value="STUDENT">Specific student</option>
+                  </select>
+                </div>
+
+                {deleteScope === "STUDENT" && (
+                  <div className="filter-group">
+                    <label className="filter-label">Student</label>
+                    <select
+                      className="filter-select"
+                      value={deleteStudentId}
+                      onChange={(e) => setDeleteStudentId(e.target.value)}
+                    >
+                      <option value="">Select student</option>
+                      {studentOptions.map((student) => (
+                        <option key={student.value} value={student.value}>
+                          {student.dropdownLabel}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              <div className="filters-row" style={{ marginTop: 12 }}>
+                <div className="filter-group">
+                  <label className="filter-label">From month</label>
+                  <select
+                    className="filter-select"
+                    value={deleteFromMonth}
+                    onChange={(e) => setDeleteFromMonth(Number(e.target.value))}
+                  >
+                    {monthOptions.map((month) => (
+                      <option key={month.value} value={month.value}>
+                        {month.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label">From year</label>
+                  <input
+                    type="number"
+                    className="filter-input"
+                    value={deleteFromYear}
+                    onChange={(e) => setDeleteFromYear(Number(e.target.value))}
+                  />
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label">To month</label>
+                  <select
+                    className="filter-select"
+                    value={deleteToMonth}
+                    onChange={(e) => setDeleteToMonth(Number(e.target.value))}
+                  >
+                    {monthOptions.map((month) => (
+                      <option key={month.value} value={month.value}>
+                        {month.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label">To year</label>
+                  <input
+                    type="number"
+                    className="filter-input"
+                    value={deleteToYear}
+                    onChange={(e) => setDeleteToYear(Number(e.target.value))}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginTop: 12 }}>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={deleteLoading}
+                  style={{ background: "#b91c1c", borderColor: "#b91c1c" }}
+                >
+                  {deleteLoading ? "Deleting…" : "Delete Fee Records"}
+                </button>
+              </div>
+
+              {deleteMessage && (
+                <p style={{ marginTop: 8, fontSize: "0.85rem" }}>
+                  {deleteMessage}
+                </p>
               )}
             </form>
           </div>
